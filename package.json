@@ -1,17 +1,28 @@
 {
+  "name": "lokinet-control-panel",
+  "productName": "Lokinet Control Panel",
+  "description": "A Control panel for Lokinet",
+  "version": "0.1.0",
+  "license": "GPL-3.0",
+  "author": {
+    "name": "Loki Project",
+    "email": "team@loki.network"
+  },
   "main": "./dist/main.js",
   "scripts": {
     "lint": "eslint . --ext .ts --ext .tsx",
-    "format": "prettier --config .prettierrc 'src/**/*.tsx' --write",
+    "format": "prettier --config .prettierrc './**/*.tsx' './**/*.ts' --write",
     "format-and-lint": "yarn format && yarn lint",
     "dev:electron": "cross-env NODE_ENV=development webpack --config webpack.electron.config.js --mode development && electron .",
     "dev:react": "cross-env NODE_ENV=development webpack serve --config webpack.react.config.js --mode development"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
+    "@babel/plugin-transform-runtime": "^7.12.15",
     "@babel/preset-env": "^7.12.16",
     "@babel/preset-react": "^7.12.13",
     "@babel/preset-typescript": "^7.12.16",
+    "@types/lodash": "^4.14.168",
     "@typescript-eslint/eslint-plugin": "^4.15.1",
     "@typescript-eslint/parser": "^4.15.1",
     "babel-loader": "^8.2.2",
@@ -32,11 +43,14 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
+    "@babel/runtime": "^7.12.13",
     "@types/react": "16.14.0",
     "@types/react-dom": "^17.0.1",
+    "lodash": "^4.17.20",
     "react": "16.14.0",
     "react-dom": "^17.0.1",
     "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^2.0.3"
+    "semantic-ui-react": "^2.0.3",
+    "zeromq": "6.0.0-beta.6"
   }
 }

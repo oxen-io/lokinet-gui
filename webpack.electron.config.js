@@ -22,6 +22,9 @@ module.exports = {
       },
     ],
   },
+  node: {
+  __dirname: true
+  },
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: '[name].js',

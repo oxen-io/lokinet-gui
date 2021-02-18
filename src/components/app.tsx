@@ -13,9 +13,12 @@ import {
   GridRow,
   Header
 } from 'semantic-ui-react';
+import { getStatus, initializeIpcRendererSide } from '../ipc/ipc_renderer';
 
 const mainElement = document.createElement('div');
 document.body.appendChild(mainElement);
+
+initializeIpcRendererSide();
 
 const EnableExitToggle = () => {
   return <Checkbox slider />;
@@ -27,8 +30,12 @@ const StopAndStart = () => {
     <Button
       circular
       inverted
+      // disabled={clicked}
       loading={clicked}
-      onClick={() => setClicked(true)}
+      onClick={() => {
+        setClicked(false);
+        getStatus().then(console.warn);
+      }}
       size="massive"
       icon="power off"
     />
