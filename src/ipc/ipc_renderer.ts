@@ -191,3 +191,97 @@ export async function shutdown(): Promise<void> {
 export async function close(): Promise<void> {
   await channels.close();
 }
+
+// const forEachSession = (visit, stats) => {
+//   const st = stats.result;
+//   for (const idx in st.links) {
+//     if (!st.links[idx]) continue;
+//     else {
+//       const links = st.links[idx];
+//       for (const l_idx in links) {
+//         const link = links[l_idx];
+//         if (!link) continue;
+//         const peers = link.sessions.established;
+//         for (const p_idx in peers) {
+//           visit(peers[p_idx]);
+//         }
+//       }
+//     }
+//   }
+// };
+
+// export const parseStateResults = (payload: string, error?: string) => {
+//   let stats = null;
+
+//   const toReturn = new Object(null) as any;
+
+//   if (!error) {
+//     try {
+//       stats = JSON.parse(payload);
+//     } catch (e) {
+//       console.log("Couldn't parse 'stateResult' JSON-RPC payload", err);
+//     }
+//   }
+
+//   // if we got an error, just return isRunning false.
+//   // the redux store will reset all values to their default.
+//   if (error) {
+//     toReturn.isRunning = false;
+//     return toReturn;
+//   }
+
+//   // calculate our new state in local scope before updating global scope
+//   let newConnected = !error && stats != null;
+//   let newRunning = false;
+//   let newLokiAddress = '';
+//   let newLokiExit = '';
+//   let newNumRouters = 0;
+//   let newNumPaths = 0;
+//   let txRate = 0;
+//   let rxRate = 0;
+//   let peers = 0;
+//   let ratio = 0;
+
+//   try {
+//     forEachSession((s: any) => {
+//       txRate += s.tx;
+//       rxRate += s.rx;
+//       peers += 1;
+//     }, stats);
+//   } catch (err) {
+//     txRate = 0;
+//     rxRate = 0;
+//     peers = 0;
+//     console.log("Couldn't pull tx/rx of payload", err);
+//   }
+
+//   // we're polling every 500ms, so our per-second rate is half of the
+//   // rate we tallied up in this sample
+//   // TODO: don't be so sloppy
+//   uploadUsage = txRate / 2;
+//   downloadUsage = rxRate / 2;
+
+//   numPeersConnected = peers;
+//   try {
+//     newRunning = stats.result.running;
+//   } catch (err) {
+//     console.log("Couldn't pull running status of payload", err);
+//   }
+
+//   try {
+//     newLokiAddress = stats.result.services.default.identity;
+//   } catch (err) {
+//     console.log("Couldn't pull loki address out of payload", err);
+//   }
+
+//   try {
+//     var exitMap = stats.result.services.default.exitMap;
+//     if (exitMap) {
+//       for (var k in exitMap) {
+//         newLokiExit = exitMap[k];
+//       }
+//     }
+//   } catch (err) {
+//     console.log("Couldn't pull exit address out of payload", err);
+//   }
+// };
