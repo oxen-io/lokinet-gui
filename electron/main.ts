@@ -32,7 +32,8 @@ function createWindow() {
       })
     );
   }
-  mainWindow.removeMenu();
+  // if you hide the menu the shortcut CTLR-Q won't work
+  // mainWindow.removeMenu();
   void initializeIpcNodeSide();
 
   mainWindow.on('closed', () => {

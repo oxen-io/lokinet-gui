@@ -5,7 +5,6 @@ import ReactDom from 'react-dom';
 import {
   Heading,
   ChakraProvider,
-  Center,
   Flex,
   HStack,
   Stack,
@@ -20,7 +19,7 @@ import {
 } from '../ipc/ipc_renderer';
 import { DownSpeedStats, UpSpeedStats } from './components/SpeedStats';
 import { StopAndStart } from './components/StopAndStartButton';
-import { SpeedChart } from './components/SpeedChat';
+import { SpeedChart } from './components/SpeedChart';
 import { EnableExitToggle } from './components/EnableExitToggle';
 import { ActivePathStats, LokinetRoutersStats } from './components/RouterStats';
 import { selectStatus, updateFromDaemonStatus } from '../features/statusSlice';
@@ -34,19 +33,32 @@ document.body.appendChild(mainElement);
 initializeIpcRendererSide();
 
 const App = () => {
-  const state = useSelector(selectStatus);
+  // Select (i.e. extract the daemon status from our global redux state)
+  const daemonStatus = useSelector(selectStatus);
+
+  // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
-  console.info('state', state);
+  // console.info('state', state);
+
+  // register an interval for fetching the status of the daemon
   useInterval(async () => {
-    const status = await getStatus();
-    const parsedState = parseStateResults(status);
-    dispatch(updateFromDaemonStatus({ stateFromDaemon: parsedState }));
+    // getStatus sends an IPC call to our node environment
+    // once on the node environment, it will trigger and wait for the RPC call to finish
+    // or timeout before returning.
+    const statusAsString = await getStatus();
+    // The status we get is a plain string. Extract the details we care from it and build
+    // the state we will send as update to the redux store
+    const parsedStatus = parseStateResults(statusAsString);
+
+    // Send the update to the redux store.
+    dispatch(updateFromDaemonStatus({ stateFromDaemon: parsedStatus }));
   }, POLLING_STATUS_INTERVAL_MS);
+
   return (
     <ChakraProvider resetCSS={true}>
-      <Center height="100vh">
-        <Stack padding="20px">
-          <Heading size="4xl">Lokinet</Heading>
+      <Flex width="100%" height="100%" justifyContent="center">
+        <Stack padding="20px" textAlign="center">
+          <Heading size="2xl">Lokinet GUI</Heading>
           <Flex>
             <StopAndStart />
           </Flex>
@@ -54,21 +66,24 @@ const App = () => {
             <EnableExitToggle />
           </Flex>
           <ActivePathStats
-            activePaths={state.numPathsBuilt}
-            ratio={state.ratio}
+            activePaths={daemonStatus.numPathsBuilt}
+            ratio={daemonStatus.ratio}
           />
-          <LokinetRoutersStats numRouters={state.numRoutersKnown} />
+          <LokinetRoutersStats numRouters={daemonStatus.numRoutersKnown} />
           <HStack justify="space-between">
-            <UpSpeedStats upSpeed={state.uploadUsage} />
-            <DownSpeedStats downSpeed={state.downloadUsage} />
+            <UpSpeedStats upSpeed={daemonStatus.uploadUsage} />
+            <DownSpeedStats downSpeed={daemonStatus.downloadUsage} />
           </HStack>
-          <SpeedChart />
+          <Flex height={200}>
+            <SpeedChart speedHistory={daemonStatus.speedHistory} />
+          </Flex>
         </Stack>
-      </Center>
+      </Flex>
     </ChakraProvider>
   );
 };
 
+// Make the Redux store available to all sub components of <App/>
 ReactDom.render(
   <Provider store={store}>
     <App />
