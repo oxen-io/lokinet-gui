@@ -1,7 +1,7 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { statusSlice } from '../features/statusSlice';
 
-const store = configureStore({
+export const store = configureStore({
   reducer: {
     status: statusSlice.reducer
   }

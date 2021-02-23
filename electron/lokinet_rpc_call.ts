@@ -3,7 +3,7 @@
 import { ipcMain } from 'electron';
 import { Dealer as ZeroMqDealer } from 'zeromq';
 import { eventsByJobId } from './ipc_node';
-import { IPC_CHANNEL_KEY } from './shared_ipc';
+import { DEBUG_IPC_CALLS, IPC_CHANNEL_KEY } from './shared_ipc';
 
 const RPC_BOUND_PORT = 1190;
 const RPC_BOUND_IP = '127.0.0.1';
@@ -24,7 +24,9 @@ const request = async (
   if (!reply_tag) {
     throw new Error(`You must use a reply tag for cmd ${cmd}`);
   }
-  console.warn(`\t\t====> sending cmd:${cmd};  reply_tag:${reply_tag}`);
+  if (DEBUG_IPC_CALLS) {
+    console.info(`\t====> sending RPC  cmd:${cmd};  reply_tag:${reply_tag}`);
+  }
   await dealer.send([cmd, reply_tag]);
 };
 
@@ -73,7 +75,11 @@ const loopDealerReceiving = async (): Promise<void> => {
           if (!event) {
             throw new Error(`Could not find the event for jobId ${jobId}`);
           }
-
+          if (DEBUG_IPC_CALLS) {
+            console.info(
+              `\t<==== received RPC  jobId:${jobId};  content:${content}`
+            );
+          }
           event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, content);
           delete eventsByJobId[jobId];
         } else {

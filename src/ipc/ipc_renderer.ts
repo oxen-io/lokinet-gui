@@ -4,9 +4,8 @@ import Electron from 'electron';
 const { ipcRenderer } = Electron;
 import _ from 'lodash';
 import crypto from 'crypto';
-import { IPC_CHANNEL_KEY } from '../../electron/shared_ipc';
+import { DEBUG_IPC_CALLS, IPC_CHANNEL_KEY } from '../../electron/shared_ipc';
 
-const DEBUG_IPC_CALLS = true;
 const IPC_UPDATE_TIMEOUT = 5 * 1000; // 5 secs
 
 const channelsToMake = {
@@ -43,7 +42,6 @@ export function initializeIpcRendererSide(): void {
   ipcRenderer.on(
     `${IPC_CHANNEL_KEY}-done`,
     (event, jobId, errorForDisplay, result) => {
-      console.warn('IPC_CHANNEL_KEY}-done called');
       const job = _getJob(jobId);
       if (!job) {
         throw new Error(
@@ -192,96 +190,161 @@ export async function close(): Promise<void> {
   await channels.close();
 }
 
-// const forEachSession = (visit, stats) => {
-//   const st = stats.result;
-//   for (const idx in st.links) {
-//     if (!st.links[idx]) continue;
-//     else {
-//       const links = st.links[idx];
-//       for (const l_idx in links) {
-//         const link = links[l_idx];
-//         if (!link) continue;
-//         const peers = link.sessions.established;
-//         for (const p_idx in peers) {
-//           visit(peers[p_idx]);
-//         }
-//       }
-//     }
-//   }
-// };
+const forEachSession = (visit: any, stats: any) => {
+  const st = stats.result;
+  for (const idx in st.links) {
+    if (!st.links[idx]) continue;
+    else {
+      const links = st.links[idx];
+      for (const l_idx in links) {
+        const link = links[l_idx];
+        if (!link) continue;
+        const peers = link.sessions.established;
+        for (const p_idx in peers) {
+          visit(peers[p_idx]);
+        }
+      }
+    }
+  }
+};
 
-// export const parseStateResults = (payload: string, error?: string) => {
-//   let stats = null;
+let lastParseStateResult: number | undefined = undefined;
 
-//   const toReturn = new Object(null) as any;
+export type ParsedStateFromDaemon = {
+  isRunning: boolean;
+  lokiUptime: number;
+  numPeersConnected: number;
+  uploadUsage: number;
+  downloadUsage: number;
+  lokiAddress: string;
+  numPathsBuilt: number;
+  numRoutersKnown: number;
+  ratio: string;
+};
 
-//   if (!error) {
-//     try {
-//       stats = JSON.parse(payload);
-//     } catch (e) {
-//       console.log("Couldn't parse 'stateResult' JSON-RPC payload", err);
-//     }
-//   }
+export const parseStateResults = (
+  payload: string,
+  error?: string
+): ParsedStateFromDaemon => {
+  let stats = null;
+  if (!lastParseStateResult) {
+    lastParseStateResult = Date.now() - 5 * 100; //500 ms ago
+  }
+  const newParseTimestamp = Date.now();
 
-//   // if we got an error, just return isRunning false.
-//   // the redux store will reset all values to their default.
-//   if (error) {
-//     toReturn.isRunning = false;
-//     return toReturn;
-//   }
+  const parsedState: ParsedStateFromDaemon = {
+    isRunning: false,
+    lokiUptime: 0,
+    numPeersConnected: 0,
+    uploadUsage: 0,
+    downloadUsage: 0,
+    lokiAddress: '',
+    numPathsBuilt: 0,
+    numRoutersKnown: 0,
+    ratio: ''
+  };
 
-//   // calculate our new state in local scope before updating global scope
-//   let newConnected = !error && stats != null;
-//   let newRunning = false;
-//   let newLokiAddress = '';
-//   let newLokiExit = '';
-//   let newNumRouters = 0;
-//   let newNumPaths = 0;
-//   let txRate = 0;
-//   let rxRate = 0;
-//   let peers = 0;
-//   let ratio = 0;
+  if (!error) {
+    try {
+      stats = JSON.parse(payload);
+    } catch (e) {
+      console.log("Couldn't parse 'stateResult' JSON-RPC payload", e);
+    }
+  }
 
-//   try {
-//     forEachSession((s: any) => {
-//       txRate += s.tx;
-//       rxRate += s.rx;
-//       peers += 1;
-//     }, stats);
-//   } catch (err) {
-//     txRate = 0;
-//     rxRate = 0;
-//     peers = 0;
-//     console.log("Couldn't pull tx/rx of payload", err);
-//   }
+  // if we got an error, just return isRunning false.
+  // the redux store will reset all values to their default.
+  if (error) {
+    lastParseStateResult = newParseTimestamp;
+    return parsedState;
+  }
 
-//   // we're polling every 500ms, so our per-second rate is half of the
-//   // rate we tallied up in this sample
-//   // TODO: don't be so sloppy
-//   uploadUsage = txRate / 2;
-//   downloadUsage = rxRate / 2;
+  let txRate = 0;
+  let rxRate = 0;
+  let peers = 0;
+  try {
+    forEachSession((s: any) => {
+      txRate += s.tx;
+      rxRate += s.rx;
+      peers += 1;
+    }, stats);
+    parsedState.numPeersConnected = peers;
+  } catch (err) {
+    parsedState.numPeersConnected = 0;
+    console.log("Couldn't pull tx/rx of payload", err);
+  }
 
-//   numPeersConnected = peers;
-//   try {
-//     newRunning = stats.result.running;
-//   } catch (err) {
-//     console.log("Couldn't pull running status of payload", err);
-//   }
+  const timeDiff = newParseTimestamp - lastParseStateResult;
+  // we're polling every 500ms, so our per-second rate is half of the
+  // rate we tallied up in this sample
+  parsedState.uploadUsage = (txRate * timeDiff) / 1000;
+  parsedState.downloadUsage = (rxRate * timeDiff) / 1000;
 
-//   try {
-//     newLokiAddress = stats.result.services.default.identity;
-//   } catch (err) {
-//     console.log("Couldn't pull loki address out of payload", err);
-//   }
+  parsedState.isRunning = stats?.result?.running || false;
+  parsedState.numRoutersKnown = stats?.result?.numNodesKnown || 0;
 
-//   try {
-//     var exitMap = stats.result.services.default.exitMap;
-//     if (exitMap) {
-//       for (var k in exitMap) {
-//         newLokiExit = exitMap[k];
-//       }
-//     }
-//   } catch (err) {
-//     console.log("Couldn't pull exit address out of payload", err);
-//   }
-// };
+  parsedState.lokiAddress = stats?.result?.services?.default?.identity || '';
+  parsedState.numPathsBuilt = stats?.result?.services?.default?.identity || '';
+
+  const exitMap = stats?.result?.services?.default?.exitMap;
+  if (exitMap) {
+    console.warn('exitMap:', exitMap);
+    // const exitFromDaemon = exitMap.find(k =>)
+    // for (const k in exitMap) {
+    //   lokiFromD = exitMap[k];
+    // }
+  }
+  const authCodes = stats?.result?.services?.default?.authCodes || '';
+
+  if (authCodes) {
+    console.warn('authCodes:', authCodes);
+
+    //   if (lokiExit in authCodes) {
+    //     var auth = authCodes[lokiExit];
+    //     if (auth !== exitAuth) {
+    //       exitAuth = auth;
+    //     }
+    //   }
+  }
+
+  // compute all stats on all path builders on the default endpoint
+
+  lastParseStateResult = newParseTimestamp;
+
+  // Merge snodeSessions, remoteSessions and default into a single array
+  const builders = new Array<any>();
+  const snodeSessions = stats?.result?.services?.default?.snodeSessions || [];
+  snodeSessions.forEach((session: any) => {
+    builders.push(session);
+  });
+
+  const remoteSessions = stats?.result?.services?.default?.remoteSessions || [];
+  remoteSessions.forEach((session: any) => {
+    builders.push(session);
+  });
+
+  const defaultService = stats?.result?.services?.default;
+  if (defaultService) {
+    builders.push(defaultService);
+  }
+
+  // Iterate over all items on this array to build the global pathStats
+  const pathStats = builders.reduce(
+    (accumulator, currentItem) => {
+      accumulator.paths += currentItem?.paths?.length || 0;
+      accumulator.success += currentItem?.buildStats?.success || 0;
+      accumulator.attempts += currentItem?.buildStats?.attempts || 0;
+      return accumulator;
+    },
+    {
+      paths: 0,
+      success: 0,
+      attempts: 0
+    }
+  );
+  const ratio = (pathStats.success * 100) / (pathStats.attempts + 1);
+  parsedState.ratio = `${Math.ceil(ratio)}%`;
+
+  parsedState.numPathsBuilt = pathStats.paths;
+  return parsedState;
+};

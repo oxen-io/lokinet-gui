@@ -19,21 +19,31 @@ const StatsBox = ({ children }: { children: React.ReactNode }) => (
   </Box>
 );
 
-export const ActivePathStats = (): JSX.Element => (
+export const ActivePathStats = ({
+  activePaths,
+  ratio
+}: {
+  activePaths: number;
+  ratio: string;
+}): JSX.Element => (
   <StatsBox>
     <Stat padding="5px">
       <StatLabel>Active Paths</StatLabel>
-      <StatNumber>3</StatNumber>
-      <StatHelpText>(50% success)</StatHelpText>
+      <StatNumber>{activePaths}</StatNumber>
+      <StatHelpText>({ratio} success)</StatHelpText>
     </Stat>
   </StatsBox>
 );
 
-export const LokinetRoutersStats = (): JSX.Element => (
+export const LokinetRoutersStats = ({
+  numRouters
+}: {
+  numRouters: number;
+}): JSX.Element => (
   <StatsBox>
     <Stat padding="5px">
       <StatLabel>Lokinet Routers</StatLabel>
-      <StatNumber>1294</StatNumber>
+      <StatNumber>{numRouters}</StatNumber>
     </Stat>
   </StatsBox>
 );

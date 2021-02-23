@@ -10,8 +10,7 @@ export const StopAndStart = (): JSX.Element => {
       isRound
       isLoading={clicked}
       onClick={() => {
-        setClicked(true);
-        // getStatus().then(console.warn);
+        setClicked(false);
       }}
       size="lg"
       icon={<MdPowerSettingsNew />}
