@@ -3,7 +3,6 @@ import React from 'react';
 import ReactDom from 'react-dom';
 
 import {
-  Heading,
   ChakraProvider,
   Flex,
   HStack,
@@ -29,7 +28,11 @@ import { selectStatus, updateFromDaemonStatus } from '../features/statusSlice';
 import { Provider, useSelector } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch } from './hooks';
-import { updateFromDaemonGeneralInfos } from '../features/generalInfosSlice';
+import {
+  selectGeneralInfos,
+  updateFromDaemonGeneralInfos
+} from '../features/generalInfosSlice';
+import { AppTitle } from './components/AppTitle';
 
 const mainElement = document.createElement('div');
 document.body.appendChild(mainElement);
@@ -39,6 +42,7 @@ initializeIpcRendererSide();
 const App = () => {
   // Select (i.e. extract the daemon status from our global redux state)
   const daemonStatus = useSelector(selectStatus);
+  const daemonGeneralInfos = useSelector(selectGeneralInfos);
 
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
@@ -74,7 +78,10 @@ const App = () => {
     <ChakraProvider resetCSS={true}>
       <Flex width="100%" height="100%" justifyContent="center">
         <Stack padding="20px" textAlign="center">
-          <Heading size="2xl">Lokinet GUI</Heading>
+          <AppTitle
+            uptime={daemonGeneralInfos.uptime}
+            version={daemonGeneralInfos.version}
+          />
           <Flex>
             <StopAndStart />
           </Flex>
