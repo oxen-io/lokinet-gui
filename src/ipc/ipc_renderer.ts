@@ -15,6 +15,8 @@ const channelsToMake = {
 const channels = {} as any;
 export const _jobs = Object.create(null);
 
+export const POLLING_STATUS_INTERVAL_MS = 500;
+
 // shutting down clean handling
 let _shuttingDown = false;
 let _shutdownCallback: any = null;
@@ -212,7 +214,6 @@ let lastParseStateResult: number | undefined = undefined;
 
 export type ParsedStateFromDaemon = {
   isRunning: boolean;
-  lokiUptime: number;
   numPeersConnected: number;
   uploadUsage: number;
   downloadUsage: number;
@@ -231,10 +232,9 @@ export const parseStateResults = (
     lastParseStateResult = Date.now() - 5 * 100; //500 ms ago
   }
   const newParseTimestamp = Date.now();
-
+  // console.warn('payload', payload);
   const parsedState: ParsedStateFromDaemon = {
     isRunning: false,
-    lokiUptime: 0,
     numPeersConnected: 0,
     uploadUsage: 0,
     downloadUsage: 0,
@@ -274,11 +274,10 @@ export const parseStateResults = (
     console.log("Couldn't pull tx/rx of payload", err);
   }
 
-  const timeDiff = newParseTimestamp - lastParseStateResult;
   // we're polling every 500ms, so our per-second rate is half of the
   // rate we tallied up in this sample
-  parsedState.uploadUsage = (txRate * timeDiff) / 1000;
-  parsedState.downloadUsage = (rxRate * timeDiff) / 1000;
+  parsedState.uploadUsage = (txRate * POLLING_STATUS_INTERVAL_MS) / 1000;
+  parsedState.downloadUsage = (rxRate * POLLING_STATUS_INTERVAL_MS) / 1000;
 
   parsedState.isRunning = stats?.result?.running || false;
   parsedState.numRoutersKnown = stats?.result?.numNodesKnown || 0;

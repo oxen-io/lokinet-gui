@@ -15,7 +15,8 @@ import {
 import {
   getStatus,
   initializeIpcRendererSide,
-  parseStateResults
+  parseStateResults,
+  POLLING_STATUS_INTERVAL_MS
 } from '../ipc/ipc_renderer';
 import { DownSpeedStats, UpSpeedStats } from './components/SpeedStats';
 import { StopAndStart } from './components/StopAndStartButton';
@@ -40,7 +41,7 @@ const App = () => {
     const status = await getStatus();
     const parsedState = parseStateResults(status);
     dispatch(updateFromDaemonStatus({ stateFromDaemon: parsedState }));
-  }, 500);
+  }, POLLING_STATUS_INTERVAL_MS);
   return (
     <ChakraProvider resetCSS={true}>
       <Center height="100vh">

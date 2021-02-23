@@ -4,13 +4,7 @@ import { ParsedStateFromDaemon } from '../ipc/ipc_renderer';
 
 interface StatusState {
   isRunning: boolean;
-  lokiVersion: string;
   lokiAddress: string;
-  lokiExit: string;
-  exitAuth: string;
-  exitStatus: string;
-  exitBusy: boolean;
-  lokiUptime: number;
   numPathsBuilt: number;
   numRoutersKnown: number;
   downloadUsage: number;
@@ -21,13 +15,7 @@ interface StatusState {
 
 const initialState: StatusState = {
   isRunning: false,
-  lokiVersion: '',
   lokiAddress: '',
-  lokiExit: '',
-  exitAuth: '',
-  exitStatus: '',
-  exitBusy: false,
-  lokiUptime: 0,
   numPathsBuilt: 0,
   numRoutersKnown: 0,
   downloadUsage: 0,
@@ -57,9 +45,7 @@ export const statusSlice = createSlice({
       //   state.numRoutersKnown = 0;
       //   state.numPeersConnected = 0;
       //   // not yet set on state received
-      //   state.lokiVersion = '';
       //   state.lokiAddress = '';
-      //   state.lokiUptime = 0;
       // }
       state.isRunning = newIsRunning;
 
@@ -82,13 +68,9 @@ export const statusSlice = createSlice({
       state.lokiAddress = newIsRunning
         ? action.payload.stateFromDaemon?.lokiAddress || ''
         : '';
-      state.lokiUptime = newIsRunning
-        ? action.payload.stateFromDaemon?.lokiUptime || 0
-        : 0;
       state.ratio = newIsRunning
         ? action.payload.stateFromDaemon?.ratio || ''
         : '';
-      // lokiVersion
       return state;
     }
   }
