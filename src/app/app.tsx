@@ -13,8 +13,11 @@ import {
 
 import {
   getStatus,
+  getVersion,
   initializeIpcRendererSide,
+  parseGeneralInfos,
   parseStateResults,
+  POLLING_GENERAL_INFOS_INTERVAL_MS,
   POLLING_STATUS_INTERVAL_MS
 } from '../ipc/ipc_renderer';
 import { DownSpeedStats, UpSpeedStats } from './components/SpeedStats';
@@ -26,6 +29,7 @@ import { selectStatus, updateFromDaemonStatus } from '../features/statusSlice';
 import { Provider, useSelector } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch } from './hooks';
+import { updateFromDaemonGeneralInfos } from '../features/generalInfosSlice';
 
 const mainElement = document.createElement('div');
 document.body.appendChild(mainElement);
@@ -53,6 +57,18 @@ const App = () => {
     // Send the update to the redux store.
     dispatch(updateFromDaemonStatus({ stateFromDaemon: parsedStatus }));
   }, POLLING_STATUS_INTERVAL_MS);
+
+  // register an interval for fetching the version and uptime of the daemon.
+  // Note: With react, no refresh is triggered if the change made does not make a change
+  useInterval(async () => {
+    const generalInfos = await getVersion();
+    const parsedInfos = parseGeneralInfos(generalInfos);
+    console.warn({ generalInfos });
+    console.warn(parsedInfos);
+
+    // Send the update to the redux store.
+    dispatch(updateFromDaemonGeneralInfos({ generalsInfos: parsedInfos }));
+  }, POLLING_GENERAL_INFOS_INTERVAL_MS);
 
   return (
     <ChakraProvider resetCSS={true}>

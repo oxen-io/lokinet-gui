@@ -6,19 +6,12 @@ import {
 } from '../app/components/SpeedChart';
 import { RootState } from '../app/store';
 import {
+  defaultParsedStateFromDaemon,
   ParsedStateFromDaemon,
   POLLING_STATUS_INTERVAL_MS
 } from '../ipc/ipc_renderer';
 
-export interface StatusState {
-  isRunning: boolean;
-  lokiAddress: string;
-  numPathsBuilt: number;
-  numRoutersKnown: number;
-  downloadUsage: number;
-  uploadUsage: number;
-  numPeersConnected: number;
-  ratio: string;
+export interface StatusState extends ParsedStateFromDaemon {
   speedHistory: SpeedHistoryDataType;
 }
 const getDefaultSpeedHistory = () => {
@@ -28,15 +21,8 @@ const getDefaultSpeedHistory = () => {
   };
 };
 
-const initialState: StatusState = {
-  isRunning: false,
-  lokiAddress: '',
-  numPathsBuilt: 0,
-  numRoutersKnown: 0,
-  downloadUsage: 0,
-  uploadUsage: 0,
-  numPeersConnected: 0,
-  ratio: '',
+const initialStatusState: StatusState = {
+  ...defaultParsedStateFromDaemon,
   speedHistory: getDefaultSpeedHistory()
 };
 
@@ -54,7 +40,7 @@ const removeFirstElementIfNeeded = (speedHistory: SpeedHistoryDataType) => {
 
 export const statusSlice = createSlice({
   name: 'status',
-  initialState,
+  initialState: initialStatusState,
   reducers: {
     updateFromDaemonStatus: (
       state,

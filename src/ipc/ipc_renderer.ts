@@ -16,6 +16,7 @@ const channels = {} as any;
 export const _jobs = Object.create(null);
 
 export const POLLING_STATUS_INTERVAL_MS = 500;
+export const POLLING_GENERAL_INFOS_INTERVAL_MS = 1000;
 
 // shutting down clean handling
 let _shuttingDown = false;
@@ -210,9 +211,7 @@ const forEachSession = (visit: any, stats: any) => {
   }
 };
 
-let lastParseStateResult: number | undefined = undefined;
-
-export type ParsedStateFromDaemon = {
+export interface ParsedStateFromDaemon {
   isRunning: boolean;
   numPeersConnected: number;
   uploadUsage: number;
@@ -221,6 +220,27 @@ export type ParsedStateFromDaemon = {
   numPathsBuilt: number;
   numRoutersKnown: number;
   ratio: string;
+}
+
+export interface ParsedGeneralInfosFromDaemon {
+  uptime: number;
+  version: string;
+}
+
+export const defaultParsedStateFromDaemon = {
+  isRunning: false,
+  numPeersConnected: 0,
+  uploadUsage: 0,
+  downloadUsage: 0,
+  lokiAddress: '',
+  numPathsBuilt: 0,
+  numRoutersKnown: 0,
+  ratio: ''
+};
+
+export const defaultParsedGeneralInfosFromDaemon = {
+  version: '',
+  uptime: 0
 };
 
 export const parseStateResults = (
@@ -228,22 +248,9 @@ export const parseStateResults = (
   error?: string
 ): ParsedStateFromDaemon => {
   let stats = null;
-  if (!lastParseStateResult) {
-    lastParseStateResult = Date.now() - 5 * 100; //500 ms ago
-  }
-  const newParseTimestamp = Date.now();
-  // console.warn('payload', payload);
-  const parsedState: ParsedStateFromDaemon = {
-    isRunning: false,
-    numPeersConnected: 0,
-    uploadUsage: 0,
-    downloadUsage: 0,
-    lokiAddress: '',
-    numPathsBuilt: 0,
-    numRoutersKnown: 0,
-    ratio: ''
-  };
+  const parsedState: ParsedStateFromDaemon = defaultParsedStateFromDaemon;
 
+  // We can either have an error of communication, or an error on the returned JSON
   if (!error) {
     try {
       stats = JSON.parse(payload);
@@ -254,8 +261,8 @@ export const parseStateResults = (
 
   // if we got an error, just return isRunning false.
   // the redux store will reset all values to their default.
-  if (error) {
-    lastParseStateResult = newParseTimestamp;
+  if (error || stats.error) {
+    console.warn('We got an error for Status: ', error || stats.error);
     return parsedState;
   }
 
@@ -307,9 +314,6 @@ export const parseStateResults = (
   }
 
   // compute all stats on all path builders on the default endpoint
-
-  lastParseStateResult = newParseTimestamp;
-
   // Merge snodeSessions, remoteSessions and default into a single array
   const builders = new Array<any>();
   const snodeSessions = stats?.result?.services?.default?.snodeSessions || [];
@@ -346,4 +350,31 @@ export const parseStateResults = (
 
   parsedState.numPathsBuilt = pathStats.paths;
   return parsedState;
+};
+
+export const parseGeneralInfos = (
+  payload: string,
+  error?: string
+): ParsedGeneralInfosFromDaemon => {
+  let stats = null;
+  const parsedGeneralsInfos: ParsedGeneralInfosFromDaemon = defaultParsedGeneralInfosFromDaemon;
+
+  if (!error) {
+    try {
+      stats = JSON.parse(payload);
+    } catch (e) {
+      console.log("Couldn't parse 'stateResult' JSON-RPC payload", e);
+    }
+  }
+
+  // if we got an error, just return isRunning false.
+  // the redux store will reset all values to their default.
+  if (error || stats.error) {
+    console.warn('We got an error for GeneralsInfos: ', error || stats.error);
+    return parsedGeneralsInfos;
+  }
+
+  parsedGeneralsInfos.uptime = stats?.result?.uptime || 0;
+  parsedGeneralsInfos.version = stats?.result?.version || '';
+  return parsedGeneralsInfos;
 };
