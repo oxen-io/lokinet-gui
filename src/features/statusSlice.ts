@@ -1,11 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import _ from 'lodash';
 import {
+  MAX_NUMBER_POINT_HISTORY,
   SpeedHistoryCoordinates,
   SpeedHistoryDataType
 } from '../app/components/SpeedChart';
 import { RootState } from '../app/store';
-import { ParsedStateFromDaemon } from '../ipc/ipc_renderer';
+import {
+  ParsedStateFromDaemon,
+  POLLING_STATUS_INTERVAL_MS
+} from '../ipc/ipc_renderer';
 
 export interface StatusState {
   isRunning: boolean;
@@ -18,6 +21,12 @@ export interface StatusState {
   ratio: string;
   speedHistory: SpeedHistoryDataType;
 }
+const getDefaultSpeedHistory = () => {
+  return {
+    upload: new Array<SpeedHistoryCoordinates>({ x: 0, y: 0 }),
+    download: new Array<SpeedHistoryCoordinates>({ x: 0, y: 0 })
+  };
+};
 
 const initialState: StatusState = {
   isRunning: false,
@@ -28,9 +37,19 @@ const initialState: StatusState = {
   uploadUsage: 0,
   numPeersConnected: 0,
   ratio: '',
-  speedHistory: _.range(2).map(
-    () => new Array<SpeedHistoryCoordinates>({ x: 0, y: 0 })
-  )
+  speedHistory: getDefaultSpeedHistory()
+};
+
+const removeFirstElementIfNeeded = (speedHistory: SpeedHistoryDataType) => {
+  if (speedHistory.download.length > MAX_NUMBER_POINT_HISTORY) {
+    speedHistory.download.shift();
+    speedHistory.upload.shift();
+    for (let i = 0; i < speedHistory.upload.length; i++) {
+      speedHistory.upload[i].x = (i * POLLING_STATUS_INTERVAL_MS) / 1000;
+      speedHistory.download[i].x = (i * POLLING_STATUS_INTERVAL_MS) / 1000;
+    }
+  }
+  return speedHistory;
 };
 
 export const statusSlice = createSlice({
@@ -53,9 +72,7 @@ export const statusSlice = createSlice({
         state.numPeersConnected = 0;
         state.lokiAddress = '';
         state.ratio = '';
-        state.speedHistory = _.range(2).map(
-          () => new Array<SpeedHistoryCoordinates>({ x: 0, y: 0 })
-        );
+        state.speedHistory = getDefaultSpeedHistory();
         return state;
       }
 
@@ -71,17 +88,21 @@ export const statusSlice = createSlice({
       state.ratio = action.payload.stateFromDaemon?.ratio || '';
 
       // update graph speeds data
-      state.speedHistory[0].push({
-        x: state.speedHistory[0].length / 2,
-        y: state.downloadUsage
+      state.speedHistory.download.push({
+        x:
+          (state.speedHistory.download.length * POLLING_STATUS_INTERVAL_MS) /
+          1000,
+        y: state.downloadUsage / 1000 // kb
       });
-      state.speedHistory[1].push({
-        x: state.speedHistory[1].length / 2,
-        y: state.uploadUsage
+      state.speedHistory.upload.push({
+        x:
+          (state.speedHistory.upload.length * POLLING_STATUS_INTERVAL_MS) /
+          1000,
+        y: state.uploadUsage / 1024 // kb
       });
+
       // Remove the first item is the size is too big
-      state.speedHistory[0].length > 300 && state.speedHistory[0].shift();
-      state.speedHistory[1].length > 300 && state.speedHistory[1].shift();
+      state.speedHistory = removeFirstElementIfNeeded(state.speedHistory);
       return state;
     }
   }
