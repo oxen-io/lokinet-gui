@@ -1,15 +1,10 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
   MAX_NUMBER_POINT_HISTORY,
-  SpeedHistoryCoordinates,
   SpeedHistoryDataType
 } from '../app/components/SpeedChart';
 import { RootState } from '../app/store';
-import {
-  DaemonStatus,
-  defaultDaemonStatus,
-  POLLING_STATUS_INTERVAL_MS
-} from '../ipc/ipc_renderer';
+import { DaemonStatus, defaultDaemonStatus } from '../ipc/ipc_renderer';
 
 export interface StatusState {
   isRunning: boolean;
@@ -22,10 +17,12 @@ export interface StatusState {
   ratio: string;
   speedHistory: SpeedHistoryDataType;
 }
-const getDefaultSpeedHistory = () => {
+const getDefaultSpeedHistory = (): SpeedHistoryDataType => {
   return {
-    upload: new Array<SpeedHistoryCoordinates>({ x: 0, y: 0 }),
-    download: new Array<SpeedHistoryCoordinates>({ x: 0, y: 0 })
+    upload: new Array<number>(MAX_NUMBER_POINT_HISTORY).fill(0),
+    download: new Array<number>(MAX_NUMBER_POINT_HISTORY).fill(0),
+    lastUploadUsage: undefined,
+    lastDownloadUsage: undefined
   };
 };
 
@@ -38,10 +35,6 @@ const removeFirstElementIfNeeded = (speedHistory: SpeedHistoryDataType) => {
   if (speedHistory.download.length > MAX_NUMBER_POINT_HISTORY) {
     speedHistory.download.shift();
     speedHistory.upload.shift();
-    for (let i = 0; i < speedHistory.upload.length; i++) {
-      speedHistory.upload[i].x = (i * POLLING_STATUS_INTERVAL_MS) / 1000;
-      speedHistory.download[i].x = (i * POLLING_STATUS_INTERVAL_MS) / 1000;
-    }
   }
   return speedHistory;
 };
@@ -80,19 +73,28 @@ export const statusSlice = createSlice({
       state.lokiAddress = action.payload.daemonStatus?.lokiAddress || '';
       state.ratio = action.payload.daemonStatus?.ratio || '';
 
-      // update graph speeds data
-      state.speedHistory.download.push({
-        x:
-          (state.speedHistory.download.length * POLLING_STATUS_INTERVAL_MS) /
-          1000,
-        y: state.downloadUsage / 1000 // kb
-      });
-      state.speedHistory.upload.push({
-        x:
-          (state.speedHistory.upload.length * POLLING_STATUS_INTERVAL_MS) /
-          1000,
-        y: state.uploadUsage / 1024 // kb
-      });
+      // As we pull status every 500 ms, we have to merge two rates for one second for the graph.
+      // This code effectively save one call temporary until we get the second call 500ms later.
+      // Then, we merge the two usage in a single entry added to the data used by the graph
+      if (
+        !state.speedHistory.lastUploadUsage ||
+        !state.speedHistory.lastDownloadUsage
+      ) {
+        state.speedHistory.lastUploadUsage = state.downloadUsage;
+        state.speedHistory.lastDownloadUsage = state.uploadUsage;
+      } else {
+        // update graph speeds data
+        const newDownload =
+          (state.speedHistory.lastDownloadUsage + state.downloadUsage) / 1024; // kb
+        const newUpload =
+          (state.speedHistory.lastUploadUsage + state.uploadUsage) / 1024; // kb
+
+        // reset the memoized last usage for the next call
+        state.speedHistory.lastDownloadUsage = undefined;
+        state.speedHistory.lastUploadUsage = undefined;
+        state.speedHistory.download.push(newDownload);
+        state.speedHistory.upload.push(newUpload);
+      }
 
       // Remove the first item is the size is too big
       state.speedHistory = removeFirstElementIfNeeded(state.speedHistory);

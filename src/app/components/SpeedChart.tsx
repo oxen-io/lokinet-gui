@@ -8,11 +8,12 @@ import {
   VictoryLegend
 } from 'victory';
 
-export type SpeedHistoryCoordinates = { x: number; y: number };
-type SpeedHistoryRowDataType = Array<SpeedHistoryCoordinates>;
+export type NumberQueue = Array<number>;
 export type SpeedHistoryDataType = {
-  upload: SpeedHistoryRowDataType;
-  download: SpeedHistoryRowDataType;
+  upload: NumberQueue;
+  download: NumberQueue;
+  lastUploadUsage?: number;
+  lastDownloadUsage?: number;
 };
 
 export const MAX_NUMBER_POINT_HISTORY = 120; // 1 minute as there is 2 points per sec currently
@@ -24,6 +25,21 @@ export const SpeedChart = ({
 }): JSX.Element => {
   const uploadColor = 'red';
   const downloadColor = 'blue';
+
+  const uploadCoordinates = speedHistory.upload.map((y, index) => {
+    return {
+      x: index,
+      y
+    };
+  });
+
+  const downloadCoordinates = speedHistory.download.map((y, index) => {
+    return {
+      x: index,
+      y
+    };
+  });
+
   return (
     <Flex flexDirection="column">
       <VictoryChart animate={false} height={200} theme={VictoryTheme.material}>
@@ -36,13 +52,13 @@ export const SpeedChart = ({
             style={{
               data: { stroke: downloadColor }
             }}
-            data={speedHistory.download}
+            data={downloadCoordinates}
           />
           <VictoryArea
             style={{
               data: { stroke: uploadColor }
             }}
-            data={speedHistory.upload}
+            data={uploadCoordinates}
           />
         </VictoryGroup>
       </VictoryChart>
@@ -50,8 +66,8 @@ export const SpeedChart = ({
         orientation="vertical"
         width={200}
         data={[
-          { name: 'Upload Speed', symbol: { fill: uploadColor } },
-          { name: 'Download Speed', symbol: { fill: downloadColor } }
+          { name: 'Upload Speed (kb/s)', symbol: { fill: uploadColor } },
+          { name: 'Download Speed (kb/s)', symbol: { fill: downloadColor } }
         ]}
       />
     </Flex>
