@@ -12,7 +12,7 @@ import {
 
 import {
   getStatus,
-  getVersion,
+  getUpTimeAndVersion,
   initializeIpcRendererSide,
   parseGeneralInfos,
   parseStateResults,
@@ -22,7 +22,6 @@ import {
 import { DownSpeedStats, UpSpeedStats } from './components/SpeedStats';
 import { StopAndStart } from './components/StopAndStartButton';
 import { SpeedChart } from './components/SpeedChart';
-import { EnableExitToggle } from './components/EnableExitToggle';
 import { ActivePathStats, LokinetRoutersStats } from './components/RouterStats';
 import { selectStatus, updateFromDaemonStatus } from '../features/statusSlice';
 import { Provider, useSelector } from 'react-redux';
@@ -33,6 +32,9 @@ import {
   updateFromDaemonGeneralInfos
 } from '../features/generalInfosSlice';
 import { AppTitle } from './components/AppTitle';
+import { ExitPanel } from './components/ExitPanel';
+import { LokinetAddress } from './components/LokinetAdress';
+import { markExitNodesFromDaemon } from '../features/exitStatusSlice';
 
 const mainElement = document.createElement('div');
 document.body.appendChild(mainElement);
@@ -59,18 +61,20 @@ const App = () => {
     const parsedStatus = parseStateResults(statusAsString);
 
     // Send the update to the redux store.
-    dispatch(updateFromDaemonStatus({ stateFromDaemon: parsedStatus }));
+    dispatch(updateFromDaemonStatus({ daemonStatus: parsedStatus }));
+    dispatch(
+      markExitNodesFromDaemon({
+        exitNodeFromDaemon: parsedStatus.exitNode,
+        exitAuthCodeFromDaemon: parsedStatus.exitAuthCode
+      })
+    );
   }, POLLING_STATUS_INTERVAL_MS);
 
   // register an interval for fetching the version and uptime of the daemon.
   // Note: With react, no refresh is triggered if the change made does not make a change
   useInterval(async () => {
-    const generalInfos = await getVersion();
+    const generalInfos = await getUpTimeAndVersion();
     const parsedInfos = parseGeneralInfos(generalInfos);
-    console.warn({ generalInfos });
-    console.warn(parsedInfos);
-
-    // Send the update to the redux store.
     dispatch(updateFromDaemonGeneralInfos({ generalsInfos: parsedInfos }));
   }, POLLING_GENERAL_INFOS_INTERVAL_MS);
 
@@ -83,10 +87,13 @@ const App = () => {
             version={daemonGeneralInfos.version}
           />
           <Flex>
+            <LokinetAddress />
+          </Flex>
+          <Flex>
             <StopAndStart />
           </Flex>
           <Flex>
-            <EnableExitToggle />
+            <ExitPanel />
           </Flex>
           <ActivePathStats
             activePaths={daemonStatus.numPathsBuilt}

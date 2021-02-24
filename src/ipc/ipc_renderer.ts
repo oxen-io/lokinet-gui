@@ -4,16 +4,23 @@ import Electron from 'electron';
 const { ipcRenderer } = Electron;
 import _ from 'lodash';
 import crypto from 'crypto';
-import { DEBUG_IPC_CALLS, IPC_CHANNEL_KEY } from '../../electron/shared_ipc';
+import {
+  DEBUG_IPC_CALLS,
+  DEBUG_IPC_CALLS_GET_STATUS,
+  IPC_CHANNEL_KEY
+} from '../../electron/shared_ipc';
 
-const IPC_UPDATE_TIMEOUT = 5 * 1000; // 5 secs
+const IPC_UPDATE_TIMEOUT = 5000; // 5 minutes
 
 const channelsToMake = {
-  getVersion,
-  getStatus
+  getUpTimeAndVersion,
+  getStatus,
+  addExit,
+  deleteExit,
+  setConfig
 };
 const channels = {} as any;
-export const _jobs = Object.create(null);
+const _jobs = Object.create(null);
 
 export const POLLING_STATUS_INTERVAL_MS = 500;
 export const POLLING_GENERAL_INFOS_INTERVAL_MS = 1000;
@@ -23,12 +30,31 @@ let _shuttingDown = false;
 let _shutdownCallback: any = null;
 let _shutdownPromise: any = null;
 
-export async function getVersion(): Promise<string> {
-  return channels.getVersion();
+export async function getUpTimeAndVersion(): Promise<string> {
+  return channels.getUpTimeAndVersion();
 }
 
 export async function getStatus(): Promise<string> {
   return channels.getStatus();
+}
+export async function addExit(
+  exitAddress: string,
+  exitToken?: string
+): Promise<string> {
+  console.info(
+    `Triggering exit node set with node ${exitAddress}, authCode:${exitToken}`
+  );
+  return channels.addExit(exitAddress, exitToken);
+}
+export async function deleteExit(): Promise<string> {
+  return channels.deleteExit();
+}
+export async function setConfig(
+  section: string,
+  key: string,
+  value: string
+): Promise<string> {
+  return channels.setConfig(section, key, value);
 }
 
 export function initializeIpcRendererSide(): void {
@@ -60,6 +86,15 @@ export function initializeIpcRendererSide(): void {
             `Error received from IPC channel job ${jobId} (${fnName}): ${errorForDisplay}`
           )
         );
+      }
+
+      if (
+        (fnName === 'getStatus' && DEBUG_IPC_CALLS_GET_STATUS) ||
+        (fnName !== 'getStatus' && DEBUG_IPC_CALLS)
+      ) {
+        // console.log(
+        //   `IPC channel job ${jobId} (${fnName}) finished with: ${result}`
+        // );
       }
 
       return resolve(result);
@@ -109,7 +144,7 @@ function _makeJob(fnName: string) {
   const jobId = crypto.randomBytes(15).toString('hex');
 
   if (DEBUG_IPC_CALLS) {
-    console.log(`IPC channel job ${jobId} (${fnName}) started`);
+    // console.log(`IPC channel job ${jobId} (${fnName}) started`);
   }
   _jobs[jobId] = {
     fnName
@@ -211,7 +246,7 @@ const forEachSession = (visit: any, stats: any) => {
   }
 };
 
-export interface ParsedStateFromDaemon {
+export interface DaemonStatus {
   isRunning: boolean;
   numPeersConnected: number;
   uploadUsage: number;
@@ -220,6 +255,8 @@ export interface ParsedStateFromDaemon {
   numPathsBuilt: number;
   numRoutersKnown: number;
   ratio: string;
+  exitNode?: string;
+  exitAuthCode?: string;
 }
 
 export interface ParsedGeneralInfosFromDaemon {
@@ -227,7 +264,7 @@ export interface ParsedGeneralInfosFromDaemon {
   version: string;
 }
 
-export const defaultParsedStateFromDaemon = {
+export const defaultDaemonStatus = {
   isRunning: false,
   numPeersConnected: 0,
   uploadUsage: 0,
@@ -235,7 +272,9 @@ export const defaultParsedStateFromDaemon = {
   lokiAddress: '',
   numPathsBuilt: 0,
   numRoutersKnown: 0,
-  ratio: ''
+  ratio: '',
+  exitNode: undefined,
+  exitAuthCode: undefined
 };
 
 export const defaultParsedGeneralInfosFromDaemon = {
@@ -246,9 +285,9 @@ export const defaultParsedGeneralInfosFromDaemon = {
 export const parseStateResults = (
   payload: string,
   error?: string
-): ParsedStateFromDaemon => {
+): DaemonStatus => {
   let stats = null;
-  const parsedState: ParsedStateFromDaemon = defaultParsedStateFromDaemon;
+  const parsedState: DaemonStatus = defaultDaemonStatus;
 
   // We can either have an error of communication, or an error on the returned JSON
   if (!error) {
@@ -294,23 +333,23 @@ export const parseStateResults = (
 
   const exitMap = stats?.result?.services?.default?.exitMap;
   if (exitMap) {
-    console.warn('exitMap:', exitMap);
-    // const exitFromDaemon = exitMap.find(k =>)
-    // for (const k in exitMap) {
-    //   lokiFromD = exitMap[k];
-    // }
+    // exitMap should be of length 1 only, but it's an object with keys an IP (not as string)
+    // so easier to parse it like this
+    for (const k in exitMap) {
+      parsedState.exitNode = exitMap[k];
+    }
+  } else {
+    parsedState.exitNode = undefined;
   }
-  const authCodes = stats?.result?.services?.default?.authCodes || '';
+  const authCodes = stats?.result?.services?.default?.authCodes || undefined;
 
   if (authCodes) {
-    console.warn('authCodes:', authCodes);
-
-    //   if (lokiExit in authCodes) {
-    //     var auth = authCodes[lokiExit];
-    //     if (auth !== exitAuth) {
-    //       exitAuth = auth;
-    //     }
-    //   }
+    for (const lokiExit in authCodes) {
+      const auth = stats?.result?.services?.default?.authCodes[lokiExit];
+      parsedState.exitAuthCode = auth;
+    }
+  } else {
+    parsedState.exitAuthCode = undefined;
   }
 
   // compute all stats on all path builders on the default endpoint

@@ -3,7 +3,7 @@
 import { ipcMain } from 'electron';
 import { Dealer as ZeroMqDealer } from 'zeromq';
 import { eventsByJobId } from './ipc_node';
-import { DEBUG_IPC_CALLS, IPC_CHANNEL_KEY } from './shared_ipc';
+import { DEBUG_RPC_CALLS, IPC_CHANNEL_KEY } from './shared_ipc';
 
 const RPC_BOUND_PORT = 1190;
 const RPC_BOUND_IP = '127.0.0.1';
@@ -24,10 +24,10 @@ const request = async (
   if (!reply_tag) {
     throw new Error(`You must use a reply tag for cmd ${cmd}`);
   }
-  if (DEBUG_IPC_CALLS) {
+  if (DEBUG_RPC_CALLS) {
     console.info(`\t====> sending RPC  cmd:${cmd};  reply_tag:${reply_tag}`);
   }
-  await dealer.send([cmd, reply_tag]);
+  await dealer.send([cmd, reply_tag, _opts]);
 };
 
 // LokinetApiClient::invoke
@@ -40,12 +40,44 @@ const invoke = async (
   await request(endpoint, reply_tag, req);
 };
 
-export const getVersion = async (reply_tag: string): Promise<void> => {
+export const getUpTimeAndVersion = async (reply_tag: string): Promise<void> => {
   await invoke('llarp.version', reply_tag, {});
 };
 
 export const getStatus = async (reply_tag: string): Promise<void> => {
   await invoke('llarp.status', reply_tag, {});
+};
+
+export const addExit = async (
+  reply_tag: string,
+  exitAddress: string,
+  exitToken?: string
+): Promise<void> => {
+  if (exitToken) {
+    await invoke('llarp.exit', reply_tag, {
+      exit: exitAddress,
+      token: exitToken
+    });
+  } else {
+    await invoke('llarp.exit', reply_tag, { exit: exitAddress });
+  }
+};
+
+export const deleteExit = async (reply_tag: string): Promise<void> => {
+  await invoke('llarp.exit', reply_tag, { unmap: true });
+};
+
+export const setConfig = async (
+  reply_tag: string,
+  section: string,
+  key: string,
+  value: string
+): Promise<void> => {
+  const obj: { [k: string]: any } = {};
+  const config: { [k: string]: string } = {};
+  config[key] = value;
+  obj[section] = config;
+  await invoke('llarp.config', reply_tag, { override: obj, reload: true });
 };
 
 export const close = (): void => {
@@ -75,7 +107,7 @@ const loopDealerReceiving = async (): Promise<void> => {
           if (!event) {
             throw new Error(`Could not find the event for jobId ${jobId}`);
           }
-          if (DEBUG_IPC_CALLS) {
+          if (DEBUG_RPC_CALLS) {
             console.info(
               `\t<==== received RPC  jobId:${jobId};  content:${content}`
             );

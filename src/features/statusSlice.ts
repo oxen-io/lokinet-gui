@@ -6,12 +6,20 @@ import {
 } from '../app/components/SpeedChart';
 import { RootState } from '../app/store';
 import {
-  defaultParsedStateFromDaemon,
-  ParsedStateFromDaemon,
+  DaemonStatus,
+  defaultDaemonStatus,
   POLLING_STATUS_INTERVAL_MS
 } from '../ipc/ipc_renderer';
 
-export interface StatusState extends ParsedStateFromDaemon {
+export interface StatusState {
+  isRunning: boolean;
+  numPeersConnected: number;
+  uploadUsage: number;
+  downloadUsage: number;
+  lokiAddress: string;
+  numPathsBuilt: number;
+  numRoutersKnown: number;
+  ratio: string;
   speedHistory: SpeedHistoryDataType;
 }
 const getDefaultSpeedHistory = () => {
@@ -22,7 +30,7 @@ const getDefaultSpeedHistory = () => {
 };
 
 const initialStatusState: StatusState = {
-  ...defaultParsedStateFromDaemon,
+  ...defaultDaemonStatus,
   speedHistory: getDefaultSpeedHistory()
 };
 
@@ -45,11 +53,11 @@ export const statusSlice = createSlice({
     updateFromDaemonStatus: (
       state,
       action: PayloadAction<{
-        stateFromDaemon?: ParsedStateFromDaemon;
+        daemonStatus?: DaemonStatus;
         error?: string;
       }>
     ) => {
-      state.isRunning = action.payload.stateFromDaemon?.isRunning || false;
+      state.isRunning = action.payload.daemonStatus?.isRunning || false;
       if (!state.isRunning) {
         state.downloadUsage = 0;
         state.uploadUsage = 0;
@@ -62,16 +70,15 @@ export const statusSlice = createSlice({
         return state;
       }
 
-      state.downloadUsage = action.payload.stateFromDaemon?.downloadUsage || 0;
-      state.uploadUsage = action.payload.stateFromDaemon?.uploadUsage || 0;
+      state.downloadUsage = action.payload.daemonStatus?.downloadUsage || 0;
+      state.uploadUsage = action.payload.daemonStatus?.uploadUsage || 0;
 
-      state.numPathsBuilt = action.payload.stateFromDaemon?.numPathsBuilt || 0;
-      state.numRoutersKnown =
-        action.payload.stateFromDaemon?.numRoutersKnown || 0;
+      state.numPathsBuilt = action.payload.daemonStatus?.numPathsBuilt || 0;
+      state.numRoutersKnown = action.payload.daemonStatus?.numRoutersKnown || 0;
       state.numPeersConnected =
-        action.payload.stateFromDaemon?.numPeersConnected || 0;
-      state.lokiAddress = action.payload.stateFromDaemon?.lokiAddress || '';
-      state.ratio = action.payload.stateFromDaemon?.ratio || '';
+        action.payload.daemonStatus?.numPeersConnected || 0;
+      state.lokiAddress = action.payload.daemonStatus?.lokiAddress || '';
+      state.ratio = action.payload.daemonStatus?.ratio || '';
 
       // update graph speeds data
       state.speedHistory.download.push({
@@ -97,4 +104,3 @@ export const statusSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const { updateFromDaemonStatus } = statusSlice.actions;
 export const selectStatus = (state: RootState): StatusState => state.status;
-export default statusSlice.reducer;

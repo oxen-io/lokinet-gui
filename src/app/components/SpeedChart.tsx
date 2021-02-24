@@ -15,21 +15,21 @@ export type SpeedHistoryDataType = {
   download: SpeedHistoryRowDataType;
 };
 
-export const MAX_NUMBER_POINT_HISTORY = 300;
+export const MAX_NUMBER_POINT_HISTORY = 120; // 1 minute as there is 2 points per sec currently
 
 export const SpeedChart = ({
   speedHistory
 }: {
   speedHistory: SpeedHistoryDataType;
 }): JSX.Element => {
-  const uploadColor = 'cyan';
-  const downloadColor = 'magenta';
+  const uploadColor = 'red';
+  const downloadColor = 'blue';
   return (
     <Flex flexDirection="column">
       <VictoryChart animate={false} height={200} theme={VictoryTheme.material}>
         <VictoryGroup
           style={{
-            data: { fillOpacity: 0.1 }
+            data: { fillOpacity: 0 }
           }}
         >
           <VictoryArea
