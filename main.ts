@@ -10,12 +10,12 @@ function createWindow() {
   const width = 400;
   const isDev = process.env.NODE_ENV === 'development';
   mainWindow = new BrowserWindow({
-    width: isDev ? 1200 : width,
-    height: isDev ? 800 : width * ratio,
-    resizable: true, // isDev || false,
+    width,
+    height: width * ratio,
+    resizable: true,
     webPreferences: {
       nodeIntegration: true,
-      devTools: true, //isDev
+      devTools: true,
       webSecurity: true
     },
     backgroundColor: '#323641'

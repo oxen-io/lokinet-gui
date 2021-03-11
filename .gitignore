@@ -72,4 +72,3 @@ ts-gen
 patches/mtime-cache.json
 
 release/
-build/

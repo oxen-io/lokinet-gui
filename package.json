@@ -31,14 +31,19 @@
     "mac": {
       "category": "public.app-category.utilities"
     },
+    "nsis": {},
     "linux": {
       "target": [
-        "AppImage",
         "deb"
       ]
     },
+    "deb": {
+      "afterInstall": "build-scripts/deb-postinstall.sh"
+    },
     "files": [
-      "./dist/**/*"
+      "./dist/**/*",
+      "build-scripts/*",
+      "icons/*"
     ]
   },
   "devDependencies": {
