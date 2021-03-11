@@ -8,7 +8,7 @@ import {
   DEBUG_IPC_CALLS,
   DEBUG_IPC_CALLS_GET_STATUS,
   IPC_CHANNEL_KEY
-} from '../../electron/shared_ipc';
+} from '../../shared_ipc';
 
 const IPC_UPDATE_TIMEOUT = 5000; // 5 minutes
 

@@ -68,4 +68,7 @@ ts-gen
 .depshash-target
 
 # Used to accelerate builds after sync
+
 patches/mtime-cache.json
+
+release/

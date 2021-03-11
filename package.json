@@ -14,7 +14,26 @@
     "format": "prettier --config .prettierrc './**/*.tsx' './**/*.ts' --write",
     "format-and-lint": "yarn format && yarn lint",
     "dev:electron": "cross-env NODE_ENV=development webpack --config webpack.electron.config.js --mode development && electron .",
-    "dev:react": "cross-env NODE_ENV=development webpack serve --config webpack.react.config.js --mode development"
+    "dev:react": "cross-env NODE_ENV=development webpack serve --config webpack.react.config.js --mode development",
+    "compile:electron": "cross-env NODE_ENV=production webpack --config webpack.electron.config.js --mode production",
+    "compile:react": "cross-env NODE_ENV=production webpack --config webpack.react.config.js --mode production",
+    "compile": "yarn compile:electron && yarn compile:react",
+    "pack": "yarn compile && electron-builder --dir",
+    "dist": "rm -rf dist; rm -rf release; yarn compile && electron-builder",
+    "postinstall": "install-app-deps"
+  },
+  "build": {
+    "appId": "your.id",
+    "directories": {
+      "output": "release/"
+    },
+    "asar": true,
+    "mac": {
+      "category": "your.app.category.type"
+    },
+    "files": [
+      "./dist/**/*"
+    ]
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -31,6 +50,7 @@
     "cross-env": "^7.0.3",
     "css-loader": "^5.0.2",
     "electron": "^11.2.3",
+    "electron-builder": "^22.10.5",
     "eslint": "^7.20.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",
