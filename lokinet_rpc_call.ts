@@ -9,7 +9,7 @@ const RPC_BOUND_PORT = 1190;
 const RPC_BOUND_IP = '127.0.0.1';
 const RPC_ZMQ_ADDRESS = `tcp://${RPC_BOUND_IP}:${RPC_BOUND_PORT}`;
 
-let dealer: ZeroMqDealer;
+let dealer: any; // ZeroMqDealer
 
 let isRunning = false;
 

@@ -7,17 +7,17 @@ This repository contains a cross-platform GUI for controlling and observing stat
 
     git clone https://github.com/oxen-io/loki-network-gui -b dev
     cd loki-network-gui/
-    
+
 
 ### Download nvm and set the project up
     curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.37.2/install.sh | bash
     nvm install # install node version from the .nvmrc file
     nvm use
 
-### Install yarn 
+### Install yarn
     npm install --global yarn
     yarn install
-    
+
 ### Start the app on development mode
 
 #### On one terminal start the electron process
@@ -28,4 +28,5 @@ This repository contains a cross-platform GUI for controlling and observing stat
     yarn dev:react
 
 if the screen stays grey, you might need to CTRL-R the app
-                                                              
+
+

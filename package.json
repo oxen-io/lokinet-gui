@@ -1,6 +1,6 @@
 {
-  "name": "lokinet-control-panel",
-  "productName": "Lokinet Control Panel",
+  "name": "lokinet-gui",
+  "productName": "Lokinet GUI",
   "description": "A Control panel for Lokinet",
   "version": "0.1.0",
   "license": "GPL-3.0",
@@ -20,16 +20,22 @@
     "compile": "yarn compile:electron && yarn compile:react",
     "pack": "yarn compile && electron-builder --dir",
     "dist": "rm -rf dist; rm -rf release; yarn compile && electron-builder",
-    "postinstall": "install-app-deps"
+    "postinstall": "patch-package && install-app-deps"
   },
   "build": {
-    "appId": "your.id",
+    "appId": "com.electron.lokinet.gui",
     "directories": {
       "output": "release/"
     },
     "asar": true,
     "mac": {
-      "category": "your.app.category.type"
+      "category": "public.app-category.utilities"
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "deb"
+      ]
     },
     "files": [
       "./dist/**/*"
@@ -51,12 +57,15 @@
     "css-loader": "^5.0.2",
     "electron": "^11.2.3",
     "electron-builder": "^22.10.5",
+    "electron-rebuild": "^2.3.5",
     "eslint": "^7.20.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",
     "eslint-plugin-react-hooks": "^4.2.0",
     "file-loader": "^6.2.0",
     "html-webpack-plugin": "^5.1.0",
+    "patch-package": "^6.4.6",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^2.2.1",
     "style-loader": "^2.0.0",
     "typescript": "^4.1.5",

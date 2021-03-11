@@ -50,4 +50,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin(),
   ],
+  optimization: {
+    minimize: false
+  },
 };

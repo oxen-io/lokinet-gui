@@ -1,0 +1,13 @@
+diff --git a/node_modules/node-gyp-build/index.js b/node_modules/node-gyp-build/index.js
+index b5096ed..9212883 100644
+--- a/node_modules/node-gyp-build/index.js
++++ b/node_modules/node-gyp-build/index.js
+@@ -60,7 +60,7 @@ load.path = function (dir) {
+ 
+   function resolve (dir) {
+     // Find most specific flavor first
+-    var prebuilds = path.join(dir, 'prebuilds', platform + '-' + arch)
++    var prebuilds = path.join(dir, 'node_modules', 'zeromq', 'prebuilds', platform + '-' + arch)
+     var parsed = readdirSync(prebuilds).map(parseTags)
+     var candidates = parsed.filter(matchTags(runtime, abi))
+     var winner = candidates.sort(compareTags(runtime))[0]

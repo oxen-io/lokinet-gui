@@ -9,9 +9,9 @@ module.exports = {
   devtool: 'source-map',
   entry: './main.ts',
   target: 'electron-main',
-  externals: {
-    zerorpc: 'zerorpc'
-  },
+  // externals: {
+  //   zerorpc: 'zerorpc'
+  // },
   module: {
     rules: [
       {
@@ -30,5 +30,11 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: '[name].js',
+  },
+  node: {
+    // __dirname: true
+  },
+  optimization: {
+    minimize: false
   },
 };
