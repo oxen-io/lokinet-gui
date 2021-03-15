@@ -48,7 +48,7 @@ module.exports = {
     publicPath: './',
   },
   plugins: [
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({ title: 'Loki Network Control Panel' }),
   ],
   optimization: {
     minimize: false

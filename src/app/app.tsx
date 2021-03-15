@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import ReactDom from 'react-dom';
+import 'focus-visible/dist/focus-visible';
 
 import { ChakraProvider, useInterval } from '@chakra-ui/react';
 
