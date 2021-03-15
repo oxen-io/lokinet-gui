@@ -24,24 +24,18 @@ const handleTurningOffExit = async (dispatch: AppDispatch) => {
     try {
       const parsed = JSON.parse(deleteExitResult);
       if (parsed.error) {
-        dispatch(appendToApplogs(`ExitOFF: error: ${deleteExitResult}`));
-
         dispatch(
           markExitFailedToLoad(`ExitOFF: Daemon says '${parsed.error}'`)
         );
         return;
       }
       if (parsed.result !== 'OK') {
-        dispatch(appendToApplogs(`ExitOFF: daemon says: ${deleteExitResult}`));
-
         dispatch(markExitFailedToLoad(`ExitOFF: Daemon says ${parsed.error}`));
       } else {
         // Do nothing. At this point we are waiting for the next getStatus call
         // to send us the exit node set from the daemon.
       }
     } catch (e) {
-      dispatch(appendToApplogs(`ExitOFF: exception: ${deleteExitResult}`));
-
       dispatch(
         markExitFailedToLoad(
           `Couldn't parse result from deleteExit: '${deleteExitResult}'`
@@ -63,7 +57,9 @@ const handleTurningOnExit = async (
     dispatch(markExitFailedToLoad('Please enter an Exit Node address first.'));
     return;
   }
-  dispatch(appendToApplogs(`ExitON`));
+  dispatch(
+    appendToApplogs(`ExitON with '${exitNode}'; auth code: '${authCode}'`)
+  );
 
   dispatch(markExitIsTurningOn());
   // trigger the IPC+RPC call
@@ -75,8 +71,6 @@ const handleTurningOnExit = async (
     try {
       const parsed = JSON.parse(addExitResult);
       if (parsed.error) {
-        dispatch(appendToApplogs(`ExitON: error: ${addExitResult}`));
-
         dispatch(
           markExitFailedToLoad(
             `AddExit with ${exitNode}: Daemon says '${parsed.error}'`
@@ -85,8 +79,6 @@ const handleTurningOnExit = async (
         return;
       }
       if (parsed.result !== 'OK') {
-        dispatch(appendToApplogs(`ExitON: Daemon says: ${addExitResult}`));
-
         dispatch(markExitFailedToLoad(`AddExit: Daemon says ${parsed.error}`));
       } else {
         // Do nothing. At this point we are waiting for the next getStatus call

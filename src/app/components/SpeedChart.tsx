@@ -48,7 +48,7 @@ export const SpeedChart = (): JSX.Element => {
         flexDirection="column"
         width="100%"
         alignItems="left"
-        marginLeft={10}
+        paddingLeft={10}
       >
         <VictoryChart
           animate={false}

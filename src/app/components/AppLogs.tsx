@@ -7,7 +7,7 @@ export const AppLogs = (): JSX.Element => {
   const { appLogs } = useAppSelector(selectAppLogs);
 
   return (
-    <Code>
+    <Code size="xs" overflowY="auto" maxHeight="80vh">
       {appLogs.map((logLine, index) => {
         return <Text key={index}>{logLine}</Text>;
       })}

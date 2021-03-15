@@ -1,21 +1,25 @@
 import { Badge, Flex, Switch } from '@chakra-ui/react';
-import React, { useState } from 'react';
+import React from 'react';
 
 export const StopAndStart = (): JSX.Element => {
-  const [clicked, setClicked] = useState(false);
+  const isLokinetRunning = true;
   return (
     <Flex justify="center" align="center">
       <Switch
         margin="auto"
-        isLoading={clicked}
-        onClick={() => {
-          setClicked(false);
+        onChange={() => {
+          console.warn('TODO');
         }}
         size="lg"
+        colorScheme="green"
         aria-label="stop and start"
+        isChecked={isLokinetRunning}
       />
-      <Badge colorScheme="green">Lokinet Running</Badge>
-      <Badge colorScheme="red">Lokinet Stopped</Badge>
+      {isLokinetRunning ? (
+        <Badge colorScheme="green">Lokinet Running</Badge>
+      ) : (
+        <Badge colorScheme="red">Lokinet Stopped</Badge>
+      )}
     </Flex>
   );
 };

@@ -15,7 +15,7 @@ export const AppLayout = (): JSX.Element => {
   // Select (i.e. extract the daemon status from our global redux state)
   const daemonStatus = useSelector(selectStatus);
   return (
-    <Flex width="100%" height="100%">
+    <Flex width="100%" height="100vh">
       <Stack padding="20px" textAlign="center" width="400px">
         <AppTitle />
         <GeneralInfos />
