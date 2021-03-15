@@ -324,8 +324,6 @@ export const parseStateResults = (
   // rate we tallied up in this sample
   parsedState.uploadUsage = (txRate * POLLING_STATUS_INTERVAL_MS) / 1000;
   parsedState.downloadUsage = (rxRate * POLLING_STATUS_INTERVAL_MS) / 1000;
-  console.warn('txRate', txRate);
-  console.warn('rxRate', rxRate);
 
   parsedState.isRunning = stats?.result?.running || false;
   parsedState.numRoutersKnown = stats?.result?.numNodesKnown || 0;

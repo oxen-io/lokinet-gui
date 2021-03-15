@@ -15,11 +15,11 @@ export type NumberQueue = Array<number>;
 export type SpeedHistoryDataType = {
   upload: NumberQueue;
   download: NumberQueue;
-  lastUploadUsage?: number;
-  lastDownloadUsage?: number;
+  lastUploadUsage: number | null;
+  lastDownloadUsage: number | null;
 };
 
-export const MAX_NUMBER_POINT_HISTORY = 120; // 1 minute as there is 2 points per sec currently
+export const MAX_NUMBER_POINT_HISTORY = 30; // 1 minute as there is 2 points per sec currently
 
 export const SpeedChart = (): JSX.Element => {
   const uploadColor = 'red';

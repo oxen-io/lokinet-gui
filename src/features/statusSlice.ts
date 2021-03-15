@@ -21,8 +21,8 @@ const getDefaultSpeedHistory = (): SpeedHistoryDataType => {
   return {
     upload: new Array<number>(MAX_NUMBER_POINT_HISTORY).fill(0),
     download: new Array<number>(MAX_NUMBER_POINT_HISTORY).fill(0),
-    lastUploadUsage: undefined,
-    lastDownloadUsage: undefined
+    lastUploadUsage: null,
+    lastDownloadUsage: null
   };
 };
 
@@ -77,11 +77,11 @@ export const statusSlice = createSlice({
       // This code effectively save one call temporary until we get the second call 500ms later.
       // Then, we merge the two usage in a single entry added to the data used by the graph
       if (
-        !state.speedHistory.lastUploadUsage ||
-        !state.speedHistory.lastDownloadUsage
+        state.speedHistory.lastUploadUsage === null ||
+        state.speedHistory.lastDownloadUsage === null
       ) {
-        state.speedHistory.lastUploadUsage = state.downloadUsage;
-        state.speedHistory.lastDownloadUsage = state.uploadUsage;
+        state.speedHistory.lastUploadUsage = state.uploadUsage;
+        state.speedHistory.lastDownloadUsage = state.downloadUsage;
       } else {
         // update graph speeds data
         const newDownload =
@@ -89,11 +89,9 @@ export const statusSlice = createSlice({
         const newUpload =
           (state.speedHistory.lastUploadUsage + state.uploadUsage) / 1024; // kb
 
-        console.warn('newDownload', newDownload);
-        console.warn('newUpload', newUpload);
         // reset the memoized last usage for the next call
-        state.speedHistory.lastDownloadUsage = undefined;
-        state.speedHistory.lastUploadUsage = undefined;
+        state.speedHistory.lastDownloadUsage = null;
+        state.speedHistory.lastUploadUsage = null;
         state.speedHistory.download.push(newDownload);
         state.speedHistory.upload.push(newUpload);
       }
