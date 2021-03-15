@@ -89,6 +89,8 @@ export const statusSlice = createSlice({
         const newUpload =
           (state.speedHistory.lastUploadUsage + state.uploadUsage) / 1024; // kb
 
+        console.warn('newDownload', newDownload);
+        console.warn('newUpload', newUpload);
         // reset the memoized last usage for the next call
         state.speedHistory.lastDownloadUsage = undefined;
         state.speedHistory.lastUploadUsage = undefined;

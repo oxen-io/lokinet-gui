@@ -1,20 +1,21 @@
-import { IconButton } from '@chakra-ui/react';
+import { Badge, Flex, Switch } from '@chakra-ui/react';
 import React, { useState } from 'react';
-import { MdPowerSettingsNew } from 'react-icons/md';
 
 export const StopAndStart = (): JSX.Element => {
   const [clicked, setClicked] = useState(false);
   return (
-    <IconButton
-      margin="auto"
-      isRound
-      isLoading={clicked}
-      onClick={() => {
-        setClicked(false);
-      }}
-      size="lg"
-      icon={<MdPowerSettingsNew />}
-      aria-label="stop and start"
-    />
+    <Flex justify="center" align="center">
+      <Switch
+        margin="auto"
+        isLoading={clicked}
+        onClick={() => {
+          setClicked(false);
+        }}
+        size="lg"
+        aria-label="stop and start"
+      />
+      <Badge colorScheme="green">Lokinet Running</Badge>
+      <Badge colorScheme="red">Lokinet Stopped</Badge>
+    </Flex>
   );
 };

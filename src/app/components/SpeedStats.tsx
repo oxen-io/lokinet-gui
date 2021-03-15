@@ -1,5 +1,7 @@
-import { Box, HStack, Icon, Text } from '@chakra-ui/react';
+import { Flex, Heading, Icon, Text, VStack } from '@chakra-ui/react';
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { selectStatus } from '../../features/statusSlice';
 import { FiUploadCloud, FiDownloadCloud } from 'react-icons/fi';
 
 function makeRate(value: number): string {
@@ -19,24 +21,32 @@ function makeRate(value: number): string {
   );
 }
 
-export const UpSpeedStats = ({ upSpeed }: { upSpeed: number }): JSX.Element => (
-  <Box>
-    <HStack>
-      <Icon margin="5px" as={FiUploadCloud} />
-      <Text>{makeRate(upSpeed)}</Text>
-    </HStack>
-  </Box>
-);
+const SpeedStatsFlex = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <Flex width="30%" justifyContent="space-between">
+      {children}
+    </Flex>
+  );
+};
 
-export const DownSpeedStats = ({
-  downSpeed
-}: {
-  downSpeed: number;
-}): JSX.Element => (
-  <Box>
-    <HStack>
-      <Icon margin="5px" as={FiDownloadCloud} />
-      <Text>{makeRate(downSpeed)}</Text>
-    </HStack>
-  </Box>
-);
+export const SpeedStats = (): JSX.Element => {
+  const daemonStatus = useSelector(selectStatus);
+  const upSpeed = makeRate(daemonStatus.uploadUsage);
+  const downSpeed = makeRate(daemonStatus.downloadUsage);
+
+  return (
+    <VStack>
+      <Heading size="md" marginRight="auto">
+        Speeds
+      </Heading>
+      <SpeedStatsFlex>
+        <Icon margin="5px" as={FiUploadCloud} />
+        <Text>{upSpeed}</Text>
+      </SpeedStatsFlex>
+      <SpeedStatsFlex>
+        <Icon margin="5px" as={FiDownloadCloud} />
+        <Text>{downSpeed}</Text>
+      </SpeedStatsFlex>
+    </VStack>
+  );
+};

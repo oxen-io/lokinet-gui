@@ -1,49 +1,39 @@
-import {
-  Stat,
-  StatLabel,
-  StatNumber,
-  StatHelpText,
-  Box
-} from '@chakra-ui/react';
+import { Flex, Heading, Text, VStack } from '@chakra-ui/react';
 import React from 'react';
 
-const StatsBox = ({ children }: { children: React.ReactNode }) => (
-  <Box
-    maxW="sm"
-    borderWidth="1px"
-    borderRadius="lg"
-    overflow="hidden"
-    shadow="xs"
-  >
-    {children}
-  </Box>
-);
+const RouterStatsFlex = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <Flex width="40%" justifyContent="space-between">
+      {children}
+    </Flex>
+  );
+};
 
-export const ActivePathStats = ({
+export const RoutersStats = ({
+  numRouters,
   activePaths,
   ratio
 }: {
+  numRouters: number;
   activePaths: number;
   ratio: string;
 }): JSX.Element => (
-  <StatsBox>
-    <Stat padding="5px">
-      <StatLabel>Active Paths</StatLabel>
-      <StatNumber>{activePaths}</StatNumber>
-      <StatHelpText>({ratio} success)</StatHelpText>
-    </Stat>
-  </StatsBox>
-);
+  <VStack>
+    <Heading size="md" marginRight="auto">
+      Routers
+    </Heading>
 
-export const LokinetRoutersStats = ({
-  numRouters
-}: {
-  numRouters: number;
-}): JSX.Element => (
-  <StatsBox>
-    <Stat padding="5px">
-      <StatLabel>Lokinet Routers</StatLabel>
-      <StatNumber>{numRouters}</StatNumber>
-    </Stat>
-  </StatsBox>
+    <RouterStatsFlex>
+      <Text fontWeight="bold">Count</Text>
+      <Text>{numRouters}</Text>
+    </RouterStatsFlex>
+    <RouterStatsFlex>
+      <Text fontWeight="bold">Active Paths</Text>
+      <Text>{activePaths}</Text>
+    </RouterStatsFlex>
+    <RouterStatsFlex>
+      <Text fontWeight="bold">Success</Text>
+      <Text>{ratio}</Text>
+    </RouterStatsFlex>
+  </VStack>
 );

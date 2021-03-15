@@ -1,4 +1,4 @@
-import { Flex, FormControl, FormLabel, Input } from '@chakra-ui/react';
+import { Flex, Input } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import {
@@ -21,24 +21,26 @@ export const ExitPanel = (): JSX.Element => {
 
   return (
     <Flex flexDirection="column" alignSelf="center" width="100%">
-      <FormControl id="exitNode">
-        <FormLabel size="xs">Exit node:</FormLabel>
-        <Input
-          isDisabled={disableInputEdits}
-          onChange={(e) => dispatch(onUserExitNodeSet(e?.currentTarget?.value))}
-          onPaste={(e) => dispatch(onUserExitNodeSet(e?.currentTarget?.value))}
-          size="xs"
-        />
-      </FormControl>
-      <FormControl id="authCodes">
-        <FormLabel size="xs">Auth code:</FormLabel>
-        <Input
-          isDisabled={disableInputEdits}
-          onChange={(e) => dispatch(onUserAuthCodeSet(e?.currentTarget?.value))}
-          onPaste={(e) => dispatch(onUserAuthCodeSet(e?.currentTarget?.value))}
-          size="xs"
-        />
-      </FormControl>
+      <Input
+        isDisabled={disableInputEdits}
+        onChange={(e) => dispatch(onUserExitNodeSet(e?.currentTarget?.value))}
+        onPaste={(e) => dispatch(onUserExitNodeSet(e?.currentTarget?.value))}
+        size="sm"
+        variant="flushed"
+        marginBottom={2}
+        noOfLines={1}
+        placeholder="Exit node"
+      />
+      <Input
+        isDisabled={disableInputEdits}
+        onChange={(e) => dispatch(onUserAuthCodeSet(e?.currentTarget?.value))}
+        onPaste={(e) => dispatch(onUserAuthCodeSet(e?.currentTarget?.value))}
+        size="sm"
+        variant="flushed"
+        placeholder="Auth code"
+        marginBottom={2}
+        noOfLines={1}
+      />
       <EnableExitToggle />
     </Flex>
   );

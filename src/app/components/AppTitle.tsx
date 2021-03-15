@@ -1,56 +1,6 @@
-import { Heading, useToast } from '@chakra-ui/react';
+import { Heading } from '@chakra-ui/react';
 import React from 'react';
 
-const formatUptime = (uptimeInMs: number) => {
-  const seconds = uptimeInMs / 1000;
-  const d = Math.floor(seconds / (3600 * 24));
-  const h = Math.floor((seconds % (3600 * 24)) / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = Math.floor(seconds % 60);
-
-  const dDisplay = d > 0 ? d + (d == 1 ? ' day, ' : ' days, ') : '';
-  const hDisplay = h > 0 ? h + (h == 1 ? ' hour, ' : ' hours, ') : '';
-  const mDisplay = m > 0 ? m + (m == 1 ? ' minute, ' : ' minutes, ') : '';
-  const sDisplay = s > 0 ? s + (s == 1 ? ' second' : ' seconds') : '';
-  return dDisplay + hDisplay + mDisplay + sDisplay;
-};
-
-export const AppTitle = ({
-  uptime,
-  version
-}: {
-  uptime: number;
-  version: string;
-}): JSX.Element => {
-  const toast = useToast();
-
-  const showVersionAndUptimeToast = () => {
-    if (uptime > 0) {
-      if (toast.isActive('generalInfos')) {
-        toast.update('generalInfos', {
-          title: `Uptime: ${formatUptime(uptime)}`,
-          description: `Version: ${version}`,
-          status: 'success',
-          duration: 2000,
-          isClosable: true
-        });
-      } else {
-        toast({
-          title: `Uptime: ${formatUptime(uptime)}`,
-          description: `${version}`,
-          status: 'success',
-          duration: 2000,
-          isClosable: true,
-          id: 'generalInfos'
-        });
-      }
-    } else {
-      console.warn('Not showing toast, uptime is not set');
-    }
-  };
-  return (
-    <Heading size="2xl" onClick={showVersionAndUptimeToast}>
-      Lokinet GUI
-    </Heading>
-  );
+export const AppTitle = (): JSX.Element => {
+  return <Heading size="lg">Lokinet GUI</Heading>;
 };

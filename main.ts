@@ -7,11 +7,11 @@ let mainWindow: Electron.BrowserWindow | null;
 
 function createWindow() {
   const ratio = 1.6;
-  const width = 400;
+  const width = 800;
   const isDev = process.env.NODE_ENV === 'development';
   mainWindow = new BrowserWindow({
     width,
-    height: width * ratio,
+    height: width / ratio,
     resizable: true,
     webPreferences: {
       nodeIntegration: true,

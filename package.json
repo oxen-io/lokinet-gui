@@ -20,7 +20,7 @@
     "compile": "yarn compile:electron && yarn compile:react",
     "pack": "yarn compile && electron-builder --dir",
     "dist": "rm -rf dist; rm -rf release; yarn compile && electron-builder",
-    "postinstall": "patch-package && install-app-deps"
+    "postinstall": "patch-package && electron-builder install-app-deps"
   },
   "build": {
     "appId": "com.electron.lokinet.gui",
@@ -31,7 +31,9 @@
     "mac": {
       "category": "public.app-category.utilities"
     },
-    "nsis": {},
+    "nsis": {
+      "include": "build-scripts/nsis-installer.nsh"
+    },
     "linux": {
       "target": [
         "deb"
@@ -62,7 +64,6 @@
     "css-loader": "^5.0.2",
     "electron": "^11.2.3",
     "electron-builder": "^22.10.5",
-    "electron-rebuild": "^2.3.5",
     "eslint": "^7.20.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",

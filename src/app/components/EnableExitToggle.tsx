@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button } from '@chakra-ui/react';
+import { Badge, Flex, Spinner, Switch } from '@chakra-ui/react';
 import { useSelector } from 'react-redux';
 import {
   markExitFailedToLoad,
@@ -102,20 +102,31 @@ export const EnableExitToggle = (): JSX.Element => {
   // AND the user did not enter an exit yet
   const isOffAndMissingNode = !isExitEnabledFromDaemon && !exitNode;
   return (
-    <Button
-      isLoading={exitLoading}
-      isDisabled={isOffAndMissingNode}
-      loadingText="Please wait..."
-      colorScheme={isExitEnabledFromDaemon ? 'red' : 'green'}
-      onClick={async () => {
-        if (isExitEnabledFromDaemon) {
-          handleTurningOffExit(dispatch);
-        } else {
-          handleTurningOnExit(dispatch, exitNode, authCode);
-        }
-      }}
-    >
-      {isExitEnabledFromDaemon ? 'Disable Exit' : 'Enable Exit'}
-    </Button>
+    <Flex justify="center" align="center">
+      {exitLoading ? (
+        <Spinner margin="auto" />
+      ) : (
+        <Switch
+          margin="auto"
+          isChecked={isExitEnabledFromDaemon}
+          onChange={() => {
+            if (isExitEnabledFromDaemon) {
+              handleTurningOffExit(dispatch);
+            } else {
+              handleTurningOnExit(dispatch, exitNode, authCode);
+            }
+          }}
+          size="lg"
+          aria-label="stop and start"
+          isDisabled={isOffAndMissingNode}
+        />
+      )}
+
+      {isExitEnabledFromDaemon ? (
+        <Badge colorScheme="green">Exit Enabled</Badge>
+      ) : (
+        <Badge colorScheme="red">Exit Disabled</Badge>
+      )}
+    </Flex>
   );
 };
