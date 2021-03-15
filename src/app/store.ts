@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
+import { appLogsSlice } from '../features/appLogsSlice';
 import { exitStatusSlice } from '../features/exitStatusSlice';
 import { generalInfosSlice } from '../features/generalInfosSlice';
 import { statusSlice } from '../features/statusSlice';
@@ -9,7 +10,8 @@ export const store = configureStore({
     status: statusSlice.reducer,
     generalInfos: generalInfosSlice.reducer,
     exitStatus: exitStatusSlice.reducer,
-    uiStatus: uiSlice.reducer
+    uiStatus: uiSlice.reducer,
+    appLogsStatus: appLogsSlice.reducer
   }
 });
 

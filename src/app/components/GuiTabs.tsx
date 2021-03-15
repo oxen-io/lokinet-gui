@@ -1,13 +1,6 @@
-import {
-  Code,
-  Stack,
-  Tab,
-  TabList,
-  TabPanel,
-  TabPanels,
-  Tabs
-} from '@chakra-ui/react';
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import React from 'react';
+import { AppLogs } from './AppLogs';
 import { SpeedChart } from './SpeedChart';
 
 export const GuiTabs = (): JSX.Element => {
@@ -22,9 +15,7 @@ export const GuiTabs = (): JSX.Element => {
           <SpeedChart />
         </TabPanel>
         <TabPanel>
-          <Stack direction="row">
-            <Code children="console.log(welcome)" />
-          </Stack>
+          <AppLogs />
         </TabPanel>
       </TabPanels>
     </Tabs>

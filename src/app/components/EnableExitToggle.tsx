@@ -10,30 +10,38 @@ import {
 import { useAppDispatch } from '../hooks';
 import { addExit, deleteExit } from '../../ipc/ipc_renderer';
 import { AppDispatch } from '../store';
+import { appendToApplogs } from '../../features/appLogsSlice';
 
 const handleTurningOffExit = async (dispatch: AppDispatch) => {
+  dispatch(appendToApplogs('ExitOFF'));
   dispatch(markExitIsTurningOff());
   // trigger the IPC+RPC call
   const deleteExitResult = await deleteExit();
 
   if (deleteExitResult) {
+    dispatch(appendToApplogs(`ExitOFF: result: ${deleteExitResult}`));
+
     try {
       const parsed = JSON.parse(deleteExitResult);
       if (parsed.error) {
+        dispatch(appendToApplogs(`ExitOFF: error: ${deleteExitResult}`));
+
         dispatch(
-          markExitFailedToLoad(`DeleteExit: Daemon says '${parsed.error}'`)
+          markExitFailedToLoad(`ExitOFF: Daemon says '${parsed.error}'`)
         );
         return;
       }
       if (parsed.result !== 'OK') {
-        dispatch(
-          markExitFailedToLoad(`DeleteExit: Daemon says ${parsed.error}`)
-        );
+        dispatch(appendToApplogs(`ExitOFF: daemon says: ${deleteExitResult}`));
+
+        dispatch(markExitFailedToLoad(`ExitOFF: Daemon says ${parsed.error}`));
       } else {
         // Do nothing. At this point we are waiting for the next getStatus call
         // to send us the exit node set from the daemon.
       }
     } catch (e) {
+      dispatch(appendToApplogs(`ExitOFF: exception: ${deleteExitResult}`));
+
       dispatch(
         markExitFailedToLoad(
           `Couldn't parse result from deleteExit: '${deleteExitResult}'`
@@ -50,17 +58,25 @@ const handleTurningOnExit = async (
   authCode?: string
 ) => {
   if (!exitNode) {
+    dispatch(appendToApplogs(`ExitON: enter an Exit Node`));
+
     dispatch(markExitFailedToLoad('Please enter an Exit Node address first.'));
     return;
   }
+  dispatch(appendToApplogs(`ExitON`));
+
   dispatch(markExitIsTurningOn());
   // trigger the IPC+RPC call
   const addExitResult = await addExit(exitNode, authCode);
 
   if (addExitResult) {
+    dispatch(appendToApplogs(`ExitON: result: ${addExitResult}`));
+
     try {
       const parsed = JSON.parse(addExitResult);
       if (parsed.error) {
+        dispatch(appendToApplogs(`ExitON: error: ${addExitResult}`));
+
         dispatch(
           markExitFailedToLoad(
             `AddExit with ${exitNode}: Daemon says '${parsed.error}'`
@@ -69,6 +85,8 @@ const handleTurningOnExit = async (
         return;
       }
       if (parsed.result !== 'OK') {
+        dispatch(appendToApplogs(`ExitON: Daemon says: ${addExitResult}`));
+
         dispatch(markExitFailedToLoad(`AddExit: Daemon says ${parsed.error}`));
       } else {
         // Do nothing. At this point we are waiting for the next getStatus call

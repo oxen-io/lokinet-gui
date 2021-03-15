@@ -22,7 +22,7 @@ export const ExitPanel = (): JSX.Element => {
   return (
     <Flex flexDirection="column" alignSelf="center" width="100%">
       <Input
-        isDisabled={disableInputEdits}
+        disabled={disableInputEdits}
         onChange={(e) => dispatch(onUserExitNodeSet(e?.currentTarget?.value))}
         onPaste={(e) => dispatch(onUserExitNodeSet(e?.currentTarget?.value))}
         size="sm"
@@ -32,7 +32,7 @@ export const ExitPanel = (): JSX.Element => {
         placeholder="Exit node"
       />
       <Input
-        isDisabled={disableInputEdits}
+        disabled={disableInputEdits}
         onChange={(e) => dispatch(onUserAuthCodeSet(e?.currentTarget?.value))}
         onPaste={(e) => dispatch(onUserAuthCodeSet(e?.currentTarget?.value))}
         size="sm"
