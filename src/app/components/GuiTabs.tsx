@@ -5,16 +5,22 @@ import { SpeedChart } from './SpeedChart';
 
 export const GuiTabs = (): JSX.Element => {
   return (
-    <Tabs maxHeight="100vh" variant="soft-rounded" padding={3}>
+    <Tabs
+      maxHeight="100vh"
+      width="70vw"
+      variant="soft-rounded"
+      colorScheme="green"
+      padding={3}
+    >
       <TabList>
         <Tab>Chart</Tab>
         <Tab>Logs</Tab>
       </TabList>
-      <TabPanels>
-        <TabPanel>
+      <TabPanels maxHeight="100%">
+        <TabPanel maxHeight="100%">
           <SpeedChart />
         </TabPanel>
-        <TabPanel>
+        <TabPanel maxHeight="100%">
           <AppLogs />
         </TabPanel>
       </TabPanels>

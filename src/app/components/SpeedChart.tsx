@@ -23,7 +23,7 @@ export const MAX_NUMBER_POINT_HISTORY = 30; // 1 minute as there is 2 points per
 
 export const SpeedChart = (): JSX.Element => {
   const uploadColor = 'red';
-  const downloadColor = 'blue';
+  const downloadColor = 'green';
   const daemonStatus = useSelector(selectStatus);
 
   const uploadCoordinates = daemonStatus.speedHistory.upload.map((y, index) => {
@@ -78,7 +78,7 @@ export const SpeedChart = (): JSX.Element => {
         <VictoryLegend
           orientation="vertical"
           width={200}
-          height={50}
+          height={60}
           containerComponent={<VictoryContainer responsive={false} />}
           data={[
             { name: 'Upload Speed (kb/s)', symbol: { fill: uploadColor } },

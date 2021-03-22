@@ -16,7 +16,7 @@ export const AppLayout = (): JSX.Element => {
   const daemonStatus = useSelector(selectStatus);
   return (
     <Flex width="100%" height="100vh">
-      <Stack padding="20px" textAlign="center" width="400px">
+      <Stack padding="20px" textAlign="center" width="30vw">
         <AppTitle />
         <GeneralInfos />
         <LokinetAddress />
