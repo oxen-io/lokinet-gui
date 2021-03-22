@@ -19,6 +19,10 @@ export const ExitPanel = (): JSX.Element => {
   const disableInputEdits =
     exitStatus.exitLoading || Boolean(exitStatus.exitNodeFromDaemon);
 
+  const exitToUse = disableInputEdits
+    ? exitStatus.exitNodeFromDaemon
+    : exitStatus.exitNodeFromUser;
+
   return (
     <Flex flexDirection="column" alignSelf="center" width="100%">
       <Input
@@ -30,6 +34,7 @@ export const ExitPanel = (): JSX.Element => {
         marginBottom={2}
         noOfLines={1}
         placeholder="Exit node"
+        value={exitToUse}
       />
       <Input
         disabled={disableInputEdits}

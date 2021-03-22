@@ -10,7 +10,7 @@ import {
   IPC_CHANNEL_KEY
 } from '../../sharedIpc';
 
-const IPC_UPDATE_TIMEOUT = 1000; // 5 minutes
+const IPC_UPDATE_TIMEOUT = 5000; // 5 secs
 
 const channelsToMake = {
   getUpTimeAndVersion,
