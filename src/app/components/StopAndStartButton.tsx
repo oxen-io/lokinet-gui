@@ -12,7 +12,7 @@ export const StopAndStart = (): JSX.Element => {
   return (
     <Flex justify="center" align="center">
       <Switch
-        margin="auto"
+        marginRight="auto"
         onChange={async () => {
           if (isLokinetRunning) {
             await doStopLokinetProcess();

@@ -112,10 +112,10 @@ export const EnableExitToggle = (): JSX.Element => {
   return (
     <Flex justify="center" align="center">
       {exitLoading ? (
-        <Spinner margin="auto" />
+        <Spinner marginRight="auto" />
       ) : (
         <Switch
-          margin="auto"
+          marginRight="auto"
           isChecked={isExitEnabledFromDaemon}
           onChange={() => {
             if (isExitEnabledFromDaemon) {
@@ -126,6 +126,7 @@ export const EnableExitToggle = (): JSX.Element => {
           }}
           size="lg"
           aria-label="stop and start"
+          colorScheme="green"
           isDisabled={isOffAndMissingNode}
         />
       )}
