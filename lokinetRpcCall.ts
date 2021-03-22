@@ -116,6 +116,7 @@ const loopDealerReceiving = async (): Promise<void> => {
           delete eventsByJobId[jobId];
         } else {
           // delete eventsByJobId[jobId];
+          //FIXME TODO
           throw new Error('To handle');
         }
       } else {

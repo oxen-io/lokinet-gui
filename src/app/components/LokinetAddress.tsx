@@ -1,4 +1,4 @@
-import { Code, Flex, FormLabel, IconButton, Tooltip } from '@chakra-ui/react';
+import { Code, Flex, Text, IconButton, Tooltip } from '@chakra-ui/react';
 import React from 'react';
 import { AiFillCopy } from 'react-icons/ai';
 import { useSelector } from 'react-redux';
@@ -24,19 +24,22 @@ export const LokinetAddress = (): JSX.Element => {
   };
 
   return (
-    <Flex flexDirection="column">
-      <FormLabel size="xs">Loki address:</FormLabel>
+    <Flex flexDirection="row" alignItems="center">
+      <Text size="xs" flexShrink={0}>
+        Loki address:
+      </Text>
 
       {lokinetAddress && (
-        <Flex flexDirection="row">
+        <>
           <Tooltip
             openDelay={500}
             label={lokinetAddress}
             aria-label={lokinetAddress}
+            style={{ width: '100%' }}
           >
             <Code
               flexShrink={1}
-              height="100%"
+              height="fit-content"
               alignSelf="center"
               size="xs"
               isTruncated={true}
@@ -45,13 +48,15 @@ export const LokinetAddress = (): JSX.Element => {
             </Code>
           </Tooltip>
           <IconButton
-            height="20px"
             variant="ghost"
             aria-label="Copy"
+            height="20px"
+            width="20px"
+            minWidth="20px"
             icon={<AiFillCopy />}
             onClick={copyAndToast}
           />
-        </Flex>
+        </>
       )}
     </Flex>
   );

@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
   MAX_NUMBER_POINT_HISTORY,
   SpeedHistoryDataType
@@ -99,10 +99,26 @@ export const statusSlice = createSlice({
       // Remove the first item is the size is too big
       state.speedHistory = removeFirstElementIfNeeded(state.speedHistory);
       return state;
+    },
+    markAsStopped: (state) => {
+      state.isRunning = false;
+      state.downloadUsage = 0;
+      state.uploadUsage = 0;
+      state.numPathsBuilt = 0;
+      state.numRoutersKnown = 0;
+      state.numPeersConnected = 0;
+      state.lokiAddress = '';
+      state.ratio = '';
+      state.speedHistory = getDefaultSpeedHistory();
+      return state;
     }
   }
 });
 
 // Action creators are generated for each case reducer function
-export const { updateFromDaemonStatus } = statusSlice.actions;
+export const { updateFromDaemonStatus, markAsStopped } = statusSlice.actions;
 export const selectStatus = (state: RootState): StatusState => state.status;
+export const selectLokinetRunning = createSelector(
+  selectStatus,
+  (status) => status.isRunning
+);

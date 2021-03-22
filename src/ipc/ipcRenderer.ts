@@ -10,14 +10,16 @@ import {
   IPC_CHANNEL_KEY
 } from '../../sharedIpc';
 
-const IPC_UPDATE_TIMEOUT = 5000; // 5 minutes
+const IPC_UPDATE_TIMEOUT = 1000; // 5 minutes
 
 const channelsToMake = {
   getUpTimeAndVersion,
   getStatus,
   addExit,
   deleteExit,
-  setConfig
+  setConfig,
+  doStartLokinetProcess,
+  doStopLokinetProcess
 };
 const channels = {} as any;
 const _jobs = Object.create(null);
@@ -46,8 +48,17 @@ export async function addExit(
   );
   return channels.addExit(exitAddress, exitToken);
 }
+
 export async function deleteExit(): Promise<string> {
   return channels.deleteExit();
+}
+
+export async function doStartLokinetProcess(): Promise<boolean> {
+  return channels.doStartLokinetProcess();
+}
+
+export async function doStopLokinetProcess(): Promise<boolean> {
+  return channels.doStopLokinetProcess();
 }
 export async function setConfig(
   section: string,
@@ -73,9 +84,10 @@ export function initializeIpcRendererSide(): void {
     (event, jobId, errorForDisplay, result) => {
       const job = _getJob(jobId);
       if (!job) {
-        throw new Error(
+        console.warn(
           `Received IPC channel reply to job ${jobId}, but did not have it in our registry!`
         );
+        return;
       }
 
       const { resolve, reject, fnName } = job;

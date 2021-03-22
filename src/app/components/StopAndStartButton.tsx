@@ -1,14 +1,24 @@
 import { Badge, Flex, Switch } from '@chakra-ui/react';
 import React from 'react';
+import { useSelector } from 'react-redux';
+import { selectLokinetRunning } from '../../features/statusSlice';
+import {
+  doStartLokinetProcess,
+  doStopLokinetProcess
+} from '../../ipc/ipcRenderer';
 
 export const StopAndStart = (): JSX.Element => {
-  const isLokinetRunning = true;
+  const isLokinetRunning = useSelector(selectLokinetRunning);
   return (
     <Flex justify="center" align="center">
       <Switch
         margin="auto"
-        onChange={() => {
-          console.warn('TODO');
+        onChange={async () => {
+          if (isLokinetRunning) {
+            await doStopLokinetProcess();
+          } else {
+            await doStartLokinetProcess();
+          }
         }}
         size="lg"
         colorScheme="green"

@@ -24,9 +24,7 @@ const handleTurningOffExit = async (dispatch: AppDispatch) => {
     try {
       const parsed = JSON.parse(deleteExitResult);
       if (parsed.error) {
-        dispatch(
-          markExitFailedToLoad(`ExitOFF: <= '${parsed.error}'`)
-        );
+        dispatch(markExitFailedToLoad(`ExitOFF: <= '${parsed.error}'`));
         return;
       }
       if (parsed.result !== 'OK') {

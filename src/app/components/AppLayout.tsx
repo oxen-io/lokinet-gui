@@ -6,7 +6,7 @@ import { AppTitle } from './AppTitle';
 import { ExitPanel } from './ExitPanel';
 import { GeneralInfos } from './GeneralInfos';
 import { GuiTabs } from './GuiTabs';
-import { LokinetAddress } from './LokinetAdress';
+import { LokinetAddress } from './LokinetAddress';
 import { RoutersStats } from './RouterStats';
 import { SpeedStats } from './SpeedStats';
 import { StopAndStart } from './StopAndStartButton';

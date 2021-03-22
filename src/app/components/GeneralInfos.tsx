@@ -39,7 +39,12 @@ export const GeneralInfos = (): JSX.Element => {
         <Flex justifyContent="space-between">
           <Text size="xs">Version: </Text>
           <Tooltip openDelay={500} label={version} aria-label={version}>
-            <Code size="xs" isTruncated={true}>
+            <Code
+              size="xs"
+              isTruncated={true}
+              height="fit-content"
+              alignSelf="center"
+            >
               {version}
             </Code>
           </Tooltip>
