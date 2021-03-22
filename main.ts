@@ -1,7 +1,7 @@
 import { app, BrowserWindow } from 'electron';
 import * as path from 'path';
 import * as url from 'url';
-import { initializeIpcNodeSide } from './ipc_node';
+import { initializeIpcNodeSide } from './ipcNode';
 
 let mainWindow: Electron.BrowserWindow | null;
 

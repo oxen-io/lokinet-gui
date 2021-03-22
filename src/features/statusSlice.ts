@@ -4,7 +4,7 @@ import {
   SpeedHistoryDataType
 } from '../app/components/SpeedChart';
 import { RootState } from '../app/store';
-import { DaemonStatus, defaultDaemonStatus } from '../ipc/ipc_renderer';
+import { DaemonStatus, defaultDaemonStatus } from '../ipc/ipcRenderer';
 
 export interface StatusState {
   isRunning: boolean;

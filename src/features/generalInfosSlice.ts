@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../app/store';
-import { ParsedGeneralInfosFromDaemon } from '../ipc/ipc_renderer';
+import { ParsedGeneralInfosFromDaemon } from '../ipc/ipcRenderer';
 
 export type GeneralInfosState = ParsedGeneralInfosFromDaemon;
 const initialGeneralInfosState: GeneralInfosState = {

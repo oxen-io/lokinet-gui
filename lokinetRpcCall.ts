@@ -2,8 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ipcMain } from 'electron';
 import { Dealer as ZeroMqDealer } from 'zeromq';
-import { eventsByJobId } from './ipc_node';
-import { DEBUG_RPC_CALLS, IPC_CHANNEL_KEY } from './shared_ipc';
+import { eventsByJobId } from './ipcNode';
+import { DEBUG_RPC_CALLS, IPC_CHANNEL_KEY } from './sharedIpc';
 
 const RPC_BOUND_PORT = 1190;
 const RPC_BOUND_IP = '127.0.0.1';

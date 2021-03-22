@@ -1,14 +1,27 @@
 import Electron from 'electron';
-import { initialLokinetRpcDealer } from './lokinet_rpc_call';
-import { IPC_CHANNEL_KEY } from './shared_ipc';
+import { initialLokinetRpcDealer } from './lokinetRpcCall';
+import { IPC_CHANNEL_KEY } from './sharedIpc';
 const { ipcMain } = Electron;
 
-import * as rpcCalls from './lokinet_rpc_call';
+import { exec } from 'child_process';
+
+function execute(command: string, callback: any) {
+  exec(command, (error, stdout, stderr) => {
+    callback(stdout);
+  });
+}
+
+import * as rpcCalls from './lokinetRpcCall';
 
 export const eventsByJobId = Object.create(null);
 
 export async function initializeIpcNodeSide(): Promise<void> {
   await initialLokinetRpcDealer();
+
+  // call the function
+  execute('ping -c 4 0.0.0.0', (output: string) => {
+    console.log(output);
+  });
 
   ipcMain.on(IPC_CHANNEL_KEY, async (event, jobId, callName, ...args) => {
     try {

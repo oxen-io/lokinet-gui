@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import 'focus-visible/dist/focus-visible';
 
-import { ChakraProvider, useInterval } from '@chakra-ui/react';
+import { ChakraProvider, extendTheme, useInterval } from '@chakra-ui/react';
 
 import {
   getStatus,
@@ -13,7 +13,7 @@ import {
   parseStateResults,
   POLLING_GENERAL_INFOS_INTERVAL_MS,
   POLLING_STATUS_INTERVAL_MS
-} from '../ipc/ipc_renderer';
+} from '../ipc/ipcRenderer';
 import { updateFromDaemonStatus } from '../features/statusSlice';
 import { Provider } from 'react-redux';
 import { store } from './store';
@@ -31,6 +31,11 @@ const App = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
   // console.info('state', state);
+  const theme = extendTheme({
+    config: {
+      initialColorMode: 'dark'
+    }
+  });
 
   // register an interval for fetching the status of the daemon
   useInterval(async () => {
@@ -61,7 +66,7 @@ const App = () => {
   }, POLLING_GENERAL_INFOS_INTERVAL_MS);
 
   return (
-    <ChakraProvider resetCSS={true}>
+    <ChakraProvider resetCSS={true} theme={theme}>
       <AppLayout />
     </ChakraProvider>
   );
