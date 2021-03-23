@@ -54,6 +54,7 @@ export const SpeedChart = (): JSX.Element => {
           animate={false}
           theme={VictoryTheme.material}
           containerComponent={<VictoryContainer responsive={false} />}
+          minDomain={{ y: 1 }}
         >
           <VictoryGroup
             style={{

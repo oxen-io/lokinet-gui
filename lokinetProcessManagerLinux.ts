@@ -1,6 +1,5 @@
-import { invoke } from './lokinetProcessManager';
-
 import util from 'util';
+import { doForciblyStopLokinetProcessSystemd, doStartLokinetProcessSystemd, doStopLokinetProcessSystemd } from './lokinetProcessManagerSystemd';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const exec = util.promisify(require('child_process').exec);
 
@@ -21,7 +20,7 @@ const isSystemD = async () => {
 
 export const doStartLokinetProcessLinux = async (): Promise<boolean> => {
   if (await isSystemD()) {
-    return invoke('systemctl', ['--no-block', 'start', 'lokinet.service']);
+    return doStartLokinetProcessSystemd();
   } else {
     console.warn('not systemd not supported yet.');
   }
@@ -30,7 +29,7 @@ export const doStartLokinetProcessLinux = async (): Promise<boolean> => {
 
 export const doStopLokinetProcessLinux = async (): Promise<boolean> => {
   if (await isSystemD()) {
-    return invoke('systemctl', ['--no-block', 'stop', 'lokinet.service']);
+    return doStopLokinetProcessSystemd();
   } else {
     console.warn('not systemd not supported yet.');
   }
@@ -39,5 +38,10 @@ export const doStopLokinetProcessLinux = async (): Promise<boolean> => {
 
 // systemd's "stop" is a managed stop -- it will do its own forceful kill
 export const doForciblyStopLokinetProcessLinux = async (): Promise<boolean> => {
-  return doStopLokinetProcessLinux();
+  if (await isSystemD()) {
+    return doForciblyStopLokinetProcessSystemd();
+  } else {
+    console.warn('not systemd not supported yet.');
+  }
+  return false;
 };
