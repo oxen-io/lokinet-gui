@@ -5,6 +5,14 @@ import {
   doStartLokinetProcessLinux,
   doStopLokinetProcessLinux
 } from './lokinetProcessManagerLinux';
+
+import {
+  doForciblyStopLokinetProcessWindows,
+  doStartLokinetProcessWindows,
+  doStopLokinetProcessWindows
+} from './lokinetProcessManagerWindows';
+
+
 import { IPC_CHANNEL_KEY } from './sharedIpc';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const exec = util.promisify(require('child_process').exec);
@@ -46,6 +54,11 @@ const getEventByJobId = (jobId: string) => {
 export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
   let result = false;
   switch (process.platform) {
+    case WIN:
+      result = await doStartLokinetProcessWindows();
+      const event = getEventByJobId(jobId);
+      event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
+      return;
     case LINUX: {
       result = await doStartLokinetProcessLinux();
       const event = getEventByJobId(jobId);
@@ -66,12 +79,21 @@ export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
       event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, ret);
       return;
     }
+    case WIN: {
+      const ret = await doStopLokinetProcessWindows();
+      const event = getEventByJobId(jobId);
+      event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, ret);
+      return;
+    }
   }
   throw new Error(`doStopLokinetProcess not made for ${process.platform}`);
 };
 
 export const doForciblyStopLokinetProcess = async (): Promise<void> => {
   switch (process.platform) {
+    case WIN:
+      await doForciblyStopLokinetProcessWindows();
+      return;
     case LINUX:
       await doForciblyStopLokinetProcessLinux();
       return;

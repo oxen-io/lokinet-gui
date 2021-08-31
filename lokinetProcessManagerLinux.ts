@@ -1,5 +1,9 @@
 import util from 'util';
-import { doForciblyStopLokinetProcessSystemd, doStartLokinetProcessSystemd, doStopLokinetProcessSystemd } from './lokinetProcessManagerSystemd';
+import {
+  doForciblyStopLokinetProcessSystemd,
+  doStartLokinetProcessSystemd,
+  doStopLokinetProcessSystemd
+} from './lokinetProcessManagerSystemd';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const exec = util.promisify(require('child_process').exec);
 
