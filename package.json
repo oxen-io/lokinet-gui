@@ -20,7 +20,9 @@
     "compile": "yarn compile:electron && yarn compile:react",
     "pack": "yarn compile && electron-builder --dir",
     "dist": "rm -rf dist; rm -rf release; yarn compile && electron-builder",
-    "postinstall": "patch-package && electron-builder install-app-deps"
+    "postinstall": "yarn patch-package && electron-builder install-app-deps",
+    "win32": "rm -rf dist; rm -rf release; yarn compile && electron-builder --windows portable",
+    "deb": "rm -rf dist; rm -rf release; yarn compile && electron-builder --linux deb"
   },
   "build": {
     "appId": "com.electron.lokinet.gui",
@@ -30,6 +32,10 @@
     "asar": true,
     "mac": {
       "category": "public.app-category.utilities"
+    },
+    "win": {
+      "target": "nsis",
+      "requestedExecutionLevel": "requireAdministrator"
     },
     "nsis": {
       "include": "build-scripts/nsis-installer.nsh"

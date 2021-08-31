@@ -37,3 +37,7 @@ if the screen stays grey, you might need to CTRL-R the app
 
 After running the `yarn install` command, you should be able to run `yarn dist` to build the binaries.
 They will be saved under `./release`.
+
+### CI Builds
+
+builds from ci can be obtained from our [ci server](https://oxen.rocks)
