@@ -40,9 +40,7 @@ export const exitStatusSlice = createSlice({
       state.exitLoading = true;
       return state;
     },
-    markExitFailedToLoad: (state, action: PayloadAction<string>) => {
-      console.warn('markExitFailedToLoad with error: ', action.payload);
-
+    markExitFailedToLoad: (state) => {
       state.exitLoading = false;
       state.exitNodeFromDaemon = undefined;
       state.exitAuthCodeFromDaemon = undefined;
