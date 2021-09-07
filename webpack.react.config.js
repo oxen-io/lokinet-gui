@@ -6,7 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
-    mainFields: ['main', 'module', 'browser'],
+    mainFields: ['main', 'module', 'browser']
   },
   entry: './src/app/app.tsx',
   target: 'electron-renderer',
@@ -15,10 +15,8 @@ module.exports = {
     rules: [
       {
         test: /\.(js|ts|tsx)$/,
-        exclude: /node_modules/,
-        use: {
-          loader: 'babel-loader',
-        },
+        use: [{ loader: 'babel-loader', options: { cacheDirectory: true } }],
+        exclude: /node_modules(?!\/webpack-dev-server)/
       },
       {
         test: /\.css$/,
@@ -28,29 +26,26 @@ module.exports = {
         test: /\.(png|jpe?g|gif|woff2|woff|ttf|svg|eot)$/i,
         use: [
           {
-            loader: 'file-loader',
-          },
-        ],
+            loader: 'file-loader'
+          }
+        ]
       }
-    ],
+    ]
   },
   devServer: {
-    contentBase: path.join(__dirname, './dist'),
+    static: { directory: path.join(__dirname, './dist'), publicPath: '/' },
     historyApiFallback: true,
     compress: true,
     hot: true,
-    port: 4000,
-    publicPath: '/',
+    port: 4000
   },
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'js/[name].js',
-    publicPath: './',
+    publicPath: './'
   },
-  plugins: [
-    new HtmlWebpackPlugin({ title: 'Loki Network Control Panel' }),
-  ],
+  plugins: [new HtmlWebpackPlugin({ title: 'Loki Network Control Panel' })],
   optimization: {
     minimize: false
-  },
+  }
 };
