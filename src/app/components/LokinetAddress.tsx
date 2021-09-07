@@ -10,7 +10,7 @@ export const LokinetAddress = (): JSX.Element => {
   const statusFromDaemon = useSelector(selectStatus);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, copyToClipboard] = useCopyToClipboard();
-  const lokinetAddress = statusFromDaemon.lokiAddress;
+  const lokinetAddress = statusFromDaemon.lokiAddress || '';
 
   const toast = useToast();
   const copyAndToast = () => {
@@ -25,39 +25,37 @@ export const LokinetAddress = (): JSX.Element => {
 
   return (
     <Flex flexDirection="row" alignItems="center">
-      <Text size="xs" flexShrink={0}>
+      <Text size="xs" flexShrink={0} paddingRight={2}>
         Loki address:
       </Text>
 
-      {lokinetAddress && (
-        <>
-          <Tooltip
-            openDelay={500}
-            label={lokinetAddress}
-            aria-label={lokinetAddress}
-            style={{ width: '100%' }}
+      <>
+        <Tooltip
+          openDelay={100}
+          label={lokinetAddress}
+          aria-label={lokinetAddress}
+          style={{ width: '100%' }}
+        >
+          <Code
+            flexShrink={1}
+            height="fit-content"
+            alignSelf="center"
+            size="xs"
+            isTruncated={true}
           >
-            <Code
-              flexShrink={1}
-              height="fit-content"
-              alignSelf="center"
-              size="xs"
-              isTruncated={true}
-            >
-              {lokinetAddress}
-            </Code>
-          </Tooltip>
-          <IconButton
-            variant="ghost"
-            aria-label="Copy"
-            height="20px"
-            width="20px"
-            minWidth="20px"
-            icon={<AiFillCopy />}
-            onClick={copyAndToast}
-          />
-        </>
-      )}
+            {lokinetAddress}
+          </Code>
+        </Tooltip>
+        <IconButton
+          variant="ghost"
+          aria-label="Copy"
+          height="20px"
+          width="20px"
+          minWidth="20px"
+          icon={<AiFillCopy />}
+          onClick={copyAndToast}
+        />
+      </>
     </Flex>
   );
 };

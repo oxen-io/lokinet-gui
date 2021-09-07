@@ -1,26 +1,34 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import React from 'react';
 import { AppLogs } from './AppLogs';
+import { MainTab } from './MainTab';
 import { SpeedChart } from './SpeedChart';
 
 export const GuiTabs = (): JSX.Element => {
   return (
     <Tabs
-      maxHeight="100vh"
-      width="70vw"
+      maxHeight="100%"
+      width="100%"
       variant="soft-rounded"
       colorScheme="green"
       padding={3}
+      display="flex"
+      flexDir="column"
+      flexGrow={1}
     >
-      <TabList>
+      <TabList justifyContent="center">
+        <Tab>Main</Tab>
         <Tab>Chart</Tab>
         <Tab>Logs</Tab>
       </TabList>
-      <TabPanels maxHeight="100%">
-        <TabPanel maxHeight="100%">
+      <TabPanels flexGrow={1} padding={1}>
+        <TabPanel padding={2}>
+          <MainTab />
+        </TabPanel>
+        <TabPanel padding={2}>
           <SpeedChart />
         </TabPanel>
-        <TabPanel maxHeight="100%">
+        <TabPanel padding={2}>
           <AppLogs />
         </TabPanel>
       </TabPanels>

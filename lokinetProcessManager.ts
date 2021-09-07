@@ -14,7 +14,7 @@ const exec = util.promisify(require('child_process').exec);
 
 const LINUX = 'linux';
 const WIN = 'win32';
-const MACOS = 'darwin';
+// const MACOS = 'darwin';
 
 export const invoke = async (
   cmd: string,

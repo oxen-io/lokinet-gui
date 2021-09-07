@@ -10,7 +10,7 @@ import {
 export const StopAndStart = (): JSX.Element => {
   const isLokinetRunning = useSelector(selectLokinetRunning);
   return (
-    <Flex justify="center" align="center">
+    <Flex justify="center" align="center" paddingTop={2} paddingBottom={2}>
       <Switch
         marginRight="auto"
         onChange={async () => {

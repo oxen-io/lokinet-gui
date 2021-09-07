@@ -22,34 +22,28 @@ export const GeneralInfos = (): JSX.Element => {
 
   const formattedUptime = formatUptime(uptime);
   return (
-    <Stack>
+    <Stack flexGrow={1}>
       <Flex justifyContent="space-between">
         <Text size="xs">Uptime: </Text>
-        <Tooltip
-          openDelay={500}
-          label={formattedUptime}
-          aria-label={formattedUptime}
-        >
-          <Text size="xs" isTruncated={true}>
-            {formattedUptime}
-          </Text>
+        <Text size="xs" isTruncated={true}>
+          {formattedUptime}
+        </Text>
+      </Flex>
+      <Flex justifyContent="space-between">
+        <Text size="xs" paddingRight={2}>
+          Version:{' '}
+        </Text>
+        <Tooltip openDelay={100} label={version} aria-label={version}>
+          <Code
+            size="xs"
+            isTruncated={true}
+            height="fit-content"
+            alignSelf="center"
+          >
+            {version}
+          </Code>
         </Tooltip>
       </Flex>
-      {version && (
-        <Flex justifyContent="space-between">
-          <Text size="xs">Version: </Text>
-          <Tooltip openDelay={500} label={version} aria-label={version}>
-            <Code
-              size="xs"
-              isTruncated={true}
-              height="fit-content"
-              alignSelf="center"
-            >
-              {version}
-            </Code>
-          </Tooltip>
-        </Flex>
-      )}
     </Stack>
   );
 };

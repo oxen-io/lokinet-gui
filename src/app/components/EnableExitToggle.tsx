@@ -134,7 +134,7 @@ export const EnableExitToggle = (): JSX.Element => {
       {isExitEnabledFromDaemon ? (
         <Badge colorScheme="green">Exit Enabled</Badge>
       ) : (
-        <Badge colorScheme="red">Exit Disabled</Badge>
+        <Badge colorScheme="red">No Exit Set</Badge>
       )}
     </Flex>
   );

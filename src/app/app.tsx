@@ -22,19 +22,35 @@ import { updateFromDaemonGeneralInfos } from '../features/generalInfosSlice';
 import { markExitNodesFromDaemon } from '../features/exitStatusSlice';
 import { AppLayout } from './components/AppLayout';
 
-const mainElement = document.createElement('div');
-document.body.appendChild(mainElement);
-
 initializeIpcRendererSide();
 
 const App = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
-  // console.info('state', state);
+  const styles = {
+    global: () => ({
+      body: {
+        color: 'black',
+        bg: 'white',
+        height: '100%',
+        width: '100vw'
+      },
+      html: {
+        height: '100%'
+      }
+    })
+  };
+
   const theme = extendTheme({
     config: {
       initialColorMode: 'light'
-    }
+    },
+    colors: {
+      green: {
+        200: 'red'
+      }
+    },
+    styles
   });
 
   // register an interval for fetching the status of the daemon
@@ -93,5 +109,5 @@ ReactDom.render(
   <Provider store={store}>
     <App />
   </Provider>,
-  mainElement
+  document.body
 );

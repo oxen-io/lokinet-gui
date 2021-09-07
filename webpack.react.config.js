@@ -15,8 +15,8 @@ module.exports = {
     rules: [
       {
         test: /\.(js|ts|tsx)$/,
-        use: [{ loader: 'babel-loader', options: { cacheDirectory: true } }],
-        exclude: /node_modules(?!\/webpack-dev-server)/
+        use: [{ loader: 'babel-loader', options: { cacheDirectory: false } }],
+        exclude: /node_modules/
       },
       {
         test: /\.css$/,
@@ -42,7 +42,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'js/[name].js',
-    publicPath: './'
+    publicPath: '/'
   },
   plugins: [new HtmlWebpackPlugin({ title: 'Loki Network Control Panel' })],
   optimization: {

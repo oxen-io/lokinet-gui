@@ -29,11 +29,15 @@ export const appLogsSlice = createSlice({
       // Remove the first item is the size is too big
       state.appLogs = removeFirstElementIfNeeded(state.appLogs);
       return state;
+    },
+    clearLogs: (state) => {
+      state.appLogs = [];
+      return state;
     }
   }
 });
 
 // Action creators are generated for each case reducer function
-export const { appendToApplogs } = appLogsSlice.actions;
+export const { appendToApplogs, clearLogs } = appLogsSlice.actions;
 export const selectAppLogs = (state: RootState): AppLogsState =>
   state.appLogsStatus;

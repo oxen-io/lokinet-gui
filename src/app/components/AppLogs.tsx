@@ -1,16 +1,32 @@
-import { Code, Text } from '@chakra-ui/react';
+import { Button, Code, Flex, Text } from '@chakra-ui/react';
 import React from 'react';
-import { selectAppLogs } from '../../features/appLogsSlice';
+import { useDispatch } from 'react-redux';
+import { clearLogs, selectAppLogs } from '../../features/appLogsSlice';
 import { useAppSelector } from '../hooks';
 
 export const AppLogs = (): JSX.Element => {
   const { appLogs } = useAppSelector(selectAppLogs);
+  const dispatch = useDispatch();
 
   return (
-    <Code size="xs" overflowY="auto" maxHeight="80vh">
-      {appLogs.map((logLine, index) => {
-        return <Text key={index}>{logLine}</Text>;
-      })}
-    </Code>
+    <Flex flexDirection="column">
+      <Button
+        onClick={() => dispatch(clearLogs())}
+        width="fit-content"
+        alignSelf="center"
+        marginBottom={2}
+      >
+        Clear
+      </Button>
+      <Code size="xs" overflowY="auto" textAlign="left" maxHeight="70vh">
+        {appLogs.map((logLine, index) => {
+          return (
+            <Text fontSize={12} key={index}>
+              {logLine}
+            </Text>
+          );
+        })}
+      </Code>
+    </Flex>
   );
 };

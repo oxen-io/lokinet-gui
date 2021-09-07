@@ -16,8 +16,8 @@ module.exports = {
     rules: [
       {
         test: /\.(js|ts|tsx)$/,
-        use: [{ loader: 'babel-loader', options: { cacheDirectory: true } }],
-        exclude: /node_modules(?!\/webpack-dev-server)/
+        use: [{ loader: 'babel-loader', options: { cacheDirectory: false } }],
+        exclude: /node_modules/
       },
       {
         test: /\.css$/,
