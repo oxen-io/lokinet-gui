@@ -1,14 +1,19 @@
-import { invoke } from './lokinetProcessManager';
+import { ILokinetProcessManager, invoke } from './lokinetProcessManager';
 
-export const doStartLokinetProcessWindows = async (): Promise<boolean> => {
-  return invoke('net', ['start', 'lokinet']);
-};
+export class LokinetWindowsProcessManager implements ILokinetProcessManager {
+  doStartLokinetProcess(): Promise<boolean> {
+    return invoke('net', ['start', 'lokinet']);
+  }
 
-export const doStopLokinetProcessWindows = async (): Promise<boolean> => {
-  return invoke('net', ['stop', 'lokinet']);
-};
+  doStopLokinetProcess(): Promise<boolean> {
+    return invoke('net', ['stop', 'lokinet']);
+  }
 
-export const doForciblyStopLokinetProcessWindows =
-  async (): Promise<boolean> => {
-    return doStopLokinetProcessWindows();
-  };
+  doForciblyStopLokinetProcess(): Promise<boolean> {
+    return this.doStopLokinetProcess();
+  }
+
+  getDefaultBootstrapFileLocation(): string {
+    return 'C:\\ProgramData\\lokinet\\bootstrap.signed';
+  }
+}
