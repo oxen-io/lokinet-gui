@@ -52,7 +52,7 @@ export const ExitPanel = (): JSX.Element => {
             noOfLines={1}
             placeholder="Exit address"
             _placeholder={{ color: '#a7a7a7' }}
-            value={exitToUse}
+            value={exitToUse || ''}
           />
           <Input
             disabled={disableInputEdits}
@@ -64,6 +64,7 @@ export const ExitPanel = (): JSX.Element => {
             }
             size="sm"
             variant="flushed"
+            value={exitStatus.exitAuthCodeFromUser || ''}
             placeholder="Auth code"
             _placeholder={{ color: '#a7a7a7' }}
             marginBottom={2}

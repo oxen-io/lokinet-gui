@@ -19,7 +19,7 @@ export type SpeedHistoryDataType = {
   lastDownloadUsage: number | null;
 };
 
-export const MAX_NUMBER_POINT_HISTORY = 30; // 1 minute as there is 2 points per sec currently
+export const MAX_NUMBER_POINT_HISTORY = 60; // 1 minute as there is 2 points per sec currently
 
 export const SpeedChart = (): JSX.Element => {
   const uploadColor = 'var(--chakra-colors-green-500)';

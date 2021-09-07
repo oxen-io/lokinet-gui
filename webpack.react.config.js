@@ -44,7 +44,7 @@ module.exports = {
     filename: 'js/[name].js',
     publicPath: '/'
   },
-  plugins: [new HtmlWebpackPlugin({ title: 'Loki Network Control Panel' })],
+  plugins: [new HtmlWebpackPlugin({ title: 'Lokinet GUI' })],
   optimization: {
     minimize: false
   }

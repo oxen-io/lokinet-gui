@@ -1,5 +1,5 @@
 import { Button, Code, Flex, Text } from '@chakra-ui/react';
-import React from 'react';
+import React, { useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { clearLogs, selectAppLogs } from '../../features/appLogsSlice';
 import { useAppSelector } from '../hooks';
@@ -7,6 +7,7 @@ import { useAppSelector } from '../hooks';
 export const AppLogs = (): JSX.Element => {
   const { appLogs } = useAppSelector(selectAppLogs);
   const dispatch = useDispatch();
+  const logsRef = useRef<HTMLElement | null>(null);
 
   return (
     <Flex flexDirection="column">
@@ -18,7 +19,15 @@ export const AppLogs = (): JSX.Element => {
       >
         Clear
       </Button>
-      <Code size="xs" overflowY="auto" textAlign="left" maxHeight="70vh">
+      <Code
+        size="xs"
+        overflowY="auto"
+        textAlign="left"
+        maxHeight="70vh"
+        display="flex"
+        flexDirection="column-reverse"
+        ref={logsRef}
+      >
         {appLogs.map((logLine, index) => {
           return (
             <Text fontSize={12} key={index}>

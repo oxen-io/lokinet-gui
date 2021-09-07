@@ -32,6 +32,7 @@ const handleTurningOffExit = async (dispatch: AppDispatch) => {
       } else {
         // Do nothing. At this point we are waiting for the next getStatus call
         // to send us the exit node set from the daemon.
+        dispatch(appendToApplogs(`ExitOFF: <= ${parsed.result}`));
       }
     } catch (e) {
       dispatch(
@@ -76,9 +77,10 @@ const handleTurningOnExit = async (
         );
         return;
       }
-      if (parsed.result !== 'OK') {
+      if (!parsed.result || !parsed.result.startsWith('OK: connected to')) {
         dispatch(markExitFailedToLoad(`AddExit: Daemon says ${parsed.error}`));
       } else {
+        dispatch(appendToApplogs(`ExitON <= ${parsed.result}`));
         // Do nothing. At this point we are waiting for the next getStatus call
         // to send us the exit node set from the daemon.
       }
@@ -106,9 +108,11 @@ export const EnableExitToggle = (): JSX.Element => {
   const dispatch = useAppDispatch();
 
   const isExitEnabledFromDaemon = Boolean(exitNodeFromDaemon);
+
   // Disable the button if the exit mode is not enabled by the daemon
   // AND the user did not enter an exit yet
-  const isOffAndMissingNode = !isExitEnabledFromDaemon && !exitNode;
+  const isOffAndMissingNode =
+    !isExitEnabledFromDaemon && !exitNode && !exitNodeFromDaemon;
   return (
     <Flex justify="center" align="center">
       {exitLoading ? (

@@ -21,6 +21,7 @@ import { useAppDispatch } from './hooks';
 import { updateFromDaemonGeneralInfos } from '../features/generalInfosSlice';
 import { markExitNodesFromDaemon } from '../features/exitStatusSlice';
 import { AppLayout } from './components/AppLayout';
+import { appendToApplogs } from '../features/appLogsSlice';
 
 initializeIpcRendererSide();
 
@@ -65,6 +66,24 @@ const App = () => {
       const parsedStatus = parseStateResults(statusAsString);
       // Send the update to the redux store.
       dispatch(updateFromDaemonStatus({ daemonStatus: parsedStatus }));
+      if (
+        store.getState().exitStatus.exitNodeFromDaemon !== parsedStatus.exitNode
+      ) {
+        dispatch(
+          appendToApplogs(`exitNode set by daemon: ${parsedStatus.exitNode}`)
+        );
+      }
+
+      if (
+        store.getState().exitStatus.exitAuthCodeFromDaemon !==
+        parsedStatus.exitAuthCode
+      ) {
+        dispatch(
+          appendToApplogs(
+            `authCode set by daemon: ${parsedStatus.exitAuthCode}`
+          )
+        );
+      }
       dispatch(
         markExitNodesFromDaemon({
           exitNodeFromDaemon: parsedStatus.exitNode,
@@ -76,8 +95,8 @@ const App = () => {
       dispatch(markAsStopped());
       dispatch(
         markExitNodesFromDaemon({
-          exitNodeFromDaemon: '',
-          exitAuthCodeFromDaemon: ''
+          exitNodeFromDaemon: undefined,
+          exitAuthCodeFromDaemon: undefined
         })
       );
     }
