@@ -1,10 +1,18 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import React from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import {
+  selectSelectedTab,
+  setTabSelected,
+  TabIndex
+} from '../../features/uiStatusSlice';
 import { AppLogs } from './AppLogs';
 import { MainTab } from './MainTab';
 import { SpeedChart } from './SpeedChart';
 
 export const GuiTabs = (): JSX.Element => {
+  const selectedTab = useSelector(selectSelectedTab);
+  const dispatch = useDispatch();
   return (
     <Tabs
       maxHeight="100%"
@@ -15,6 +23,10 @@ export const GuiTabs = (): JSX.Element => {
       display="flex"
       flexDir="column"
       flexGrow={1}
+      index={selectedTab}
+      onChange={(index) => {
+        dispatch(setTabSelected(index as TabIndex));
+      }}
     >
       <TabList justifyContent="center">
         <Tab>Main</Tab>
