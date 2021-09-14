@@ -19,7 +19,7 @@ export interface ExitStatusState {
 const initialStatusState: ExitStatusState = {
   // default to true to let the user know we are fetching data on app load
   exitLoading: true,
-  exitNodeFromUser: undefined,
+  exitNodeFromUser: 'exit.loki',
   exitAuthCodeFromUser: undefined,
   exitNodeFromDaemon: undefined,
   exitAuthCodeFromDaemon: undefined
@@ -31,6 +31,7 @@ export const exitStatusSlice = createSlice({
   reducers: {
     markExitIsTurningOn: (state) => {
       state.exitLoading = true;
+
       state.exitNodeFromDaemon = undefined;
       state.exitAuthCodeFromDaemon = undefined;
       return state;
@@ -39,30 +40,17 @@ export const exitStatusSlice = createSlice({
       state.exitLoading = true;
       return state;
     },
-    markExitFailedToLoad: (state, action: PayloadAction<string>) => {
-      console.warn('markExitFailedToLoad with error: ', action.payload);
+    markExitFailedToLoad: (state) => {
       state.exitLoading = false;
       state.exitNodeFromDaemon = undefined;
       state.exitAuthCodeFromDaemon = undefined;
       return state;
     },
     onUserExitNodeSet: (state, action: PayloadAction<string>) => {
-      if (state.exitLoading) {
-        console.warn(
-          'We were not on the loading state, skipping update onUserExitNodeSet()'
-        );
-        return;
-      }
       state.exitNodeFromUser = action.payload;
       return state;
     },
     onUserAuthCodeSet: (state, action: PayloadAction<string>) => {
-      if (state.exitLoading) {
-        console.warn(
-          'We were not on the loading state, skipping update onUserAuthCodeSet()'
-        );
-        return;
-      }
       state.exitAuthCodeFromUser = action.payload;
       return state;
     },
@@ -73,10 +61,6 @@ export const exitStatusSlice = createSlice({
         exitAuthCodeFromDaemon?: string;
       }>
     ) => {
-      if (!state.exitLoading) {
-        // console.warn('Dropping update of exit as we are not currently loading');
-        return;
-      }
       state.exitLoading = false;
       state.exitNodeFromDaemon = action.payload.exitNodeFromDaemon;
       state.exitAuthCodeFromDaemon = action.payload.exitAuthCodeFromDaemon;

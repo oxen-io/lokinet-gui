@@ -408,7 +408,8 @@ export const parseGeneralInfos = (
   error?: string
 ): ParsedGeneralInfosFromDaemon => {
   let stats = null;
-  const parsedGeneralsInfos: ParsedGeneralInfosFromDaemon = defaultParsedGeneralInfosFromDaemon;
+  const parsedGeneralsInfos: ParsedGeneralInfosFromDaemon =
+    defaultParsedGeneralInfosFromDaemon;
 
   if (!error) {
     try {

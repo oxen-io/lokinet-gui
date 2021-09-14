@@ -13,32 +13,32 @@ import { AppDispatch } from '../store';
 import { appendToApplogs } from '../../features/appLogsSlice';
 
 const handleTurningOffExit = async (dispatch: AppDispatch) => {
-  dispatch(appendToApplogs('ExitOFF =>'));
+  dispatch(appendToApplogs('TurnExitOFF =>'));
   dispatch(markExitIsTurningOff());
   // trigger the IPC+RPC call
   const deleteExitResult = await deleteExit();
 
   if (deleteExitResult) {
-    dispatch(appendToApplogs(`ExitOFF <= ${deleteExitResult}`));
-
     try {
       const parsed = JSON.parse(deleteExitResult);
       if (parsed.error) {
-        dispatch(markExitFailedToLoad(`ExitOFF: <= '${parsed.error}'`));
+        dispatch(markExitFailedToLoad());
+        dispatch(appendToApplogs(`TurnExitOFF <= ${parsed.error}`));
+
         return;
       }
       if (parsed.result !== 'OK') {
-        dispatch(markExitFailedToLoad(`ExitOFF: <= ${parsed.error}`));
+        dispatch(markExitFailedToLoad());
+        dispatch(appendToApplogs(`TurnExitOFF <= ${parsed}`));
       } else {
         // Do nothing. At this point we are waiting for the next getStatus call
         // to send us the exit node set from the daemon.
+        dispatch(appendToApplogs(`TurnExitOFF OK: <= ${parsed.result}`));
       }
     } catch (e) {
-      dispatch(
-        markExitFailedToLoad(
-          `Couldn't parse result from deleteExit: '${deleteExitResult}'`
-        )
-      );
+      dispatch(markExitFailedToLoad());
+      dispatch(appendToApplogs(`TurnExitOFF: <= ${deleteExitResult}`));
+
       return;
     }
   }
@@ -50,13 +50,13 @@ const handleTurningOnExit = async (
   authCode?: string
 ) => {
   if (!exitNode) {
-    dispatch(appendToApplogs(`ExitON => enter an Exit Node`));
+    dispatch(appendToApplogs(`TurnExitON => Please enter an Exit Node first`));
 
-    dispatch(markExitFailedToLoad('Please enter an Exit Node address first.'));
+    dispatch(markExitFailedToLoad());
     return;
   }
   dispatch(
-    appendToApplogs(`ExitON => with '${exitNode}'; auth code: '${authCode}'`)
+    appendToApplogs(`TurnExitON with '${exitNode}'; auth code: '${authCode}'`)
   );
 
   dispatch(markExitIsTurningOn());
@@ -64,30 +64,26 @@ const handleTurningOnExit = async (
   const addExitResult = await addExit(exitNode, authCode);
 
   if (addExitResult) {
-    dispatch(appendToApplogs(`ExitON <= ${addExitResult}`));
-
     try {
       const parsed = JSON.parse(addExitResult);
       if (parsed.error) {
-        dispatch(
-          markExitFailedToLoad(
-            `AddExit with ${exitNode}: Daemon says '${parsed.error}'`
-          )
-        );
+        dispatch(markExitFailedToLoad());
+        dispatch(appendToApplogs(`TurnExitON <= '${parsed.error}'`));
+
         return;
       }
-      if (parsed.result !== 'OK') {
-        dispatch(markExitFailedToLoad(`AddExit: Daemon says ${parsed.error}`));
+      if (!parsed.result || !parsed.result.startsWith('OK: connected to')) {
+        dispatch(markExitFailedToLoad());
+        dispatch(appendToApplogs(`TurnExitON <= ${parsed}`));
       } else {
+        dispatch(appendToApplogs(`TurnExitON <= ${parsed.result}`));
         // Do nothing. At this point we are waiting for the next getStatus call
         // to send us the exit node set from the daemon.
       }
     } catch (e) {
-      dispatch(
-        markExitFailedToLoad(
-          `Couldn't parse result from addExit: '${addExitResult}'`
-        )
-      );
+      dispatch(markExitFailedToLoad());
+      dispatch(appendToApplogs(`TurnExitON <= ${addExitResult}`));
+
       return;
     }
   }
@@ -106,9 +102,11 @@ export const EnableExitToggle = (): JSX.Element => {
   const dispatch = useAppDispatch();
 
   const isExitEnabledFromDaemon = Boolean(exitNodeFromDaemon);
+
   // Disable the button if the exit mode is not enabled by the daemon
   // AND the user did not enter an exit yet
-  const isOffAndMissingNode = !isExitEnabledFromDaemon && !exitNode;
+  const isOffAndMissingNode =
+    !isExitEnabledFromDaemon && !exitNode && !exitNodeFromDaemon;
   return (
     <Flex justify="center" align="center">
       {exitLoading ? (
@@ -134,7 +132,7 @@ export const EnableExitToggle = (): JSX.Element => {
       {isExitEnabledFromDaemon ? (
         <Badge colorScheme="green">Exit Enabled</Badge>
       ) : (
-        <Badge colorScheme="red">Exit Disabled</Badge>
+        <Badge colorScheme="red">No Exit Set</Badge>
       )}
     </Flex>
   );

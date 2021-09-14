@@ -1,9 +1,10 @@
-import { Flex, Heading, Text, VStack } from '@chakra-ui/react';
+import { Flex, Stack, Text } from '@chakra-ui/react';
 import React from 'react';
+import { VerticalDivider } from './VerticalDivider';
 
 const RouterStatsFlex = ({ children }: { children: React.ReactNode }) => {
   return (
-    <Flex width="40%" justifyContent="space-between">
+    <Flex width="100%" justifyContent="space-between">
       {children}
     </Flex>
   );
@@ -18,22 +19,26 @@ export const RoutersStats = ({
   activePaths: number;
   ratio: string;
 }): JSX.Element => (
-  <VStack>
-    <Heading size="md" marginRight="auto">
+  <Flex flexDirection="column" flexGrow={1}>
+    <Text alignSelf="flex-start" fontWeight={700}>
       Routers
-    </Heading>
-
-    <RouterStatsFlex>
-      <Text fontWeight="bold">Count</Text>
-      <Text>{numRouters}</Text>
-    </RouterStatsFlex>
-    <RouterStatsFlex>
-      <Text fontWeight="bold">Active Paths</Text>
-      <Text>{activePaths}</Text>
-    </RouterStatsFlex>
-    <RouterStatsFlex>
-      <Text fontWeight="bold">Success</Text>
-      <Text>{ratio}</Text>
-    </RouterStatsFlex>
-  </VStack>
+    </Text>
+    <Stack direction="row" alignSelf="center" width="100%" height="100%" p={2}>
+      <VerticalDivider />
+      <Flex flexDirection="column" flexGrow={1}>
+        <RouterStatsFlex>
+          <Text>Total count</Text>
+          <Text>{numRouters}</Text>
+        </RouterStatsFlex>
+        <RouterStatsFlex>
+          <Text>Active paths</Text>
+          <Text>{activePaths}</Text>
+        </RouterStatsFlex>
+        <RouterStatsFlex>
+          <Text>Success</Text>
+          <Text>{ratio}</Text>
+        </RouterStatsFlex>
+      </Flex>
+    </Stack>
+  </Flex>
 );

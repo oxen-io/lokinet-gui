@@ -6,26 +6,28 @@ import { initializeIpcNodeSide } from './ipcNode';
 let mainWindow: Electron.BrowserWindow | null;
 
 function createWindow() {
-  const ratio = 1.6;
-  const height = 600;
-  const width = height * ratio;
+  const height = 650;
+  const width = 400;
 
   const isDev = process.env.NODE_ENV === 'development';
   mainWindow = new BrowserWindow({
     width,
     height,
+    minHeight: height,
+    minWidth: width,
     resizable: true,
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
       webSecurity: true
     },
-    backgroundColor: '#323641'
+    backgroundColor: '#323641',
+    autoHideMenuBar: true
   });
 
   if (isDev) {
     mainWindow.loadURL(`http://localhost:4000`);
-    mainWindow.webContents.openDevTools();
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
     const pathname = path.join(__dirname, 'index.html');
     mainWindow.loadURL(

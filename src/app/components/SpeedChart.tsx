@@ -19,11 +19,11 @@ export type SpeedHistoryDataType = {
   lastDownloadUsage: number | null;
 };
 
-export const MAX_NUMBER_POINT_HISTORY = 30; // 1 minute as there is 2 points per sec currently
+export const MAX_NUMBER_POINT_HISTORY = 60; // 1 minute as there is 2 points per sec currently
 
 export const SpeedChart = (): JSX.Element => {
-  const uploadColor = 'red';
-  const downloadColor = 'green';
+  const uploadColor = 'var(--chakra-colors-green-500)';
+  const downloadColor = 'var(--chakra-colors-red-500)';
   const daemonStatus = useSelector(selectStatus);
 
   const uploadCoordinates = daemonStatus.speedHistory.upload.map((y, index) => {
@@ -44,17 +44,11 @@ export const SpeedChart = (): JSX.Element => {
 
   return (
     <Flex flexDirection="column" height="100%">
-      <Flex
-        flexDirection="column"
-        width="100%"
-        alignItems="left"
-        paddingLeft={10}
-      >
+      <Flex flexDirection="column" width="100%" alignItems="center">
         <VictoryChart
           animate={false}
           theme={VictoryTheme.material}
           containerComponent={<VictoryContainer responsive={false} />}
-          minDomain={{ y: 1 }}
         >
           <VictoryGroup
             style={{
@@ -63,13 +57,13 @@ export const SpeedChart = (): JSX.Element => {
           >
             <VictoryArea
               style={{
-                data: { stroke: downloadColor }
+                data: { stroke: downloadColor, fill: downloadColor }
               }}
               data={downloadCoordinates}
             />
             <VictoryArea
               style={{
-                data: { stroke: uploadColor }
+                data: { stroke: uploadColor, fill: uploadColor }
               }}
               data={uploadCoordinates}
             />

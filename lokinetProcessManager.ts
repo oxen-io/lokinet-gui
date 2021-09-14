@@ -1,17 +1,12 @@
 import util from 'util';
 import { eventsByJobId } from './ipcNode';
+import { LokinetLinuxProcessManager } from './lokinetProcessManagerLinux';
 import {
-  doForciblyStopLokinetProcessLinux,
-  doStartLokinetProcessLinux,
-  doStopLokinetProcessLinux
-} from './lokinetProcessManagerLinux';
+  LokinetSystemDProcessManager,
+  isSystemD
+} from './lokinetProcessManagerSystemd';
 
-import {
-  doForciblyStopLokinetProcessWindows,
-  doStartLokinetProcessWindows,
-  doStopLokinetProcessWindows
-} from './lokinetProcessManagerWindows';
-
+import { LokinetWindowsProcessManager } from './lokinetProcessManagerWindows';
 
 import { IPC_CHANNEL_KEY } from './sharedIpc';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -19,7 +14,7 @@ const exec = util.promisify(require('child_process').exec);
 
 const LINUX = 'linux';
 const WIN = 'win32';
-const MACOS = 'darwin';
+// const MACOS = 'darwin';
 
 export const invoke = async (
   cmd: string,
@@ -51,71 +46,85 @@ const getEventByJobId = (jobId: string) => {
   return event;
 };
 
-export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
-  let result = false;
-  switch (process.platform) {
-    case WIN:
-      result = await doStartLokinetProcessWindows();
-      const event = getEventByJobId(jobId);
-      event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
-      return;
-    case LINUX: {
-      result = await doStartLokinetProcessLinux();
-      const event = getEventByJobId(jobId);
-      event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
+export interface ILokinetProcessManager {
+  doStartLokinetProcess: () => Promise<boolean>;
+  doStopLokinetProcess: () => Promise<boolean>;
+  doForciblyStopLokinetProcess: () => Promise<boolean>;
 
-      return;
-    }
+  // /var/lib/lokinet/bootstrap.signed for MacOS
+  getDefaultBootstrapFileLocation: () => string;
+}
+
+let lokinetProcessManager: ILokinetProcessManager;
+
+const getLokinetProcessManager = async () => {
+  if (lokinetProcessManager) {
+    return lokinetProcessManager;
   }
 
-  throw new Error(`doStartLokinetProcess not made for ${process.platform}`);
+  if (process.platform === WIN) {
+    lokinetProcessManager = new LokinetWindowsProcessManager();
+    return lokinetProcessManager;
+  }
+
+  if (process.platform === LINUX) {
+    if (await isSystemD()) {
+      lokinetProcessManager = new LokinetSystemDProcessManager();
+      return lokinetProcessManager;
+    }
+    lokinetProcessManager = new LokinetLinuxProcessManager();
+    return lokinetProcessManager;
+  }
+
+  throw new Error(
+    `LokinetProcessManager not implemented for ${process.platform}`
+  );
+};
+
+export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
+  let result = false;
+
+  try {
+    const manager = await getLokinetProcessManager();
+    result = await manager.doStartLokinetProcess();
+  } catch (e) {
+    console.warn('doStartLokinetProcess failed with', e);
+  }
+
+  const event = getEventByJobId(jobId);
+  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
 export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
-  switch (process.platform) {
-    case LINUX: {
-      const ret = await doStopLokinetProcessLinux();
-      const event = getEventByJobId(jobId);
-      event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, ret);
-      return;
-    }
-    case WIN: {
-      const ret = await doStopLokinetProcessWindows();
-      const event = getEventByJobId(jobId);
-      event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, ret);
-      return;
-    }
+  let result = false;
+
+  try {
+    const manager = await getLokinetProcessManager();
+    result = await manager.doStopLokinetProcess();
+  } catch (e) {
+    console.warn('doStopLokinetProcess failed with', e);
   }
-  throw new Error(`doStopLokinetProcess not made for ${process.platform}`);
+
+  const event = getEventByJobId(jobId);
+  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
-export const doForciblyStopLokinetProcess = async (): Promise<void> => {
-  switch (process.platform) {
-    case WIN:
-      await doForciblyStopLokinetProcessWindows();
-      return;
-    case LINUX:
-      await doForciblyStopLokinetProcessLinux();
-      return;
+export const doForciblyStopLokinetProcess = async (
+  jobId: string
+): Promise<void> => {
+  let result = false;
+
+  try {
+    const manager = await getLokinetProcessManager();
+    result = await manager.doForciblyStopLokinetProcess();
+  } catch (e) {
+    console.warn('doForciblyStopLokinetProcess failed with', e);
   }
-  throw new Error(
-    `doForciblyStopLokinetProcessLinux not made for ${process.platform}`
-  );
+
+  const event = getEventByJobId(jobId);
+  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
 export const doGetProcessPid = (): number => {
   return 0;
-};
-
-export const getDefaultBootstrapFileLocation = (): string => {
-  switch (process.platform) {
-    case LINUX:
-      throw new Error('TODO');
-    case WIN:
-      return 'C:\\ProgramData\\lokinet\\bootstrap.signed';
-    case MACOS:
-      return '/var/lib/lokinet/bootstrap.signed';
-    default:
-      throw new Error(`Unsupported platform ${process.platform}`);
-  }
 };

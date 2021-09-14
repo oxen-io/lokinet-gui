@@ -21,20 +21,37 @@ import { useAppDispatch } from './hooks';
 import { updateFromDaemonGeneralInfos } from '../features/generalInfosSlice';
 import { markExitNodesFromDaemon } from '../features/exitStatusSlice';
 import { AppLayout } from './components/AppLayout';
-
-const mainElement = document.createElement('div');
-document.body.appendChild(mainElement);
+import { appendToApplogs } from '../features/appLogsSlice';
 
 initializeIpcRendererSide();
 
 const App = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
-  // console.info('state', state);
+  const styles = {
+    global: () => ({
+      body: {
+        color: 'black',
+        bg: 'white',
+        height: '100%',
+        width: '100vw'
+      },
+      html: {
+        height: '100%'
+      }
+    })
+  };
+
   const theme = extendTheme({
     config: {
       initialColorMode: 'light'
-    }
+    },
+    colors: {
+      green: {
+        200: 'red'
+      }
+    },
+    styles
   });
 
   // register an interval for fetching the status of the daemon
@@ -49,6 +66,24 @@ const App = () => {
       const parsedStatus = parseStateResults(statusAsString);
       // Send the update to the redux store.
       dispatch(updateFromDaemonStatus({ daemonStatus: parsedStatus }));
+      if (
+        store.getState().exitStatus.exitNodeFromDaemon !== parsedStatus.exitNode
+      ) {
+        dispatch(
+          appendToApplogs(`exitNode set by daemon: ${parsedStatus.exitNode}`)
+        );
+      }
+
+      if (
+        store.getState().exitStatus.exitAuthCodeFromDaemon !==
+        parsedStatus.exitAuthCode
+      ) {
+        dispatch(
+          appendToApplogs(
+            `authCode set by daemon: ${parsedStatus.exitAuthCode}`
+          )
+        );
+      }
       dispatch(
         markExitNodesFromDaemon({
           exitNodeFromDaemon: parsedStatus.exitNode,
@@ -60,8 +95,8 @@ const App = () => {
       dispatch(markAsStopped());
       dispatch(
         markExitNodesFromDaemon({
-          exitNodeFromDaemon: '',
-          exitAuthCodeFromDaemon: ''
+          exitNodeFromDaemon: undefined,
+          exitAuthCodeFromDaemon: undefined
         })
       );
     }
@@ -93,5 +128,5 @@ ReactDom.render(
   <Provider store={store}>
     <App />
   </Provider>,
-  mainElement
+  document.body
 );
