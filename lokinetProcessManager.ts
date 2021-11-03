@@ -7,6 +7,7 @@ import {
 } from './lokinetProcessManagerSystemd';
 
 import { LokinetWindowsProcessManager } from './lokinetProcessManagerWindows';
+import { LokinetMacOSProcessManager } from './lokinetProcessManagerApple';
 
 import { IPC_CHANNEL_KEY } from './sharedIpc';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -14,7 +15,7 @@ const exec = util.promisify(require('child_process').exec);
 
 const LINUX = 'linux';
 const WIN = 'win32';
-// const MACOS = 'darwin';
+const MACOS = 'darwin';
 
 export const invoke = async (
   cmd: string,
@@ -50,9 +51,6 @@ export interface ILokinetProcessManager {
   doStartLokinetProcess: () => Promise<boolean>;
   doStopLokinetProcess: () => Promise<boolean>;
   doForciblyStopLokinetProcess: () => Promise<boolean>;
-
-  // /var/lib/lokinet/bootstrap.signed for MacOS
-  getDefaultBootstrapFileLocation: () => string;
 }
 
 let lokinetProcessManager: ILokinetProcessManager;
@@ -76,6 +74,12 @@ const getLokinetProcessManager = async () => {
     return lokinetProcessManager;
   }
 
+    if (process.platform === MACOS)
+    {
+        lokinetProcessManager = new LokinetMacOSProcessManager();
+        return lokinetProcessManager;
+    }
+    
   throw new Error(
     `LokinetProcessManager not implemented for ${process.platform}`
   );

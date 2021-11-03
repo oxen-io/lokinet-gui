@@ -19,8 +19,11 @@
     "compile:react": "cross-env NODE_ENV=production webpack --config webpack.react.config.js --mode production",
     "compile": "yarn compile:electron && yarn compile:react",
     "pack": "yarn compile && electron-builder --dir",
-    "dist": "rm -rf dist; rm -rf release; yarn compile && electron-builder",
+    "macos:clean": "rm -rf ./external/lokinet/build-mac dist release",
+    "macos:dist": "cd ./external/lokinet/ && ./contrib/mac.sh -DCODESIGN_APP=5F5807E17217CA29048925C9C1C12BEAD53E3C89 && cd - && yarn compile && electron-builder --macos",
+    "macos:release": "yarn macos:clean && cd ./external/lokinet/ && ./contrib/mac.sh -DCODESIGN_APP=5F5807E17217CA29048925C9C1C12BEAD53E3C89 && cd - && yarn compile && electron-builder --mas",
     "postinstall": "yarn patch-package && electron-builder install-app-deps",
+    "macos": "yarn macos:clean macos:dist",
     "win32": "rm -rf dist; rm -rf release; yarn compile && electron-builder --windows portable",
     "deb": "rm -rf dist; rm -rf release; yarn compile && electron-builder --linux deb"
   },
@@ -31,7 +34,21 @@
     },
     "asar": true,
     "mac": {
-      "category": "public.app-category.utilities"
+      "identity": "5F5807E17217CA29048925C9C1C12BEAD53E3C89",
+      "entitlementsInherit": "./external/lokinet/contrib/macos/lokinet-extension.entitlements.plist",
+      "provisioningProfile": "./external/lokinet/contrib/macos/lokinet-extension.provisionprofile",
+      "category": "public.app-category.utilities",
+      "extraFiles": [
+        {
+          "from": "./external/lokinet/build-mac/daemon/lokinet.app/Contents/Plugins",
+          "to": "Plugins"
+        },
+        {
+          "from": "./external/lokinet/build-mac/daemon/lokinet.app/Contents/MacOS",
+          "to": "MacOS"
+        }
+      ],
+      "binaries": [ "Plugins/lokinet-extension.appex", "MacOS/lokinet", "MacOS/Lokinet GUI" ]
     },
     "win": {
       "target": "nsis",
@@ -66,6 +83,7 @@
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
     "babel-loader": "^8.2.2",
+    "cmake-js": "^6.2.1",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.7",
     "electron": "^11.4.12",

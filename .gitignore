@@ -16,6 +16,8 @@
 *.vcxproj.user
 *.xcodeproj
 /.idea/
+/release/
+/build/
 /dist/
 /external_binaries/
 /out/

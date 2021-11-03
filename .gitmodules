@@ -1,0 +1,3 @@
+[submodule "external/lokinet"]
+	path = external/lokinet
+	url = https://github.com/oxen-io/lokinet
