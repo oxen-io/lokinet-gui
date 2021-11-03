@@ -341,7 +341,6 @@ export const parseStateResults = (
   parsedState.numRoutersKnown = stats?.result?.numNodesKnown || 0;
 
   parsedState.lokiAddress = stats?.result?.services?.default?.identity || '';
-  parsedState.numPathsBuilt = stats?.result?.services?.default?.identity || '';
 
   const exitMap = stats?.result?.services?.default?.exitMap;
   if (exitMap) {
