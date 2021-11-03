@@ -34,10 +34,10 @@
     },
     "asar": true,
     "mac": {
+      "category": "public.app-category.utilities",
       "identity": "5F5807E17217CA29048925C9C1C12BEAD53E3C89",
       "entitlementsInherit": "./external/lokinet/contrib/macos/lokinet-extension.entitlements.plist",
       "provisioningProfile": "./external/lokinet/contrib/macos/lokinet-extension.provisionprofile",
-      "category": "public.app-category.utilities",
       "extraFiles": [
         {
           "from": "./external/lokinet/build-mac/daemon/lokinet.app/Contents/Plugins",
@@ -83,7 +83,6 @@
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
     "babel-loader": "^8.2.2",
-    "cmake-js": "^6.2.1",
     "cross-env": "^7.0.3",
     "css-loader": "^5.2.7",
     "electron": "^11.4.12",
