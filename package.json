@@ -20,12 +20,15 @@
     "compile": "yarn compile:electron && yarn compile:react",
     "pack": "yarn compile && electron-builder --dir",
     "macos:clean": "rm -rf ./external/lokinet/build-mac dist release",
-    "macos:dist": "cd ./external/lokinet/ && ./contrib/mac.sh -DCODESIGN_APP=5F5807E17217CA29048925C9C1C12BEAD53E3C89 && cd - && yarn compile && electron-builder --macos",
-    "macos:release": "yarn macos:clean && cd ./external/lokinet/ && ./contrib/mac.sh -DCODESIGN_APP=5F5807E17217CA29048925C9C1C12BEAD53E3C89 && cd - && yarn compile && electron-builder --mas",
+    "macos:dist": "cd ./external/lokinet/ && ./contrib/mac.sh -DCODESIGN_APP=$npm_package_config_pubkey && cd - && yarn compile && electron-builder --macos",
+    "macos:release": "yarn macos:clean && cd ./external/lokinet/ && ./contrib/mac.sh -DCODESIGN_APP=$npm_package_config_pubkey && cd - && yarn compile && electron-builder --mas",
     "postinstall": "yarn patch-package && electron-builder install-app-deps",
     "macos": "yarn macos:clean macos:dist",
     "win32": "rm -rf dist; rm -rf release; yarn compile && electron-builder --windows portable",
     "deb": "rm -rf dist; rm -rf release; yarn compile && electron-builder --linux deb"
+  },
+  "config": {
+    "pubkey": "5F5807E17217CA29048925C9C1C12BEAD53E3C89"
   },
   "build": {
     "appId": "com.electron.lokinet.gui",
@@ -35,7 +38,7 @@
     "asar": true,
     "mac": {
       "category": "public.app-category.utilities",
-      "identity": "5F5807E17217CA29048925C9C1C12BEAD53E3C89",
+      "identity": "$npm_package_config_pubkey",
       "entitlementsInherit": "./external/lokinet/contrib/macos/lokinet-extension.entitlements.plist",
       "provisioningProfile": "./external/lokinet/contrib/macos/lokinet-extension.provisionprofile",
       "extraFiles": [
