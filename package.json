@@ -28,7 +28,7 @@
     "deb": "rm -rf dist; rm -rf release; yarn compile && electron-builder --linux deb"
   },
   "config": {
-    "pubkey": "5F5807E17217CA29048925C9C1C12BEAD53E3C89"
+    "pubkey": null
   },
   "build": {
     "appId": "com.electron.lokinet.gui",

@@ -35,8 +35,20 @@ if the screen stays grey, you might need to CTRL-R the app
 
 ### Build binaries
 
-After running the `yarn install` command, you should be able to run `yarn dist` to build the binaries.
+After running the `yarn install --frozen-lockfile` command, you should be able to run `yarn dist` to build the binaries.
 They will be saved under `./release`.
+
+### MacOS
+
+set up signing keys:
+
+    npm config set lokinet-gui:pubkey pubkey_id_goes_here
+
+build a codesigned release:
+
+    yarn install --frozen-lockfile
+    yarn macos:release
+
 
 ### CI Builds
 
