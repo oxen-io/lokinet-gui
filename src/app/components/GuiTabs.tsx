@@ -18,13 +18,13 @@ export const GuiTabs = (): JSX.Element => {
       maxHeight="100%"
       width="100%"
       variant="soft-rounded"
-      colorScheme="green"
+      colorScheme="gray"
       padding={3}
       display="flex"
       flexDir="column"
       flexGrow={1}
       index={selectedTab}
-      onChange={(index) => {
+      onChange={(index: number) => {
         dispatch(setTabSelected(index as TabIndex));
       }}
     >

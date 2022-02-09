@@ -3,11 +3,11 @@ import * as path from 'path';
 import * as url from 'url';
 import { initializeIpcNodeSide } from './ipcNode';
 
-let mainWindow: Electron.BrowserWindow | null;
+let mainWindow: BrowserWindow | null;
 
 function createWindow() {
   const height = 650;
-  const width = 400;
+  const width = 450;
 
   const isDev = process.env.NODE_ENV === 'development';
   mainWindow = new BrowserWindow({
@@ -16,6 +16,7 @@ function createWindow() {
     minHeight: height,
     minWidth: width,
     resizable: true,
+    icon: './images/lokinet-logo.png',
     webPreferences: {
       nodeIntegration: true,
       devTools: true,

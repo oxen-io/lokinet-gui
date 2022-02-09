@@ -1,4 +1,4 @@
-import { Flex, Icon, Stack, Text } from '@chakra-ui/react';
+import { Flex, Icon, Stack, Text, Tooltip } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectStatus } from '../../features/statusSlice';
@@ -51,11 +51,25 @@ export const SpeedStats = (): JSX.Element => {
         <Flex flexDirection="column" flexGrow={1}>
           <SpeedStatsFlex>
             <Icon margin="5px" as={FiUploadCloud} />
-            <Text>{upSpeed}</Text>
+            <Tooltip
+              openDelay={100}
+              label={'Upload Speed'}
+              aria-label={'Upload Speed'}
+              style={{ width: '100%' }}
+            >
+              <Text>{upSpeed}</Text>
+            </Tooltip>
           </SpeedStatsFlex>
+
           <SpeedStatsFlex>
             <Icon margin="5px" as={FiDownloadCloud} />
-            <Text>{downSpeed}</Text>
+            <Tooltip
+              openDelay={100}
+              label={'Download Speed'}
+              aria-label={'Download Speed'}
+            >
+              <Text>{downSpeed}</Text>
+            </Tooltip>
           </SpeedStatsFlex>
         </Flex>
       </Stack>

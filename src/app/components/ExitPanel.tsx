@@ -49,6 +49,7 @@ export const ExitPanel = (): JSX.Element => {
             size="sm"
             variant="flushed"
             marginBottom={2}
+            spellCheck={false}
             noOfLines={1}
             placeholder="Exit address"
             _placeholder={{ color: '#a7a7a7' }}
@@ -56,6 +57,7 @@ export const ExitPanel = (): JSX.Element => {
           />
           <Input
             disabled={disableInputEdits}
+            spellCheck={false}
             onChange={(e) =>
               dispatch(onUserAuthCodeSet(e?.currentTarget?.value))
             }

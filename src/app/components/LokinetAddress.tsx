@@ -34,7 +34,6 @@ export const LokinetAddress = (): JSX.Element => {
           openDelay={100}
           label={lokinetAddress}
           aria-label={lokinetAddress}
-          style={{ width: '100%' }}
         >
           <Code
             flexShrink={1}
@@ -46,15 +45,17 @@ export const LokinetAddress = (): JSX.Element => {
             {lokinetAddress}
           </Code>
         </Tooltip>
-        <IconButton
-          variant="ghost"
-          aria-label="Copy"
-          height="20px"
-          width="20px"
-          minWidth="20px"
-          icon={<AiFillCopy />}
-          onClick={copyAndToast}
-        />
+        {lokinetAddress?.length ? (
+          <IconButton
+            variant="ghost"
+            aria-label="Copy"
+            height="20px"
+            width="20px"
+            minWidth="20px"
+            icon={<AiFillCopy />}
+            onClick={copyAndToast}
+          />
+        ) : null}
       </>
     </Flex>
   );

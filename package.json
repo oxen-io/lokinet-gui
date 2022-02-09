@@ -62,6 +62,7 @@
     "@babel/preset-typescript": "^7.15.0",
     "@types/lodash": "^4.14.172",
     "@types/react-redux": "^7.1.18",
+    "@types/styled-components": "^5.1.22",
     "@types/victory": "^33.1.5",
     "@typescript-eslint/eslint-plugin": "^4.29.3",
     "@typescript-eslint/parser": "^4.29.3",
@@ -87,7 +88,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.15.3",
-    "@chakra-ui/react": "^1.6.7",
+    "@chakra-ui/react": "^1.8.3",
     "@emotion/react": "^11.4.1",
     "@emotion/styled": "^11.3.0",
     "@reduxjs/toolkit": "^1.6.1",
@@ -101,6 +102,7 @@
     "react-icons": "^4.2.0",
     "react-redux": "^7.2.4",
     "react-use": "^17.2.4",
+    "styled-components": "^5.3.3",
     "victory": "^35.11.0",
     "zeromq": "6.0.0-beta.6"
   }

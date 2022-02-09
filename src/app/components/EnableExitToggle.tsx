@@ -110,7 +110,7 @@ export const EnableExitToggle = (): JSX.Element => {
   return (
     <Flex justify="center" align="center">
       {exitLoading ? (
-        <Spinner marginRight="auto" />
+        <Spinner margin="3px" marginRight="auto" />
       ) : (
         <Switch
           marginRight="auto"

@@ -13,9 +13,9 @@ export const MainTab = (): JSX.Element => {
   const daemonStatus = useSelector(selectStatus);
   return (
     <>
+      <StopAndStart />
       <GeneralInfos />
       <LokinetAddress />
-      <StopAndStart />
       <ExitPanel />
       <RoutersStats
         activePaths={daemonStatus.numPathsBuilt}

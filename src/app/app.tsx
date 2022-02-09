@@ -28,7 +28,7 @@ initializeIpcRendererSide();
 const App = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
-  const styles = {
+  const globalStyles = {
     global: () => ({
       body: {
         color: 'black',
@@ -38,6 +38,15 @@ const App = () => {
       },
       html: {
         height: '100%'
+      },
+      input: {
+        _focus: {
+          borderColor: 'darkGrey  !important',
+          boxShadow: 'none  !important'
+        }
+      },
+      '::selection': {
+        background: 'lightGrey'
       }
     })
   };
@@ -46,12 +55,23 @@ const App = () => {
     config: {
       initialColorMode: 'light'
     },
+    _focus: { boxShadow: 'none', outline: 'darkGrey' },
+    shadows: {
+      outline: '0 0 0 2px darkGrey'
+    },
     colors: {
       green: {
-        200: 'red'
+        100: 'white',
+        500: '#1F18C0',
+        800: '#1F18C0'
+      },
+      red: {
+        100: 'white',
+        500: '#6e91ff',
+        800: '#1F18C0'
       }
     },
-    styles
+    styles: globalStyles
   });
 
   // register an interval for fetching the status of the daemon

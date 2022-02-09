@@ -23,7 +23,7 @@ export const MAX_NUMBER_POINT_HISTORY = 60; // 1 minute as there is 2 points per
 
 export const SpeedChart = (): JSX.Element => {
   const uploadColor = 'var(--chakra-colors-green-500)';
-  const downloadColor = 'var(--chakra-colors-red-500)';
+  const downloadColor = 'red';
   const daemonStatus = useSelector(selectStatus);
 
   const uploadCoordinates = daemonStatus.speedHistory.upload.map((y, index) => {
