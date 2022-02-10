@@ -1,4 +1,5 @@
 import { app, BrowserWindow } from 'electron';
+import { readdir } from 'original-fs';
 import * as path from 'path';
 import * as url from 'url';
 import { initializeIpcNodeSide } from './ipcNode';
@@ -16,7 +17,7 @@ function createWindow() {
     minHeight: height,
     minWidth: width,
     resizable: true,
-    icon: './images/lokinet-logo.png',
+    icon: './build/icon.png',
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
@@ -31,13 +32,9 @@ function createWindow() {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
     const pathname = path.join(__dirname, 'index.html');
-    mainWindow.loadURL(
-      url.format({
-        pathname,
-        protocol: 'file:',
-        slashes: true
-      })
-    );
+    console.warn('mainwindow loadingURL main as: ', pathname);
+    mainWindow.loadFile('./dist/index.html');
+    mainWindow.webContents.openDevTools();
   }
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();

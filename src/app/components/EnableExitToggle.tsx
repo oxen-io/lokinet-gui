@@ -124,15 +124,15 @@ export const EnableExitToggle = (): JSX.Element => {
           }}
           size="lg"
           aria-label="stop and start"
-          colorScheme="green"
+          colorScheme="blue"
           isDisabled={isOffAndMissingNode}
         />
       )}
 
       {isExitEnabledFromDaemon ? (
-        <Badge colorScheme="green">Exit Enabled</Badge>
+        <Badge colorScheme="blue">Exit Enabled</Badge>
       ) : (
-        <Badge colorScheme="red">No Exit Set</Badge>
+        <Badge colorScheme="blue">No Exit Set</Badge>
       )}
     </Flex>
   );

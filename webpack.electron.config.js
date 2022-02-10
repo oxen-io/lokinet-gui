@@ -9,14 +9,11 @@ module.exports = {
   devtool: 'source-map',
   entry: './main.ts',
   target: 'electron-main',
-  // externals: {
-  //   zerorpc: 'zerorpc'
-  // },
   module: {
     rules: [
       {
         test: /\.(js|ts|tsx)$/,
-        use: [{ loader: 'babel-loader', options: { cacheDirectory: false } }],
+        use: [{ loader: 'babel-loader' }],
         exclude: /node_modules/
       },
       {
@@ -29,9 +26,9 @@ module.exports = {
     path: path.resolve(__dirname, './dist'),
     filename: '[name].js'
   },
-  node: {
-    // __dirname: true
-  },
+  // node: {
+  //   __dirname: true
+  // },
   optimization: {
     minimize: false
   }

@@ -18,7 +18,7 @@ export const GuiTabs = (): JSX.Element => {
       maxHeight="100%"
       width="100%"
       variant="soft-rounded"
-      colorScheme="gray"
+      colorScheme="blue"
       padding={3}
       display="flex"
       flexDir="column"
@@ -29,9 +29,9 @@ export const GuiTabs = (): JSX.Element => {
       }}
     >
       <TabList justifyContent="center">
-        <Tab>Main</Tab>
-        <Tab>Chart</Tab>
-        <Tab>Logs</Tab>
+        <Tab _selected={{ color: 'white', bg: 'blue.500' }}>Main</Tab>
+        <Tab _selected={{ color: 'white', bg: 'blue.500' }}>Chart</Tab>
+        <Tab _selected={{ color: 'white', bg: 'blue.500' }}>Logs</Tab>
       </TabList>
       <TabPanels flexGrow={1} padding={1}>
         <TabPanel padding={2}>

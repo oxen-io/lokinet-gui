@@ -22,12 +22,12 @@ export const StopAndStart = (): JSX.Element => {
           }
         }}
         size="lg"
-        colorScheme="green"
+        colorScheme="blue"
         aria-label="stop and start"
         isChecked={isLokinetRunning}
       />
       {isLokinetRunning ? (
-        <Badge colorScheme="green">Lokinet Running</Badge>
+        <Badge colorScheme="blue">Lokinet Running</Badge>
       ) : (
         <Badge colorScheme="red">Lokinet Stopped</Badge>
       )}

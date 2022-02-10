@@ -25,6 +25,8 @@ import { appendToApplogs } from '../features/appLogsSlice';
 
 initializeIpcRendererSide();
 
+const darkBlue = '#1F18C0';
+
 const App = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
@@ -41,7 +43,7 @@ const App = () => {
       },
       input: {
         _focus: {
-          borderColor: 'darkGrey  !important',
+          borderColor: `${darkBlue}  !important`,
           boxShadow: 'none  !important'
         }
       },
@@ -55,21 +57,21 @@ const App = () => {
     config: {
       initialColorMode: 'light'
     },
-    _focus: { boxShadow: 'none', outline: 'darkGrey' },
+    _focus: { boxShadow: 'none', outline: darkBlue },
     shadows: {
-      outline: '0 0 0 2px darkGrey'
+      outline: `0 0 0 2px ${darkBlue}`
     },
     colors: {
-      green: {
+      blue: {
         100: 'white',
-        500: '#1F18C0',
-        800: '#1F18C0'
-      },
-      red: {
-        100: 'white',
-        500: '#6e91ff',
-        800: '#1F18C0'
+        500: darkBlue,
+        800: darkBlue
       }
+      // red: {
+      //   100: 'white',
+      //   500: '#6e91ff',
+      //   800: darkBlue
+      // }
     },
     styles: globalStyles
   });
