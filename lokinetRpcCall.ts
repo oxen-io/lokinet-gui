@@ -45,7 +45,7 @@ export const getUpTimeAndVersion = async (reply_tag: string): Promise<void> => {
 };
 
 export const getStatus = async (reply_tag: string): Promise<void> => {
-  await invoke('llarp.status', reply_tag, {});
+  await invoke('llarp.get_status', reply_tag, {});
 };
 
 export const addExit = async (

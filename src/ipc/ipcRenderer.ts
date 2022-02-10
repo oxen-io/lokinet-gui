@@ -309,40 +309,33 @@ export const parseStateResults = (
       console.log("Couldn't parse 'stateResult' JSON-RPC payload", e);
     }
   }
-
   // if we got an error, just return isRunning false.
   // the redux store will reset all values to their default.
   if (error || stats.error) {
     console.warn('We got an error for Status: ', error || stats.error);
     return parsedState;
   }
+  const statsResult = stats.result;
 
-  let txRate = 0;
-  let rxRate = 0;
-  let peers = 0;
-  try {
-    forEachSession((s: any) => {
-      txRate += s.tx;
-      rxRate += s.rx;
-      peers += 1;
-    }, stats);
-    parsedState.numPeersConnected = peers;
-  } catch (err) {
-    parsedState.numPeersConnected = 0;
-    console.log("Couldn't pull tx/rx of payload", err);
+  if (!statsResult || _.isEmpty(statsResult)) {
+    console.warn('We got an empty statsResult');
+    return parsedState;
   }
 
+  parsedState.numPeersConnected = statsResult.numPeersConnected;
   // we're polling every 500ms, so our per-second rate is half of the
   // rate we tallied up in this sample
+  const txRate = statsResult.txRate || 0;
+  const rxRate = statsResult.rxRate || 0;
   parsedState.uploadUsage = (txRate * POLLING_STATUS_INTERVAL_MS) / 1000;
   parsedState.downloadUsage = (rxRate * POLLING_STATUS_INTERVAL_MS) / 1000;
 
-  parsedState.isRunning = stats?.result?.running || false;
-  parsedState.numRoutersKnown = stats?.result?.numNodesKnown || 0;
+  parsedState.isRunning = statsResult.running || false;
+  parsedState.numRoutersKnown = statsResult.numRoutersKnown || 0;
 
-  parsedState.lokiAddress = stats?.result?.services?.default?.identity || '';
+  parsedState.lokiAddress = statsResult.lokiAddress || '';
 
-  const exitMap = stats?.result?.services?.default?.exitMap;
+  const exitMap = statsResult.exitMap;
   if (exitMap) {
     // exitMap should be of length 1 only, but it's an object with keys an IP (not as string)
     // so easier to parse it like this
@@ -352,53 +345,20 @@ export const parseStateResults = (
   } else {
     parsedState.exitNode = undefined;
   }
-  const authCodes = stats?.result?.services?.default?.authCodes || undefined;
+  const authCodes = statsResult?.authCodes || undefined;
 
   if (authCodes) {
     for (const lokiExit in authCodes) {
-      const auth = stats?.result?.services?.default?.authCodes[lokiExit];
+      const auth = statsResult?.authCodes[lokiExit];
       parsedState.exitAuthCode = auth;
     }
   } else {
     parsedState.exitAuthCode = undefined;
   }
 
-  // compute all stats on all path builders on the default endpoint
-  // Merge snodeSessions, remoteSessions and default into a single array
-  const builders = new Array<any>();
-  const snodeSessions = stats?.result?.services?.default?.snodeSessions || [];
-  snodeSessions.forEach((session: any) => {
-    builders.push(session);
-  });
+  parsedState.ratio = `${Math.ceil(statsResult?.ratio * 100 || 0)}%`;
 
-  const remoteSessions = stats?.result?.services?.default?.remoteSessions || [];
-  remoteSessions.forEach((session: any) => {
-    builders.push(session);
-  });
-
-  const defaultService = stats?.result?.services?.default;
-  if (defaultService) {
-    builders.push(defaultService);
-  }
-
-  // Iterate over all items on this array to build the global pathStats
-  const pathStats = builders.reduce(
-    (accumulator, currentItem) => {
-      accumulator.paths += currentItem?.paths?.length || 0;
-      accumulator.success += currentItem?.buildStats?.success || 0;
-      accumulator.attempts += currentItem?.buildStats?.attempts || 0;
-      return accumulator;
-    },
-    {
-      paths: 0,
-      success: 0,
-      attempts: 0
-    }
-  );
-  const ratio = (pathStats.success * 100) / (pathStats.attempts + 1);
-  parsedState.ratio = `${Math.ceil(ratio)}%`;
-
-  parsedState.numPathsBuilt = pathStats.paths;
+  parsedState.numPathsBuilt = statsResult.numPathsBuilt;
   return parsedState;
 };
 

@@ -34,7 +34,7 @@ function createWindow() {
     const pathname = path.join(__dirname, 'index.html');
     console.warn('mainwindow loadingURL main as: ', pathname);
     mainWindow.loadFile('./dist/index.html');
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();
