@@ -42,7 +42,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'js/[name].js',
-    publicPath: '/'
+    publicPath: './' //needs to be "./" for releases
   },
   plugins: [new HtmlWebpackPlugin({ title: 'Lokinet GUI' })],
   optimization: {
