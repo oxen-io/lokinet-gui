@@ -6,6 +6,7 @@ import { useAppSelector } from '../hooks';
 
 export const AppLogs = (): JSX.Element => {
   const { appLogs } = useAppSelector(selectAppLogs);
+  const hasLogLine = Boolean(appLogs.length);
   const dispatch = useDispatch();
 
   return (
@@ -26,13 +27,17 @@ export const AppLogs = (): JSX.Element => {
         display="flex"
         flexDirection="column-reverse"
       >
-        {appLogs.map((logLine, index) => {
-          return (
-            <Text fontSize={12} key={index}>
-              {logLine}
-            </Text>
-          );
-        })}
+        {hasLogLine ? (
+          appLogs.map((logLine, index) => {
+            return (
+              <Text fontSize={12} key={index}>
+                {logLine}
+              </Text>
+            );
+          })
+        ) : (
+          <Text fontSize={12}>No logs yet...</Text>
+        )}
       </Code>
     </Flex>
   );

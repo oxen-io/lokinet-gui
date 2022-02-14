@@ -32,7 +32,7 @@
     "directories": {
       "output": "release/"
     },
-    "asar": false,
+    "asar": true,
     "mac": {
       "category": "public.app-category.utilities"
     },
@@ -56,6 +56,7 @@
       "dist/*",
       "build-scripts/*",
       "icons/*",
+      "images/*",
       "js/main.js"
     ]
   },
