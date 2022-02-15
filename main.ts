@@ -1,7 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { app, BrowserWindow, Tray } from 'electron';
 import * as path from 'path';
 import { initializeIpcNodeSide } from './ipcNode';
 import { createTrayIcon } from './trayIcon';
+import { markShouldQuit, shouldQuit } from './windowState';
 
 let mainWindow: BrowserWindow | null;
 let tray: Tray | null = null;
@@ -45,6 +47,24 @@ function createWindow() {
   // mainWindow.removeMenu();
   void initializeIpcNodeSide();
 
+  // Emitted when the window is about to be closed.
+  // Note: We do most of our shutdown logic here because all windows are closed by
+  //   Electron before the app quits.
+  mainWindow.on('close', async (e) => {
+    if (!mainWindow || shouldQuit()) {
+      return;
+    }
+    // Prevent the shutdown
+    e.preventDefault();
+    mainWindow.hide();
+
+    // toggle the visibility of the show/hide tray icon menu entries
+
+    (tray as any)?.updateContextMenu();
+
+    return;
+  });
+
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
@@ -56,6 +76,7 @@ app.on('before-quit', () => {
   if (tray) {
     tray.destroy();
   }
+  markShouldQuit();
 });
 
 // Quit when all windows are closed.
