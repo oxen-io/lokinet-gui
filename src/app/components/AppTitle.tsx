@@ -1,4 +1,3 @@
-import { shell } from 'electron';
 import React from 'react';
 import styled from 'styled-components';
 
@@ -14,9 +13,7 @@ const StyledLogoAndTitle = styled.svg`
 
 export const AppTitle = (): JSX.Element => {
   return (
-    <LogoAndTitleContainer
-      onClick={() => shell.openExternal('https://lokinet.org')}
-    >
+    <LogoAndTitleContainer>
       <StyledLogoAndTitle
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 243.8 50.5"

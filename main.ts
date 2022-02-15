@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { app, BrowserWindow, Tray } from 'electron';
-import * as path from 'path';
 import { initializeIpcNodeSide } from './ipcNode';
 import { createTrayIcon } from './trayIcon';
 import { markShouldQuit, shouldQuit } from './windowState';
@@ -29,7 +28,7 @@ function createWindow() {
       devTools: true,
       webSecurity: true
     },
-    backgroundColor: '#323641',
+    backgroundColor: 'black',
     autoHideMenuBar: true
   });
   ready = true;
@@ -41,7 +40,7 @@ function createWindow() {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
     mainWindow.loadFile('./dist/index.html');
-    // mainWindow.webContents.openDevTools({ mode: 'detach' });
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
   }
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();

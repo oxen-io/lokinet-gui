@@ -3,7 +3,7 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import 'focus-visible/dist/focus-visible';
 
-import { ChakraProvider, extendTheme, useInterval } from '@chakra-ui/react';
+import { useInterval } from '@chakra-ui/react';
 
 import {
   getStatus,
@@ -22,59 +22,15 @@ import { updateFromDaemonGeneralInfos } from '../features/generalInfosSlice';
 import { markExitNodesFromDaemon } from '../features/exitStatusSlice';
 import { AppLayout } from './components/AppLayout';
 import { appendToApplogs } from '../features/appLogsSlice';
+import { GlobalStyle } from './globalStyles';
+import { ThemeProvider } from 'styled-components';
+import { darkTheme } from './theme';
 
 initializeIpcRendererSide();
-
-const darkBlue = '#1F18C0';
 
 const App = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
-  const globalStyles = {
-    global: () => ({
-      body: {
-        color: 'black',
-        bg: 'white',
-        height: '100%',
-        width: '100vw'
-      },
-      html: {
-        height: '100%'
-      },
-      input: {
-        _focus: {
-          borderColor: `${darkBlue}  !important`,
-          boxShadow: 'none  !important'
-        }
-      },
-      '::selection': {
-        background: 'lightGrey'
-      }
-    })
-  };
-
-  const theme = extendTheme({
-    config: {
-      initialColorMode: 'light'
-    },
-    _focus: { boxShadow: 'none', outline: darkBlue },
-    shadows: {
-      outline: `0 0 0 2px ${darkBlue}`
-    },
-    colors: {
-      blue: {
-        100: 'white',
-        500: darkBlue,
-        800: darkBlue
-      }
-      // red: {
-      //   100: 'white',
-      //   500: '#6e91ff',
-      //   800: darkBlue
-      // }
-    },
-    styles: globalStyles
-  });
 
   // register an interval for fetching the status of the daemon
   useInterval(async () => {
@@ -138,17 +94,19 @@ const App = () => {
     }
   }, POLLING_GENERAL_INFOS_INTERVAL_MS);
 
-  return (
-    <ChakraProvider resetCSS={true} theme={theme}>
-      <AppLayout />
-    </ChakraProvider>
-  );
+  return <AppLayout />;
 };
+
+ReactDom.render(<div id="root" />, document.body);
 
 // Make the Redux store available to all sub components of <App/>
 ReactDom.render(
   <Provider store={store}>
-    <App />
+    <ThemeProvider theme={darkTheme}>
+      <GlobalStyle />
+
+      <App />
+    </ThemeProvider>
   </Provider>,
-  document.body
+  document.getElementById('root')
 );

@@ -1,4 +1,4 @@
-import { Flex, Input, Text, Stack } from '@chakra-ui/react';
+import { Flex, Text, Stack } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import {
@@ -38,7 +38,7 @@ export const ExitPanel = (): JSX.Element => {
       >
         <VerticalDivider />
         <Flex flexDirection="column" flexGrow={1}>
-          <Input
+          {/* <Input
             disabled={disableInputEdits}
             onChange={(e) =>
               dispatch(onUserExitNodeSet(e?.currentTarget?.value))
@@ -71,7 +71,7 @@ export const ExitPanel = (): JSX.Element => {
             _placeholder={{ color: '#a7a7a7' }}
             marginBottom={2}
             noOfLines={1}
-          />
+          /> */}
           <EnableExitToggle />
         </Flex>
       </Stack>
