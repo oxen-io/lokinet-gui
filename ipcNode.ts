@@ -29,13 +29,13 @@ export async function initializeIpcNodeSide(): Promise<void> {
       eventsByJobId[jobId] = event;
       // this call just trigger the RPC call. The reply will come from somewhere else
       await fn(jobId, ...args);
-    } catch (error) {
-      const errorForDisplay = error && error.stack ? error.stack : error;
+    } catch (error: any) {
+      const errorForDisplay = error && error.msg ? error.msg : error;
       console.log(
         `ipc channel error with call ${callName}: ${errorForDisplay}`
       );
       delete eventsByJobId[jobId];
-      event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, errorForDisplay);
+      event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, error?.msg || null);
     }
   });
 }

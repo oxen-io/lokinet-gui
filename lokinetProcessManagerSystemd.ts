@@ -20,15 +20,15 @@ export const isSystemD = async (): Promise<boolean> => {
 };
 
 export class LokinetSystemDProcessManager implements ILokinetProcessManager {
-  async doStartLokinetProcess(): Promise<boolean> {
+  async doStartLokinetProcess(): Promise<string | null> {
     return invoke('systemctl', ['--no-block', 'start', 'lokinet.service']);
   }
 
-  async doStopLokinetProcess(): Promise<boolean> {
+  async doStopLokinetProcess(): Promise<string | null> {
     return invoke('systemctl', ['--no-block', 'stop', 'lokinet.service']);
   }
 
-  async doForciblyStopLokinetProcess(): Promise<boolean> {
+  async doForciblyStopLokinetProcess(): Promise<string | null> {
     // systemd's "stop" is a managed stop -- it will do its own forceful kill
     return this.doStopLokinetProcess();
   }

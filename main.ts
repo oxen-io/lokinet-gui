@@ -38,8 +38,6 @@ function createWindow() {
     mainWindow.loadURL(`http://localhost:4000`);
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
-    const pathname = path.join(__dirname, 'index.html');
-    console.warn('mainwindow loadingURL main as: ', pathname);
     mainWindow.loadFile('./dist/index.html');
     // mainWindow.webContents.openDevTools({ mode: 'detach' });
   }

@@ -1,15 +1,15 @@
 import { ILokinetProcessManager } from './lokinetProcessManager';
 
 export class LokinetLinuxProcessManager implements ILokinetProcessManager {
-  async doStartLokinetProcess(): Promise<boolean> {
+  async doStartLokinetProcess(): Promise<string | null> {
     throw new Error('Not systemd: not supported yet');
   }
 
-  async doStopLokinetProcess(): Promise<boolean> {
+  async doStopLokinetProcess(): Promise<string | null> {
     throw new Error('Not systemd: not supported yet');
   }
 
-  async doForciblyStopLokinetProcess(): Promise<boolean> {
+  async doForciblyStopLokinetProcess(): Promise<string | null> {
     throw new Error('Not systemd: not supported yet');
   }
 

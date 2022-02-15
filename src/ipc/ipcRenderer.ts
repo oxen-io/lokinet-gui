@@ -53,11 +53,11 @@ export async function deleteExit(): Promise<string> {
   return channels.deleteExit();
 }
 
-export async function doStartLokinetProcess(): Promise<boolean> {
+export async function doStartLokinetProcess(): Promise<string | null> {
   return channels.doStartLokinetProcess();
 }
 
-export async function doStopLokinetProcess(): Promise<boolean> {
+export async function doStopLokinetProcess(): Promise<string | null> {
   return channels.doStopLokinetProcess();
 }
 export async function setConfig(
@@ -81,7 +81,7 @@ export function initializeIpcRendererSide(): void {
 
   ipcRenderer.on(
     `${IPC_CHANNEL_KEY}-done`,
-    (event, jobId, errorForDisplay, result) => {
+    (event, jobId, errorForDisplay, result: string | null) => {
       const job = _getJob(jobId);
       if (!job) {
         console.warn(

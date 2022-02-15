@@ -19,7 +19,7 @@ const WIN = 'win32';
 export const invoke = async (
   cmd: string,
   args: Array<string>
-): Promise<boolean> => {
+): Promise<string | null> => {
   const cmdWithArgs = `${cmd} ${args.join(' ')}`;
   console.log('running cmdWithArgs', cmdWithArgs);
   try {
@@ -27,14 +27,18 @@ export const invoke = async (
     if (result && (result.stdout || result.stderr)) {
       console.warn(`Failed to invoke: '${cmdWithArgs}'`);
       console.warn(`result: `, result);
-      return false;
+      return result.stdout || result.stderr || null;
     }
-  } catch (e) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
     console.warn('invoke failed with', e);
-    return false;
+    const stderr = e.stderr ? e.stderr : '';
+    const stdout = e.stdout ? e.stdout : '';
+    const cmd = e.cmd ? `${e.cmd}: ` : '';
+    return `${cmd}${stdout}  ${stderr}`;
   }
 
-  return true;
+  return null;
 };
 
 const getEventByJobId = (jobId: string) => {
@@ -47,9 +51,9 @@ const getEventByJobId = (jobId: string) => {
 };
 
 export interface ILokinetProcessManager {
-  doStartLokinetProcess: () => Promise<boolean>;
-  doStopLokinetProcess: () => Promise<boolean>;
-  doForciblyStopLokinetProcess: () => Promise<boolean>;
+  doStartLokinetProcess: () => Promise<string | null>;
+  doStopLokinetProcess: () => Promise<string | null>;
+  doForciblyStopLokinetProcess: () => Promise<string | null>;
 
   // /var/lib/lokinet/bootstrap.signed for MacOS
   getDefaultBootstrapFileLocation: () => string;
@@ -82,7 +86,7 @@ const getLokinetProcessManager = async () => {
 };
 
 export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
-  let result = false;
+  let result: string | null = null;
 
   try {
     const manager = await getLokinetProcessManager();
@@ -96,7 +100,7 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
 };
 
 export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
-  let result = false;
+  let result: string | null = null;
 
   try {
     const manager = await getLokinetProcessManager();
@@ -112,7 +116,7 @@ export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
 export const doForciblyStopLokinetProcess = async (
   jobId: string
 ): Promise<void> => {
-  let result = false;
+  let result: string | null = null;
 
   try {
     const manager = await getLokinetProcessManager();
