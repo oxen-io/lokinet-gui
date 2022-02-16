@@ -12,8 +12,8 @@ function getMainWindow() {
   return mainWindow;
 }
 function createWindow() {
-  const height = 650;
-  const width = 450;
+  const height = 650; // 650
+  const width = 1000; // 450
 
   const isDev = process.env.NODE_ENV === 'development';
   mainWindow = new BrowserWindow({
@@ -40,7 +40,7 @@ function createWindow() {
     mainWindow.webContents.openDevTools({ mode: 'detach' });
   } else {
     mainWindow.loadFile('./dist/index.html');
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
+    mainWindow.webContents.openDevTools({ mode: 'right' });
   }
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();

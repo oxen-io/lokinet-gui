@@ -3,7 +3,6 @@ import { useSelector } from 'react-redux';
 import { selectStatus } from '../../features/statusSlice';
 import { ExitPanel } from './ExitPanel';
 import { GeneralInfos } from './GeneralInfos';
-import { LokinetAddress } from './LokinetAddress';
 import { RoutersStats } from './RouterStats';
 import { SpeedStats } from './SpeedStats';
 import { StopAndStart } from './StopAndStartButton';
@@ -15,7 +14,6 @@ export const MainTab = (): JSX.Element => {
     <>
       <StopAndStart />
       <GeneralInfos />
-      <LokinetAddress />
       <ExitPanel />
       <RoutersStats
         activePaths={daemonStatus.numPathsBuilt}

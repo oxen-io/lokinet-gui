@@ -7,8 +7,10 @@ const LogoAndTitleContainer = styled.div`
 
 const StyledLogoAndTitle = styled.svg`
   max-height: 100%;
-  max-width: 100%;
-  cursor: pointer;
+  max-width: 33%;
+  margin-top: 10px;
+  margin-bottom: 0;
+  fill: ${(props) => props.theme.textColor};
 `;
 
 export const AppTitle = (): JSX.Element => {

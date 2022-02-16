@@ -1,7 +1,9 @@
-import { Text, Stack, Code, Tooltip, Flex } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectGeneralInfos } from '../../features/generalInfosSlice';
+import { LabelSubtleWithValue } from './LabelSubtleWithValue';
+import styled from 'styled-components';
+import { selectStatus } from '../../features/statusSlice';
 
 const formatUptime = (uptimeInMs: number) => {
   const seconds = uptimeInMs / 1000;
@@ -17,33 +19,29 @@ const formatUptime = (uptimeInMs: number) => {
   return dDisplay + hDisplay + mDisplay + sDisplay;
 };
 
+const GeneralInfosContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  max-width: 80%;
+  margin: auto;
+`;
+
 export const GeneralInfos = (): JSX.Element => {
   const { uptime, version } = useSelector(selectGeneralInfos);
 
+  const statusFromDaemon = useSelector(selectStatus);
+  const lokinetAddress = statusFromDaemon.lokiAddress || '';
+
   const formattedUptime = formatUptime(uptime);
   return (
-    <Stack flexGrow={1}>
-      <Flex justifyContent="space-between">
-        <Text size="xs">Uptime: </Text>
-        <Text size="xs" isTruncated={true}>
-          {formattedUptime}
-        </Text>
-      </Flex>
-      <Flex justifyContent="space-between">
-        <Text size="xs" paddingRight={2}>
-          Version:{' '}
-        </Text>
-        <Tooltip openDelay={100} label={version} aria-label={version}>
-          <Code
-            size="xs"
-            isTruncated={true}
-            height="fit-content"
-            alignSelf="center"
-          >
-            {version}
-          </Code>
-        </Tooltip>
-      </Flex>
-    </Stack>
+    <GeneralInfosContainer>
+      <LabelSubtleWithValue label="Uptime" value={formattedUptime} />
+      <LabelSubtleWithValue label="Version" value={version} />
+      <LabelSubtleWithValue
+        label="Lokinet address"
+        value={lokinetAddress}
+        showCopyToClipBoard={true}
+      />
+    </GeneralInfosContainer>
   );
 };
