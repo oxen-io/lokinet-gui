@@ -3,7 +3,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectStatus } from '../../features/statusSlice';
 import { FiUploadCloud, FiDownloadCloud } from 'react-icons/fi';
-import { VerticalDivider } from './VerticalDivider';
+import { PlusDivider } from './PlusDivider';
 
 function makeRate(value: number): string {
   let unit_idx = 0;
@@ -47,7 +47,7 @@ export const SpeedStats = (): JSX.Element => {
         height="100%"
         p={2}
       >
-        <VerticalDivider />
+        <PlusDivider />
         <Flex flexDirection="column" flexGrow={1}>
           <SpeedStatsFlex>
             <Icon margin="5px" as={FiUploadCloud} />

@@ -1,4 +1,4 @@
-import { Flex, Text, Stack } from '@chakra-ui/react';
+import { Flex, Text, Stack, Input } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import {
@@ -8,7 +8,7 @@ import {
 } from '../../features/exitStatusSlice';
 import { useAppDispatch } from '../hooks';
 import { EnableExitToggle } from './EnableExitToggle';
-import { VerticalDivider } from './VerticalDivider';
+import { PlusDivider } from './PlusDivider';
 
 export const ExitPanel = (): JSX.Element => {
   const exitStatus = useSelector(selectExitStatus);
@@ -36,9 +36,9 @@ export const ExitPanel = (): JSX.Element => {
         height="100%"
         p={2}
       >
-        <VerticalDivider />
+        <PlusDivider />
         <Flex flexDirection="column" flexGrow={1}>
-          {/* <Input
+          <Input
             disabled={disableInputEdits}
             onChange={(e) =>
               dispatch(onUserExitNodeSet(e?.currentTarget?.value))
@@ -71,7 +71,7 @@ export const ExitPanel = (): JSX.Element => {
             _placeholder={{ color: '#a7a7a7' }}
             marginBottom={2}
             noOfLines={1}
-          /> */}
+          />
           <EnableExitToggle />
         </Flex>
       </Stack>

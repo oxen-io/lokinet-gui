@@ -1,6 +1,6 @@
 import { Flex, Stack, Text } from '@chakra-ui/react';
 import React from 'react';
-import { VerticalDivider } from './VerticalDivider';
+import { MinusDivider } from './PlusDivider';
 
 const RouterStatsFlex = ({ children }: { children: React.ReactNode }) => {
   return (
@@ -24,7 +24,7 @@ export const RoutersStats = ({
       Routers
     </Text>
     <Stack direction="row" alignSelf="center" width="100%" height="100%" p={2}>
-      <VerticalDivider />
+      <MinusDivider />
       <Flex flexDirection="column" flexGrow={1}>
         <RouterStatsFlex>
           <Text>Total count</Text>
