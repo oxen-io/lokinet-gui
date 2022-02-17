@@ -1,5 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { DefaultTheme } from 'styled-components';
 import { RootState } from '../app/store';
+import { darkTheme, lightTheme } from '../app/theme';
 
 export type TabIndex = 0 | 1 | 2;
 
@@ -39,5 +41,5 @@ export const selectUiState = (state: RootState): GeneralInfosState =>
 export const selectSelectedTab = (state: RootState): TabIndex =>
   state.uiStatus.tabSelected;
 
-export const selectTheme = (state: RootState): ThemeType =>
+export const selectedTheme = (state: RootState): ThemeType =>
   state.uiStatus.theme;

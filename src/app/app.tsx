@@ -15,7 +15,7 @@ import {
   POLLING_STATUS_INTERVAL_MS
 } from '../ipc/ipcRenderer';
 import { markAsStopped, updateFromDaemonStatus } from '../features/statusSlice';
-import { Provider } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch } from './hooks';
 import { updateFromDaemonGeneralInfos } from '../features/generalInfosSlice';
@@ -24,7 +24,8 @@ import { AppLayout } from './components/AppLayout';
 import { appendToApplogs } from '../features/appLogsSlice';
 import { GlobalStyle } from './globalStyles';
 import { ThemeProvider } from 'styled-components';
-import { darkTheme } from './theme';
+import { darkTheme, lightTheme } from './theme';
+import { selectedTheme } from '../features/uiStatusSlice';
 
 initializeIpcRendererSide();
 
@@ -99,14 +100,23 @@ const App = () => {
 
 ReactDom.render(<div id="root" />, document.body);
 
+const LokinetThemeProvider = (props: { children: React.ReactNode }) => {
+  const currentTheme = useSelector(selectedTheme);
+  return (
+    <ThemeProvider theme={currentTheme === 'light' ? lightTheme : darkTheme}>
+      {props.children}
+    </ThemeProvider>
+  );
+};
+
 // Make the Redux store available to all sub components of <App/>
 ReactDom.render(
   <Provider store={store}>
-    <ThemeProvider theme={darkTheme}>
+    <LokinetThemeProvider>
       <GlobalStyle />
 
       <App />
-    </ThemeProvider>
+    </LokinetThemeProvider>
   </Provider>,
   document.getElementById('root')
 );

@@ -22,6 +22,8 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeType }>`
     background: lightGrey;
   }
 
+
+
   * {
     box-sizing: border-box;
     margin: 0;

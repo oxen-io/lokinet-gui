@@ -8,7 +8,7 @@ import {
 } from '../../features/exitStatusSlice';
 import { useAppDispatch } from '../hooks';
 import { EnableExitToggle } from './EnableExitToggle';
-import { PlusDivider } from './PlusDivider';
+import { PlusDivider } from './Dividers';
 
 export const ExitPanel = (): JSX.Element => {
   const exitStatus = useSelector(selectExitStatus);
@@ -36,7 +36,6 @@ export const ExitPanel = (): JSX.Element => {
         height="100%"
         p={2}
       >
-        <PlusDivider />
         <Flex flexDirection="column" flexGrow={1}>
           <Input
             disabled={disableInputEdits}

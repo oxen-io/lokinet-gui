@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import React from 'react';
 import styled from 'styled-components';
 import { AiOutlinePlus } from 'react-icons/ai';
@@ -16,7 +15,7 @@ const StyledPlus = styled.div`
   }
 `;
 
-const BorderIcon = ({ type }: { type: 'plus' | 'minus' }) => {
+const BorderIcon = ({ type }: { type: 'plus' | 'minus' }): JSX.Element => {
   return (
     <StyledPlus>{type === 'plus' ? <AiOutlinePlus /> : <BiMinus />}</StyledPlus>
   );
@@ -33,11 +32,12 @@ const WhiteLine = styled.div`
 const StyledContainer = styled.div`
   width: 100%;
   color: ${(props) => props.theme.textColor};
-  height: 30px;
+  height: 93px;
   display: flex;
+  align-items: center;
 `;
 
-export const PlusDivider = () => {
+export const PlusDivider = (): JSX.Element => {
   return (
     <StyledContainer>
       <BorderIcon type="plus" />
@@ -47,7 +47,7 @@ export const PlusDivider = () => {
   );
 };
 
-export const MinusDivider = () => {
+export const MinusDivider = (): JSX.Element => {
   return (
     <StyledContainer>
       <BorderIcon type="minus" />

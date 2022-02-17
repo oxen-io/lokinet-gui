@@ -29,7 +29,8 @@ function createWindow() {
       webSecurity: true
     },
     backgroundColor: 'black',
-    autoHideMenuBar: true
+    autoHideMenuBar: true,
+    frame: false
   });
   ready = true;
 
@@ -44,7 +45,7 @@ function createWindow() {
   }
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();
-  void initializeIpcNodeSide();
+  void initializeIpcNodeSide(getMainWindow, tray);
 
   // Emitted when the window is about to be closed.
   // Note: We do most of our shutdown logic here because all windows are closed by

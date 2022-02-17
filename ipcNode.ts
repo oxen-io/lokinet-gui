@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import Electron from 'electron';
+import Electron, { BrowserWindow, Tray } from 'electron';
 import { initialLokinetRpcDealer } from './lokinetRpcCall';
-import { IPC_CHANNEL_KEY } from './sharedIpc';
+import { IPC_CHANNEL_KEY, MINIMIZE_TO_TRAY } from './sharedIpc';
 const { ipcMain } = Electron;
 
 import * as rpcCalls from './lokinetRpcCall';
@@ -9,8 +9,21 @@ import * as lokinetProcessManager from './lokinetProcessManager';
 
 export const eventsByJobId = Object.create(null);
 
-export async function initializeIpcNodeSide(): Promise<void> {
+export async function initializeIpcNodeSide(
+  getMainWindow: () => BrowserWindow | null,
+  tray: Tray
+): Promise<void> {
   await initialLokinetRpcDealer();
+
+  ipcMain.on(MINIMIZE_TO_TRAY, () => {
+    const mainWindow = getMainWindow();
+    if (mainWindow?.isVisible()) {
+      mainWindow.hide();
+    }
+    if (tray) {
+      (tray as any).updateContextMenu();
+    }
+  });
 
   ipcMain.on(IPC_CHANNEL_KEY, async (event, jobId, callName, ...args) => {
     try {

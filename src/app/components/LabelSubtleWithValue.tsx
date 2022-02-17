@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { Flex, IconButton } from '@chakra-ui/react';
 import React from 'react';
 import useCopyToClipboard from 'react-use/lib/useCopyToClipboard';
@@ -25,18 +24,20 @@ const StyledValue = styled(StyledLabelSubtle)`
 export const LabelSubtleWithValue = ({
   label,
   value,
-  showCopyToClipBoard = false
+  showCopyToClipBoard = false,
+  center = true
 }: {
   label: string;
   value: string;
   showCopyToClipBoard?: boolean;
-}) => {
+  center?: boolean;
+}): JSX.Element => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_getclipboard, copyToClipboard] = useCopyToClipboard();
   const theme = useTheme();
 
   return (
-    <Flex justifyContent="center">
+    <Flex justifyContent={center ? 'center' : 'start'}>
       <StyledLabelSubtle>{label}: </StyledLabelSubtle>
       <StyledValue>{value}</StyledValue>
       {value?.length && showCopyToClipBoard ? (

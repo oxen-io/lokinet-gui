@@ -1,9 +1,8 @@
-import { Flex, Icon, Stack, Text, Tooltip } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectStatus } from '../../features/statusSlice';
-import { FiUploadCloud, FiDownloadCloud } from 'react-icons/fi';
-import { PlusDivider } from './PlusDivider';
+import { StatsHeading, StatsSection } from './CommonStats';
+import { LabelSubtleWithValue } from './LabelSubtleWithValue';
 
 function makeRate(value: number): string {
   let unit_idx = 0;
@@ -22,57 +21,28 @@ function makeRate(value: number): string {
   );
 }
 
-const SpeedStatsFlex = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Flex width="100%" justifyContent="space-between">
-      {children}
-    </Flex>
-  );
-};
-
 export const SpeedStats = (): JSX.Element => {
   const daemonStatus = useSelector(selectStatus);
   const upSpeed = makeRate(daemonStatus.uploadUsage);
   const downSpeed = makeRate(daemonStatus.downloadUsage);
 
   return (
-    <Flex flexDirection="column" flexGrow={1}>
-      <Text alignSelf="flex-start" fontWeight={700}>
-        Speeds
-      </Text>
-      <Stack
-        direction="row"
-        alignSelf="center"
-        width="100%"
-        height="100%"
-        p={2}
-      >
-        <PlusDivider />
-        <Flex flexDirection="column" flexGrow={1}>
-          <SpeedStatsFlex>
-            <Icon margin="5px" as={FiUploadCloud} />
-            <Tooltip
-              openDelay={100}
-              label={'Upload Speed'}
-              aria-label={'Upload Speed'}
-              style={{ width: '100%' }}
-            >
-              <Text>{upSpeed}</Text>
-            </Tooltip>
-          </SpeedStatsFlex>
+    <StatsSection>
+      <StatsHeading title="SPEEDS" />
+      <LabelSubtleWithValue
+        label="Upload"
+        value={`${upSpeed}`}
+        center={false}
+      />
+      <LabelSubtleWithValue
+        label="Download"
+        value={`${downSpeed}`}
+        center={false}
+      />
+      {/*             <Icon margin="5px" as={FiDownloadCloud} />
+                  <Icon margin="5px" as={FiUploadCloud} />
 
-          <SpeedStatsFlex>
-            <Icon margin="5px" as={FiDownloadCloud} />
-            <Tooltip
-              openDelay={100}
-              label={'Download Speed'}
-              aria-label={'Download Speed'}
-            >
-              <Text>{downSpeed}</Text>
-            </Tooltip>
-          </SpeedStatsFlex>
-        </Flex>
-      </Stack>
-    </Flex>
+       */}
+    </StatsSection>
   );
 };

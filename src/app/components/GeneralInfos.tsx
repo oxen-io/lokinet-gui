@@ -23,7 +23,7 @@ const GeneralInfosContainer = styled.div`
   display: flex;
   flex-direction: column;
   max-width: 80%;
-  margin: auto;
+  margin: auto !important;
 `;
 
 export const GeneralInfos = (): JSX.Element => {

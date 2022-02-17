@@ -1,6 +1,7 @@
-import { Flex } from '@chakra-ui/react';
+import { Flex, theme } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { useTheme } from 'styled-components';
 import {
   VictoryChart,
   VictoryTheme,
@@ -22,9 +23,10 @@ export type SpeedHistoryDataType = {
 export const MAX_NUMBER_POINT_HISTORY = 60; // 1 minute as there is 2 points per sec currently
 
 export const SpeedChart = (): JSX.Element => {
-  const uploadColor = 'green';
-  const downloadColor = 'red';
+  const uploadColor = '#37EB19';
+  const downloadColor = '#F33232';
   const daemonStatus = useSelector(selectStatus);
+  const theme = useTheme();
 
   const uploadCoordinates = daemonStatus.speedHistory.upload.map((y, index) => {
     return {
@@ -44,11 +46,16 @@ export const SpeedChart = (): JSX.Element => {
 
   return (
     <Flex flexDirection="column" height="100%">
-      <Flex flexDirection="column" width="100%" alignItems="center">
+      <Flex
+        flexDirection="column"
+        width="90%"
+        alignItems="center"
+        margin="auto"
+      >
         <VictoryChart
           animate={false}
           theme={VictoryTheme.material}
-          containerComponent={<VictoryContainer responsive={false} />}
+          // containerComponent={<VictoryContainer responsive={true} />}
         >
           <VictoryGroup
             style={{
@@ -71,13 +78,13 @@ export const SpeedChart = (): JSX.Element => {
         </VictoryChart>
 
         <VictoryLegend
-          orientation="vertical"
-          width={200}
+          orientation="horizontal"
           height={60}
-          containerComponent={<VictoryContainer responsive={false} />}
+          style={{ labels: { fill: theme.textColor } }}
+          // containerComponent={<VictoryContainer responsive={false} />}
           data={[
-            { name: 'Upload Speed (kb/s)', symbol: { fill: uploadColor } },
-            { name: 'Download Speed (kb/s)', symbol: { fill: downloadColor } }
+            { name: 'Upload (kb/s)', symbol: { fill: uploadColor } },
+            { name: 'Download (kb/s)', symbol: { fill: downloadColor } }
           ]}
         />
       </Flex>
