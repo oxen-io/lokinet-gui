@@ -1,6 +1,7 @@
-import { Flex, Text, Stack, Input } from '@chakra-ui/react';
+import { Flex, Stack, Input } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 import {
   onUserAuthCodeSet,
   onUserExitNodeSet,
@@ -8,7 +9,28 @@ import {
 } from '../../features/exitStatusSlice';
 import { useAppDispatch } from '../hooks';
 import { EnableExitToggle } from './EnableExitToggle';
-import { PlusDivider } from './Dividers';
+
+const ExitInput = styled(Input)`
+  background-color: ${(props) => props.theme.inputBackground};
+  color: ${(props) => props.theme.textColor};
+  outline-color: ${(props) => props.theme.textColorSubtle};
+  font-family: 'IBM Plex Mono';
+  font-weight: 400;
+  border-radius: 3px;
+  border: none;
+  font-size: 14px;
+  line-height: 18px;
+`;
+
+const InputLabel = styled.div`
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 15px;
+  text-align: start;
+  user-select: none;
+`;
 
 export const ExitPanel = (): JSX.Element => {
   const exitStatus = useSelector(selectExitStatus);
@@ -26,9 +48,6 @@ export const ExitPanel = (): JSX.Element => {
 
   return (
     <Flex flexDirection="column" flexGrow={1}>
-      <Text alignSelf="flex-start" fontWeight={700}>
-        Exit node
-      </Text>
       <Stack
         direction="row"
         alignSelf="center"
@@ -37,7 +56,8 @@ export const ExitPanel = (): JSX.Element => {
         p={2}
       >
         <Flex flexDirection="column" flexGrow={1}>
-          <Input
+          <InputLabel>EXIT NODE</InputLabel>
+          <ExitInput
             disabled={disableInputEdits}
             onChange={(e) =>
               dispatch(onUserExitNodeSet(e?.currentTarget?.value))
@@ -50,11 +70,11 @@ export const ExitPanel = (): JSX.Element => {
             marginBottom={2}
             spellCheck={false}
             noOfLines={1}
-            placeholder="Exit address"
-            _placeholder={{ color: '#a7a7a7' }}
             value={exitToUse || ''}
           />
-          <Input
+          <InputLabel>AUTH CODE</InputLabel>
+
+          <ExitInput
             disabled={disableInputEdits}
             spellCheck={false}
             onChange={(e) =>
@@ -66,8 +86,6 @@ export const ExitPanel = (): JSX.Element => {
             size="sm"
             variant="flushed"
             value={exitStatus.exitAuthCodeFromUser || ''}
-            placeholder="Auth code"
-            _placeholder={{ color: '#a7a7a7' }}
             marginBottom={2}
             noOfLines={1}
           />

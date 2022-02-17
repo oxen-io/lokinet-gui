@@ -9,11 +9,12 @@ const StyledHeading = styled.h3`
 
   align-self: start;
   padding-bottom: 5px;
+  user-select: none;
 `;
 
 export const StatsSection = styled.div`
   display: flex;
-  width: 50%;
+  width: 35%;
   flex-direction: column;
   justify-items: start;
 `;

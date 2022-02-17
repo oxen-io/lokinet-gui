@@ -1,7 +1,6 @@
 import React from 'react';
 import styled from 'styled-components';
 import { AiOutlinePlus } from 'react-icons/ai';
-import { BiMinus } from 'react-icons/bi';
 
 const StyledPlus = styled.div`
   width: 30px;
@@ -15,9 +14,27 @@ const StyledPlus = styled.div`
   }
 `;
 
+const MinusIcon = () => {
+  return (
+    <svg
+      stroke="currentColor"
+      fill="currentColor"
+      stroke-width="0"
+      viewBox="0 0 24 24"
+      height="1em"
+      width="1em"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <path d="M5 11H19V12H5z"></path>
+    </svg>
+  );
+};
+
 const BorderIcon = ({ type }: { type: 'plus' | 'minus' }): JSX.Element => {
   return (
-    <StyledPlus>{type === 'plus' ? <AiOutlinePlus /> : <BiMinus />}</StyledPlus>
+    <StyledPlus>
+      {type === 'plus' ? <AiOutlinePlus /> : <MinusIcon />}
+    </StyledPlus>
   );
 };
 

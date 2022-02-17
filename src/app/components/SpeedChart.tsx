@@ -11,6 +11,7 @@ import {
   VictoryContainer
 } from 'victory';
 import { selectStatus } from '../../features/statusSlice';
+import { PlusDivider } from './Dividers';
 
 export type NumberQueue = Array<number>;
 export type SpeedHistoryDataType = {
@@ -46,6 +47,7 @@ export const SpeedChart = (): JSX.Element => {
 
   return (
     <Flex flexDirection="column" height="100%">
+      <PlusDivider />
       <Flex
         flexDirection="column"
         width="90%"
@@ -54,8 +56,16 @@ export const SpeedChart = (): JSX.Element => {
       >
         <VictoryChart
           animate={false}
-          theme={VictoryTheme.material}
-          // containerComponent={<VictoryContainer responsive={true} />}
+          theme={{
+            axis: {
+              style: {
+                axis: { stroke: theme.textColor },
+                axisLabel: { stroke: theme.textColor },
+                tickLabels: { fill: theme.textColor },
+                grid: { stroke: 'none' }
+              }
+            }
+          }}
         >
           <VictoryGroup
             style={{

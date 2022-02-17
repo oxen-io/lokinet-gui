@@ -8,7 +8,6 @@ const LogoAndTitleContainer = styled.div`
 const StyledLogoAndTitle = styled.svg`
   max-height: 100%;
   max-width: 33%;
-  margin-top: 10px;
   margin-bottom: 0;
   fill: ${(props) => props.theme.textColor};
 `;

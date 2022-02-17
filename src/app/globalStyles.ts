@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { createGlobalStyle } from 'styled-components';
-import { ThemeType } from './theme';
+import { createGlobalStyle, DefaultTheme } from 'styled-components';
 
-const fontArchivo = 'Archivo';
-const fontIbmPlexMono = 'IBM Plex Mono';
-
-export const GlobalStyle = createGlobalStyle<{ theme: ThemeType }>`
+export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
   body {
     background-color:  ${({ theme }) => theme.backgroundColor};
     color:  ${({ theme }) => theme.textColor};
     height: 100%;
     width: 100vw;
     font-family: "IBM Plex Mono";
+    font-weight: 400;
+
+    transition: 0.5s;
   }
 
   html {
@@ -22,7 +21,9 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeType }>`
     background: lightGrey;
   }
 
-
+  #root {
+    height: 100%;
+  }
 
   * {
     box-sizing: border-box;
@@ -31,27 +32,27 @@ export const GlobalStyle = createGlobalStyle<{ theme: ThemeType }>`
   }
 
   @font-face {
-    font-family: ${fontArchivo};
+    font-family: Archivo;
     font-style: normal;
     font-weight: 400;
-    src: url('/fonts/Archivo-Regular.ttf') format('ttf');
+    src: url('../fonts/Archivo-Regular.ttf') format('truetype');
   }
   @font-face {
-    font-family: ${fontArchivo};
+    font-family: Archivo;
     font-style: normal;
     font-weight: 500;
-    src: url('/fonts/Archivo-Medium.ttf') format('ttf');
+    src: url('../fonts/Archivo-Medium.ttf') format('truetype');
   }
   @font-face {
-    font-family: ${fontArchivo};
+    font-family: Archivo;
     font-style: normal;
     font-weight: 700;
-    src: url('/fonts/Archivo-Bold.ttf') format('ttf');
+    src: url('../fonts/Archivo-Bold.ttf') format('truetype');
   }
   @font-face {
-    font-family: ${fontIbmPlexMono};
+    font-family: "IBM Plex Mono";
     font-style: normal;
     font-weight: 400;
-    src: url('/fonts/IBMPlexMono.ttf') format('ttf');
+    src: url('../fonts/IBMPlexMono-Medium.ttf') format('truetype');
   }
 `;

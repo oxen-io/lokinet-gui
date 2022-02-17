@@ -19,7 +19,7 @@ export const MainTab = (): JSX.Element => {
       <ExitPanel />
       <MinusDivider />
 
-      <Flex flexDirection="row">
+      <Flex flexDirection="row" justifyContent="space-around">
         <RoutersStats
           activePaths={daemonStatus.numPathsBuilt}
           ratio={daemonStatus.ratio}

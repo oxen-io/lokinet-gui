@@ -20,7 +20,7 @@ function createWindow() {
     width,
     height,
     minHeight: height,
-    minWidth: width,
+    minWidth: 450,
     resizable: true,
     icon: './build/icon.png',
     webPreferences: {

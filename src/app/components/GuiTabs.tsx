@@ -34,13 +34,13 @@ export const GuiTabs = (): JSX.Element => {
         <Tab _selected={{ color: 'white', bg: 'blue.500' }}>Logs</Tab>
       </TabList>
       <TabPanels flexGrow={1} padding={1}>
-        <TabPanel padding={2}>
+        <TabPanel flexGrow={1} padding={2} height="100%">
           <MainTab />
         </TabPanel>
-        <TabPanel padding={2}>
+        <TabPanel flexGrow={1} padding={2} height="100%">
           <SpeedChart />
         </TabPanel>
-        <TabPanel padding={2}>
+        <TabPanel flexGrow={1} padding={2} height="100%">
           <AppLogs />
         </TabPanel>
       </TabPanels>
