@@ -8,18 +8,28 @@ import {
   selectExitStatus
 } from '../../features/exitStatusSlice';
 import { useAppDispatch } from '../hooks';
+import { paddingDividers } from './Dividers';
 import { EnableExitToggle } from './EnableExitToggle';
 
 const ExitInput = styled(Input)`
   background-color: ${(props) => props.theme.inputBackground};
   color: ${(props) => props.theme.textColor};
-  outline-color: ${(props) => props.theme.textColorSubtle};
+  outline-color: transparent;
   font-family: 'IBM Plex Mono';
   font-weight: 400;
   border-radius: 3px;
   border: none;
   font-size: 14px;
+  padding: 5px;
   line-height: 18px;
+  outline-style: solid;
+  outline-width: 1px;
+
+  transition: 0.5s;
+
+  :focus {
+    outline-color: ${(props) => props.theme.textColorSubtle};
+  }
 `;
 
 const InputLabel = styled.div`
@@ -30,6 +40,7 @@ const InputLabel = styled.div`
   line-height: 15px;
   text-align: start;
   user-select: none;
+  padding-bottom: 10px;
 `;
 
 export const ExitPanel = (): JSX.Element => {
@@ -47,14 +58,13 @@ export const ExitPanel = (): JSX.Element => {
     : exitStatus.exitNodeFromUser;
 
   return (
-    <Flex flexDirection="column" flexGrow={1}>
-      <Stack
-        direction="row"
-        alignSelf="center"
-        width="100%"
-        height="100%"
-        p={2}
-      >
+    <Flex
+      flexDirection="column"
+      flexGrow={1}
+      paddingLeft={paddingDividers}
+      paddingRight={paddingDividers}
+    >
+      <Stack direction="row" alignSelf="center" width="100%" height="100%">
         <Flex flexDirection="column" flexGrow={1}>
           <InputLabel>EXIT NODE</InputLabel>
           <ExitInput

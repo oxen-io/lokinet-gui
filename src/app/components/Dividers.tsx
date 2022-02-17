@@ -2,9 +2,11 @@ import React from 'react';
 import styled from 'styled-components';
 import { AiOutlinePlus } from 'react-icons/ai';
 
+export const paddingDividers = '30px';
+
 const StyledPlus = styled.div`
-  width: 30px;
-  height: 30px;
+  width: ${paddingDividers};
+  height: ${paddingDividers};
   padding: 5px;
   flex-shrink: 0;
 
@@ -25,7 +27,7 @@ const MinusIcon = () => {
       width="1em"
       xmlns="http://www.w3.org/2000/svg"
     >
-      <path d="M5 11H19V12H5z"></path>
+      <path d="M5 12H19V13H5z"></path>
     </svg>
   );
 };

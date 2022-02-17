@@ -10,7 +10,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     font-family: "IBM Plex Mono";
     font-weight: 400;
 
-    transition: 0.5s;
+    transition: 0.25s;
   }
 
   html {
@@ -30,6 +30,26 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     margin: 0;
     padding: 0;
   }
+
+  :focus {
+    outline: none;
+  }
+
+  [role="tab"] {
+    color: ${({ theme }) => theme.textColorSubtle};
+    border: none;
+    outline: none;
+    background: none;
+    cursor: pointer;
+    font-family: Archivo;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 20px;
+    border-bottom: 3px solid transparent;
+    padding: 0 5px 5px 5px;
+    transition: 0.25s;
+  }
+
 
   @font-face {
     font-family: Archivo;

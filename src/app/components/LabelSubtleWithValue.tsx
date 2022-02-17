@@ -1,8 +1,8 @@
-import { Flex, IconButton } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import React from 'react';
 import useCopyToClipboard from 'react-use/lib/useCopyToClipboard';
-import styled, { useTheme } from 'styled-components';
-import { RiFileCopyLine } from 'react-icons/ri';
+import styled, { DefaultTheme } from 'styled-components';
+import { MdOutlineContentCopy } from 'react-icons/md';
 
 const StyledLabelSubtle = styled.div`
   color: ${(props) => props.theme.textColorSubtle};
@@ -13,49 +13,69 @@ const StyledLabelSubtle = styled.div`
   white-space: nowrap;
 `;
 
-const StyledValue = styled(StyledLabelSubtle)`
+const StyledValue = styled(StyledLabelSubtle)<{
+  allowSelect: boolean;
+  theme: DefaultTheme;
+}>`
   color: ${(props) => props.theme.textColor};
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  user-select: auto;
+  user-select: ${(props) => (props.allowSelect ? 'auto' : 'none')};
+`;
+
+const InlineIconButton = styled.button<{ size: string; theme: DefaultTheme }>`
+  width: ${(props) => props.size};
+  height: ${(props) => props.size};
+  color: ${(props) => props.theme.textColor};
+  background: none;
+
+  flex-shrink: 0;
+  border: none;
+  cursor: pointer;
+
+  transition: 0.25s;
+  border-radius: 7px;
+  :hover {
+    color: ${(props) => props.theme.textColorSubtle};
+  }
+
+  svg {
+    width: 100%;
+    height: 100%;
+  }
 `;
 
 export const LabelSubtleWithValue = ({
   label,
   value,
   showCopyToClipBoard = false,
-  center = true
+  center = true,
+  enableSelectionValue = false
 }: {
   label: string;
   value: string;
   showCopyToClipBoard?: boolean;
   center?: boolean;
+  enableSelectionValue?: boolean;
 }): JSX.Element => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_getclipboard, copyToClipboard] = useCopyToClipboard();
-  const theme = useTheme();
 
   return (
     <Flex justifyContent={center ? 'center' : 'start'}>
       <StyledLabelSubtle>{label}: </StyledLabelSubtle>
-      <StyledValue>{value}</StyledValue>
+      <StyledValue allowSelect={enableSelectionValue}>{value}</StyledValue>
       {value?.length && showCopyToClipBoard ? (
-        <IconButton
-          variant="unstyled"
-          aria-label="Copy"
-          height="15px"
-          width="15px"
-          color={theme.textColor}
-          border="none"
-          cursor="pointer"
-          background="none"
-          minWidth="15px"
-          icon={<RiFileCopyLine />}
+        <InlineIconButton
+          size="15px"
           onClick={() => {
             copyToClipboard(value);
           }}
-        />
+          title="Copy to clipboard"
+        >
+          <MdOutlineContentCopy />
+        </InlineIconButton>
       ) : null}
     </Flex>
   );

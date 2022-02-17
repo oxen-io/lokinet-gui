@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { app, BrowserWindow, Tray } from 'electron';
+import { app, BrowserWindow, Tray, screen } from 'electron';
 import { initializeIpcNodeSide } from './ipcNode';
 import { createTrayIcon } from './trayIcon';
 import { markShouldQuit, shouldQuit } from './windowState';
@@ -16,19 +16,22 @@ function createWindow() {
   const width = 1000; // 450
 
   const isDev = process.env.NODE_ENV === 'development';
+  const factor = screen.getPrimaryDisplay().scaleFactor;
+
   mainWindow = new BrowserWindow({
-    width,
-    height,
-    minHeight: height,
-    minWidth: 450,
+    width: width / factor,
+    height: height / factor,
+    minHeight: height / factor,
+    minWidth: 450 / factor,
     resizable: true,
     icon: './build/icon.png',
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
-      webSecurity: true
+      webSecurity: true,
+      zoomFactor: 1.0 / factor
     },
-    backgroundColor: 'black',
+    backgroundColor: '#fff',
     autoHideMenuBar: true,
     frame: false
   });

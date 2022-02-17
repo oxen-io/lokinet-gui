@@ -36,7 +36,11 @@ export const GeneralInfos = (): JSX.Element => {
   return (
     <GeneralInfosContainer>
       <LabelSubtleWithValue label="Uptime" value={formattedUptime} />
-      <LabelSubtleWithValue label="Version" value={version} />
+      <LabelSubtleWithValue
+        label="Version"
+        value={version}
+        enableSelectionValue={true}
+      />
       <LabelSubtleWithValue
         label="Lokinet address"
         value={lokinetAddress}

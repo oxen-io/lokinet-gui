@@ -14,7 +14,7 @@ const StyledHeading = styled.h3`
 
 export const StatsSection = styled.div`
   display: flex;
-  width: 35%;
+  width: 50%;
   flex-direction: column;
   justify-items: start;
 `;

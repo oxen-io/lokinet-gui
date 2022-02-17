@@ -17,43 +17,43 @@ const Container = styled.div`
   padding-inline-end: 0.6rem;
 `;
 
-const StyledIconButton = styled(IconButton)`
+const StyledIconButton = styled.button`
   font-size: 1.4rem;
   color: ${(props) => props.theme.textColor};
   border: none;
   cursor: pointer;
   background: none;
   -webkit-app-region: no-drag;
+
+  transition: 0.25s;
+  :hover {
+    color: ${(props) => props.theme.textColorSubtle};
+  }
 `;
 
 export const TitleBar = (): JSX.Element => {
-  const theme = useTheme();
   const themeSelected = useSelector(selectedTheme);
   const dispatch = useDispatch();
   return (
     <Container>
       <StyledIconButton
-        variant="unstyled"
-        aria-label="Copy"
-        marginRight="auto"
-        icon={<HiMoon />}
+        title="Switch theme dark/white"
         onClick={() => {
           dispatch(setTheme(themeSelected === 'light' ? 'dark' : 'light'));
         }}
-      />
+        style={{ marginRight: 'auto' }}
+      >
+        <HiMoon />
+      </StyledIconButton>
+
       <StyledIconButton
-        variant="unstyled"
-        aria-label="Copy"
-        color={theme.textColor}
-        border="none"
-        cursor="pointer"
-        fontSize={'1.4rem'}
-        background="none"
-        icon={<RiCloseFill />}
+        title="Switch theme dark/white"
         onClick={() => {
           ipcRenderer.send(MINIMIZE_TO_TRAY);
         }}
-      />
+      >
+        <RiCloseFill />
+      </StyledIconButton>
     </Container>
   );
 };

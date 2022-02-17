@@ -1,6 +1,8 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTheme } from 'styled-components';
+import { NormalModule } from 'webpack';
 import {
   selectSelectedTab,
   setTabSelected,
@@ -13,12 +15,20 @@ import { SpeedChart } from './SpeedChart';
 export const GuiTabs = (): JSX.Element => {
   const selectedTab = useSelector(selectSelectedTab);
   const dispatch = useDispatch();
+
+  const theme = useTheme();
+  const fgSelected = theme.textColor;
+
+  const selectedStyle = {
+    color: fgSelected,
+    borderBottom: `3px solid ${fgSelected}}`,
+    fontWeight: 700
+  };
+
   return (
     <Tabs
       maxHeight="100%"
       width="100%"
-      variant="soft-rounded"
-      colorScheme="blue"
       padding={3}
       display="flex"
       flexDir="column"
@@ -27,11 +37,13 @@ export const GuiTabs = (): JSX.Element => {
       onChange={(index: number) => {
         dispatch(setTabSelected(index as TabIndex));
       }}
+      isLazy={true}
+      variant="unstyled"
     >
-      <TabList justifyContent="center">
-        <Tab _selected={{ color: 'white', bg: 'blue.500' }}>Main</Tab>
-        <Tab _selected={{ color: 'white', bg: 'blue.500' }}>Chart</Tab>
-        <Tab _selected={{ color: 'white', bg: 'blue.500' }}>Logs</Tab>
+      <TabList justifyContent="space-evenly">
+        <Tab _selected={selectedStyle}>MAIN</Tab>
+        <Tab _selected={selectedStyle}>CHART</Tab>
+        <Tab _selected={selectedStyle}>LOGS</Tab>
       </TabList>
       <TabPanels flexGrow={1} padding={1}>
         <TabPanel flexGrow={1} padding={2} height="100%">
