@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../app/store';
 
 export interface ExitStatusState {
@@ -80,3 +80,13 @@ export const {
 } = exitStatusSlice.actions;
 export const selectExitStatus = (state: RootState): ExitStatusState =>
   state.exitStatus;
+
+export const selectHasExitNodeEnabled = createSelector(
+  selectExitStatus,
+  (status) => Boolean(status.exitNodeFromDaemon)
+);
+
+export const selectHasExitNodeChangeLoading = createSelector(
+  selectExitStatus,
+  (status) => status.exitLoading
+);

@@ -44,7 +44,7 @@ const StyledMinusBorderIcon = styled.div`
 const StyledContainer = styled.div`
   width: 100%;
   color: ${(props) => props.theme.textColor};
-  height: 93px;
+  height: 75px;
   display: flex;
   align-items: center;
 `;

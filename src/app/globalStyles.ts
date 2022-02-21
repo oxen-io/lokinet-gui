@@ -8,10 +8,8 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     height: 100%;
     width: 100vw;
     font-family: "IBM Plex Mono";
-
-    font-weight: 400;
-
     overflow-x: hiddden;
+    font-weight: 400;
     transition: 0.25s;
   }
 
@@ -50,6 +48,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     font-size: 1.4rem;
     border-bottom: 3px solid transparent;
     padding: 0 5px 5px 5px;
+    user-select: none;
     transition: 0.25s;
   }
 

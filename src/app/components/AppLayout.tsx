@@ -1,8 +1,9 @@
 import { Flex, Stack } from '@chakra-ui/react';
 import React from 'react';
-import { AppTitle } from './AppTitle';
+import { ConnectedStatus } from './ConnectedStatus';
 import { GeneralInfos } from './GeneralInfos';
 import { GuiTabs } from './GuiTabs';
+import { PowerButton } from './PowerButton/PowerButton';
 import { TitleBar } from './TitleBar';
 
 export const AppLayout = (): JSX.Element => {
@@ -15,7 +16,8 @@ export const AppLayout = (): JSX.Element => {
         width="100%"
       >
         <TitleBar />
-        <AppTitle />
+        <ConnectedStatus />
+        <PowerButton />
         <GeneralInfos />
 
         <GuiTabs />

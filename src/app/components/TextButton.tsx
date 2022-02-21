@@ -17,6 +17,7 @@ const StyledButton = styled.button`
   padding: 4px 27px;
   margin-inline-start: 10px;
   margin-inline-end: 10px;
+  user-select: none;
 
   transition: 0.25s;
   border-radius: 7px;

@@ -2,7 +2,6 @@ import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTheme } from 'styled-components';
-import { NormalModule } from 'webpack';
 import {
   selectSelectedTab,
   setTabSelected,
