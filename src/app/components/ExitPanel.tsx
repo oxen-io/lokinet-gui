@@ -19,28 +19,20 @@ const ExitInput = styled(Input)`
   font-weight: 400;
   border-radius: 3px;
   border: none;
-  font-size: 14px;
+  font-size: 1rem;
   padding: 5px;
-  line-height: 18px;
-  outline-style: solid;
-  outline-width: 1px;
-
+  outline: none;
   transition: 0.5s;
-
-  :focus {
-    outline-color: ${(props) => props.theme.textColorSubtle};
-  }
 `;
 
 const InputLabel = styled.div`
   font-family: Archivo;
   font-style: normal;
   font-weight: 500;
-  font-size: 14px;
-  line-height: 15px;
+  font-size: 1rem;
   text-align: start;
   user-select: none;
-  padding-bottom: 10px;
+  padding: 15px 0px 5px 0;
 `;
 
 export const ExitPanel = (): JSX.Element => {

@@ -3,8 +3,7 @@ import styled from 'styled-components';
 
 const StyledHeading = styled.h3`
   font-weight: 500;
-  font-size: 18px;
-  line-height: 20px;
+  font-size: 1.25rem;
   font-family: 'Archivo';
 
   align-self: start;

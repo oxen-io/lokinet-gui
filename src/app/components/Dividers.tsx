@@ -4,7 +4,7 @@ import { AiOutlinePlus } from 'react-icons/ai';
 
 export const paddingDividers = '30px';
 
-const StyledPlus = styled.div`
+const StyledBorderIcon = styled.div`
   width: ${paddingDividers};
   height: ${paddingDividers};
   padding: 5px;
@@ -16,27 +16,11 @@ const StyledPlus = styled.div`
   }
 `;
 
-const MinusIcon = () => {
+const BorderPLusIcon = (): JSX.Element => {
   return (
-    <svg
-      stroke="currentColor"
-      fill="currentColor"
-      stroke-width="0"
-      viewBox="0 0 24 24"
-      height="1em"
-      width="1em"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <path d="M5 12H19V13H5z"></path>
-    </svg>
-  );
-};
-
-const BorderIcon = ({ type }: { type: 'plus' | 'minus' }): JSX.Element => {
-  return (
-    <StyledPlus>
-      {type === 'plus' ? <AiOutlinePlus /> : <MinusIcon />}
-    </StyledPlus>
+    <StyledBorderIcon>
+      <AiOutlinePlus />
+    </StyledBorderIcon>
   );
 };
 
@@ -46,6 +30,15 @@ const WhiteLine = styled.div`
   flex-grow: 1;
   flex-shrink: 100;
   margin: auto;
+`;
+
+const StyledMinusBorderIcon = styled.div`
+  height: 1px;
+  width: 12px;
+  background-color: ${(props) => props.theme.textColor};
+  flex-grow: 0;
+  flex-shrink: 0;
+  margin: 10px;
 `;
 
 const StyledContainer = styled.div`
@@ -59,9 +52,9 @@ const StyledContainer = styled.div`
 export const PlusDivider = (): JSX.Element => {
   return (
     <StyledContainer>
-      <BorderIcon type="plus" />
+      <BorderPLusIcon />
       <WhiteLine />
-      <BorderIcon type="plus" />
+      <BorderPLusIcon />
     </StyledContainer>
   );
 };
@@ -69,9 +62,9 @@ export const PlusDivider = (): JSX.Element => {
 export const MinusDivider = (): JSX.Element => {
   return (
     <StyledContainer>
-      <BorderIcon type="minus" />
+      <StyledMinusBorderIcon />
       <WhiteLine />
-      <BorderIcon type="minus" />
+      <StyledMinusBorderIcon />
     </StyledContainer>
   );
 };

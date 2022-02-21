@@ -10,14 +10,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const Container = styled.div`
   display: flex;
-  font-size: 140%;
+  font-size: 2rem;
   -webkit-app-region: drag;
   padding-inline-start: 0.6rem;
   padding-inline-end: 0.6rem;
 `;
 
 const StyledIconButton = styled.button`
-  font-size: 140%;
+  font-size: 2rem;
   color: ${(props) => props.theme.textColor};
   border: none;
   cursor: pointer;

@@ -6,7 +6,6 @@ import { MdOutlineContentCopy } from 'react-icons/md';
 
 const StyledLabelSubtle = styled.div`
   color: ${(props) => props.theme.textColorSubtle};
-  line-height: 18px;
   padding-inline-end: 5px;
   user-select: none;
   white-space: nowrap;

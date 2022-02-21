@@ -9,8 +9,7 @@ const StyledButton = styled.button`
   border-radius: 7px;
   outline: none;
   font-family: Archivo;
-  font-size: 14px;
-  line-height: 15px;
+  font-size: 1rem;
   text-align: center;
   text-transform: uppercase;
   cursor: pointer;

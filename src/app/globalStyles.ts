@@ -8,14 +8,17 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     height: 100%;
     width: 100vw;
     font-family: "IBM Plex Mono";
+
     font-weight: 400;
-    font-size: 14px;
+
     overflow-x: hiddden;
     transition: 0.25s;
   }
 
   html {
     height: 100%;
+    font-size: 12px;
+    line-height: 1.3;
   }
 
   ::selection {
@@ -44,36 +47,26 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     cursor: pointer;
     font-family: Archivo;
     font-weight: 400;
-    font-size: 18px;
-    line-height: 20px;
+    font-size: 1.4rem;
     border-bottom: 3px solid transparent;
     padding: 0 5px 5px 5px;
     transition: 0.25s;
   }
 
 
+
   @font-face {
     font-family: Archivo;
-    font-style: normal;
-    font-weight: 400;
-    src: url('../fonts/Archivo-Regular.ttf') format('truetype');
+    src: url('../fonts/Archivo-VariableFont.ttf') format('truetype');
+    font-weight: 100 1000;
+	  font-stretch: 62% 125%;
+
   }
-  @font-face {
-    font-family: Archivo;
-    font-style: normal;
-    font-weight: 500;
-    src: url('../fonts/Archivo-Medium.ttf') format('truetype');
-  }
-  @font-face {
-    font-family: Archivo;
-    font-style: normal;
-    font-weight: 700;
-    src: url('../fonts/Archivo-Bold.ttf') format('truetype');
-  }
+
   @font-face {
     font-family: "IBM Plex Mono";
     font-style: normal;
     font-weight: 400;
-    src: url('../fonts/IBMPlexMono-Medium.ttf') format('truetype');
+    src: url('../fonts/ibm-plex-mono.regular.ttf') format('truetype');
   }
 `;

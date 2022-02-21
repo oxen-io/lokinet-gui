@@ -29,7 +29,7 @@ export const GuiTabs = (): JSX.Element => {
     <Tabs
       maxHeight="100%"
       width="100%"
-      padding={3}
+      padding="20px 5px 0 5px"
       display="flex"
       flexDir="column"
       flexGrow={1}
