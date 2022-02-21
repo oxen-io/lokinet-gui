@@ -1,14 +1,12 @@
-import { Flex, theme } from '@chakra-ui/react';
+import { Flex } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
 import { useTheme } from 'styled-components';
 import {
   VictoryChart,
-  VictoryTheme,
   VictoryGroup,
   VictoryArea,
-  VictoryLegend,
-  VictoryContainer
+  VictoryLegend
 } from 'victory';
 import { selectStatus } from '../../features/statusSlice';
 import { PlusDivider } from './Dividers';
@@ -28,7 +26,6 @@ export const SpeedChart = (): JSX.Element => {
   const downloadColor = '#F33232';
   const daemonStatus = useSelector(selectStatus);
   const theme = useTheme();
-
   const uploadCoordinates = daemonStatus.speedHistory.upload.map((y, index) => {
     return {
       x: index,

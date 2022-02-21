@@ -1,8 +1,7 @@
-import { IconButton, theme } from '@chakra-ui/react';
 import React from 'react';
 import { RiCloseFill } from 'react-icons/ri';
 import { HiMoon } from 'react-icons/hi';
-import styled, { useTheme } from 'styled-components';
+import styled from 'styled-components';
 
 import { ipcRenderer } from 'electron';
 import { MINIMIZE_TO_TRAY } from '../../../sharedIpc';
@@ -11,14 +10,14 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const Container = styled.div`
   display: flex;
-  font-size: 1.4rem;
+  font-size: 140%;
   -webkit-app-region: drag;
   padding-inline-start: 0.6rem;
   padding-inline-end: 0.6rem;
 `;
 
 const StyledIconButton = styled.button`
-  font-size: 1.4rem;
+  font-size: 140%;
   color: ${(props) => props.theme.textColor};
   border: none;
   cursor: pointer;

@@ -3,8 +3,10 @@ import styled from 'styled-components';
 
 const StyledButton = styled.button`
   border: 1px solid ${(props) => props.theme.textColor};
-  border-radius: 7px;
   color: ${(props) => props.theme.textColor};
+  background-color: ${(props) => props.theme.backgroundColor};
+
+  border-radius: 7px;
   outline: none;
   font-family: Archivo;
   font-size: 14px;
@@ -17,13 +19,11 @@ const StyledButton = styled.button`
   margin-inline-start: 10px;
   margin-inline-end: 10px;
 
-  background-color: ${(props) => props.theme.backgroundColor};
-
   transition: 0.25s;
   border-radius: 7px;
   :hover {
-    color: ${(props) => props.theme.backgroundColor};
-    background-color: ${(props) => props.theme.textColor};
+    color: ${(props) => props.theme.textColorSubtle};
+    border: 1px solid ${(props) => props.theme.textColorSubtle};
   }
 `;
 

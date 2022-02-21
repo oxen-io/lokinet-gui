@@ -9,7 +9,8 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     width: 100vw;
     font-family: "IBM Plex Mono";
     font-weight: 400;
-
+    font-size: 14px;
+    overflow-x: hiddden;
     transition: 0.25s;
   }
 

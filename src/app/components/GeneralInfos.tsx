@@ -1,9 +1,12 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { selectGeneralInfos } from '../../features/generalInfosSlice';
+import {
+  selectLokinetAddress,
+  selectUptime,
+  selectVersion
+} from '../../features/statusSlice';
 import { LabelSubtleWithValue } from './LabelSubtleWithValue';
 import styled from 'styled-components';
-import { selectStatus } from '../../features/statusSlice';
 
 const formatUptime = (uptimeInMs: number) => {
   const seconds = uptimeInMs / 1000;
@@ -27,10 +30,9 @@ const GeneralInfosContainer = styled.div`
 `;
 
 export const GeneralInfos = (): JSX.Element => {
-  const { uptime, version } = useSelector(selectGeneralInfos);
-
-  const statusFromDaemon = useSelector(selectStatus);
-  const lokinetAddress = statusFromDaemon.lokiAddress || '';
+  const uptime = useSelector(selectUptime);
+  const version = useSelector(selectVersion);
+  const lokinetAddress = useSelector(selectLokinetAddress);
 
   const formattedUptime = formatUptime(uptime);
   return (

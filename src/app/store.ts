@@ -1,14 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { appLogsSlice } from '../features/appLogsSlice';
 import { exitStatusSlice } from '../features/exitStatusSlice';
-import { generalInfosSlice } from '../features/generalInfosSlice';
 import { statusSlice } from '../features/statusSlice';
 import { uiSlice } from '../features/uiStatusSlice';
 
 export const store = configureStore({
   reducer: {
     status: statusSlice.reducer,
-    generalInfos: generalInfosSlice.reducer,
     exitStatus: exitStatusSlice.reducer,
     uiStatus: uiSlice.reducer,
     appLogsStatus: appLogsSlice.reducer

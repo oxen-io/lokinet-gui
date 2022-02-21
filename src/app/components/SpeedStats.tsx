@@ -1,6 +1,9 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { selectStatus } from '../../features/statusSlice';
+import {
+  selectUploadUsage,
+  selectDownloadUsage
+} from '../../features/statusSlice';
 import { StatsHeading, StatsSection } from './CommonStats';
 import { LabelSubtleWithValue } from './LabelSubtleWithValue';
 
@@ -22,9 +25,10 @@ function makeRate(value: number): string {
 }
 
 export const SpeedStats = (): JSX.Element => {
-  const daemonStatus = useSelector(selectStatus);
-  const upSpeed = makeRate(daemonStatus.uploadUsage);
-  const downSpeed = makeRate(daemonStatus.downloadUsage);
+  const uploadUsage = useSelector(selectUploadUsage);
+  const downloadUsage = useSelector(selectDownloadUsage);
+  const upSpeed = makeRate(uploadUsage);
+  const downSpeed = makeRate(downloadUsage);
 
   return (
     <StatsSection>

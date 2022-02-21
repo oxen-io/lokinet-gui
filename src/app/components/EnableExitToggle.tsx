@@ -31,7 +31,7 @@ const handleTurningOffExit = async (dispatch: AppDispatch) => {
         dispatch(markExitFailedToLoad());
         dispatch(appendToApplogs(`TurnExitOFF <= ${parsed}`));
       } else {
-        // Do nothing. At this point we are waiting for the next getStatus call
+        // Do nothing. At this point we are waiting for the next getSummaryStatus call
         // to send us the exit node set from the daemon.
         dispatch(appendToApplogs(`TurnExitOFF OK: <= ${parsed.result}`));
       }
@@ -77,7 +77,7 @@ const handleTurningOnExit = async (
         dispatch(appendToApplogs(`TurnExitON <= ${parsed}`));
       } else {
         dispatch(appendToApplogs(`TurnExitON <= ${parsed.result}`));
-        // Do nothing. At this point we are waiting for the next getStatus call
+        // Do nothing. At this point we are waiting for the next getSummaryStatus call
         // to send us the exit node set from the daemon.
       }
     } catch (e) {

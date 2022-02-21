@@ -40,11 +40,7 @@ const invoke = async (
   await request(endpoint, reply_tag, req);
 };
 
-export const getUpTimeAndVersion = async (reply_tag: string): Promise<void> => {
-  await invoke('llarp.version', reply_tag, {});
-};
-
-export const getStatus = async (reply_tag: string): Promise<void> => {
+export const getSummaryStatus = async (reply_tag: string): Promise<void> => {
   await invoke('llarp.get_status', reply_tag, {});
 };
 
