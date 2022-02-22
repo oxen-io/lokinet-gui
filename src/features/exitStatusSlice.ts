@@ -90,3 +90,13 @@ export const selectHasExitNodeChangeLoading = createSelector(
   selectExitStatus,
   (status) => status.exitLoading
 );
+
+export const selectExitNodeFromUser = createSelector(
+  selectExitStatus,
+  (status) => status.exitNodeFromUser
+);
+
+export const selectAuthCodeFromUser = createSelector(
+  selectExitStatus,
+  (status) => status.exitAuthCodeFromUser
+);

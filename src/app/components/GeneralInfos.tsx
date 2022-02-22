@@ -41,7 +41,7 @@ export const GeneralInfos = (): JSX.Element => {
       <LabelSubtleWithValue
         label="Version"
         value={version}
-        enableSelectionValue={true}
+        showCopyToClipBoard={true}
       />
       <LabelSubtleWithValue
         label="Lokinet address"

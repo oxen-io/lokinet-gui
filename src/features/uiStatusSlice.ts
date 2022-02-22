@@ -1,7 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { DefaultTheme } from 'styled-components';
 import { RootState } from '../app/store';
-import { darkTheme, lightTheme } from '../app/theme';
 
 export type TabIndex = 0 | 1 | 2;
 

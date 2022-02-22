@@ -45,7 +45,9 @@ const App = () => {
         store.getState().exitStatus.exitNodeFromDaemon !== parsedStatus.exitNode
       ) {
         dispatch(
-          appendToApplogs(`exitNode set by daemon: ${parsedStatus.exitNode}`)
+          appendToApplogs(
+            `exitNode set by daemon: ${parsedStatus.exitNode || ''}`
+          )
         );
       }
 
@@ -55,7 +57,7 @@ const App = () => {
       ) {
         dispatch(
           appendToApplogs(
-            `authCode set by daemon: ${parsedStatus.exitAuthCode}`
+            `authCode set by daemon: ${parsedStatus.exitAuthCode || ''}`
           )
         );
       }

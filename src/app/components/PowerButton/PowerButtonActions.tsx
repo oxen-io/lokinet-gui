@@ -1,18 +1,13 @@
-import React from 'react';
-import { Badge, Flex, Spinner, Switch } from '@chakra-ui/react';
-import { useSelector } from 'react-redux';
+import { appendToApplogs } from '../../../features/appLogsSlice';
 import {
-  markExitFailedToLoad,
-  markExitIsTurningOn,
   markExitIsTurningOff,
-  selectExitStatus
-} from '../../features/exitStatusSlice';
-import { useAppDispatch } from '../hooks';
-import { addExit, deleteExit } from '../../ipc/ipcRenderer';
-import { AppDispatch } from '../store';
-import { appendToApplogs } from '../../features/appLogsSlice';
+  markExitFailedToLoad,
+  markExitIsTurningOn
+} from '../../../features/exitStatusSlice';
+import { addExit, deleteExit } from '../../../ipc/ipcRenderer';
+import { AppDispatch } from '../../store';
 
-const handleTurningOffExit = async (dispatch: AppDispatch) => {
+export const turnExitOff = async (dispatch: AppDispatch): Promise<void> => {
   dispatch(appendToApplogs('TurnExitOFF =>'));
   dispatch(markExitIsTurningOff());
   // trigger the IPC+RPC call
@@ -33,7 +28,7 @@ const handleTurningOffExit = async (dispatch: AppDispatch) => {
       } else {
         // Do nothing. At this point we are waiting for the next getSummaryStatus call
         // to send us the exit node set from the daemon.
-        dispatch(appendToApplogs(`TurnExitOFF OK: <= ${parsed.result}`));
+        dispatch(appendToApplogs(`TurnExitOFF OK? <= ${parsed.result}`));
       }
     } catch (e) {
       dispatch(markExitFailedToLoad());
@@ -44,11 +39,11 @@ const handleTurningOffExit = async (dispatch: AppDispatch) => {
   }
 };
 
-const handleTurningOnExit = async (
+export const turnExitOn = async (
   dispatch: AppDispatch,
   exitNode?: string,
   authCode?: string
-) => {
+): Promise<void> => {
   if (!exitNode) {
     dispatch(appendToApplogs(`TurnExitON => Please enter an Exit Node first`));
 
@@ -56,7 +51,9 @@ const handleTurningOnExit = async (
     return;
   }
   dispatch(
-    appendToApplogs(`TurnExitON with '${exitNode}'; auth code: '${authCode}'`)
+    appendToApplogs(
+      `TurnExitON with '${exitNode}'; auth code: '${authCode || ''}'`
+    )
   );
 
   dispatch(markExitIsTurningOn());
@@ -87,53 +84,4 @@ const handleTurningOnExit = async (
       return;
     }
   }
-};
-
-export const EnableExitToggle = (): JSX.Element => {
-  const exitStatus = useSelector(selectExitStatus);
-
-  const {
-    exitNodeFromUser: exitNode,
-    exitAuthCodeFromUser: authCode,
-    exitLoading,
-    exitNodeFromDaemon
-  } = exitStatus;
-
-  const dispatch = useAppDispatch();
-
-  const isExitEnabledFromDaemon = Boolean(exitNodeFromDaemon);
-
-  // Disable the button if the exit mode is not enabled by the daemon
-  // AND the user did not enter an exit yet
-  const isOffAndMissingNode =
-    !isExitEnabledFromDaemon && !exitNode && !exitNodeFromDaemon;
-  return (
-    <Flex justify="center" align="center">
-      {exitLoading ? (
-        <Spinner margin="3px" marginRight="auto" />
-      ) : (
-        <Switch
-          marginRight="auto"
-          isChecked={isExitEnabledFromDaemon}
-          onChange={() => {
-            if (isExitEnabledFromDaemon) {
-              handleTurningOffExit(dispatch);
-            } else {
-              handleTurningOnExit(dispatch, exitNode, authCode);
-            }
-          }}
-          size="lg"
-          aria-label="stop and start"
-          colorScheme="blue"
-          isDisabled={isOffAndMissingNode}
-        />
-      )}
-
-      {isExitEnabledFromDaemon ? (
-        <Badge colorScheme="blue">Exit Enabled</Badge>
-      ) : (
-        <Badge colorScheme="blue">No Exit Set</Badge>
-      )}
-    </Flex>
-  );
 };

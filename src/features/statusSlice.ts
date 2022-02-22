@@ -91,9 +91,9 @@ export const statusSlice = createSlice({
       } else {
         // update graph speeds data
         const newDownload =
-          (state.speedHistory.lastDownloadUsage + state.downloadUsage) / 1024; // kb
+          state.speedHistory.lastDownloadUsage + state.downloadUsage;
         const newUpload =
-          (state.speedHistory.lastUploadUsage + state.uploadUsage) / 1024; // kb
+          state.speedHistory.lastUploadUsage + state.uploadUsage;
 
         // reset the memoized last usage for the next call
         state.speedHistory.lastDownloadUsage = null;
@@ -102,7 +102,7 @@ export const statusSlice = createSlice({
         state.speedHistory.upload.push(newUpload);
       }
 
-      // Remove the first item is the size is too big
+      // Remove the first item is the size is too long
       state.speedHistory = removeFirstElementIfNeeded(state.speedHistory);
       return state;
     },
@@ -136,12 +136,27 @@ export const selectLokinetAddress = createSelector(
   (status) => status.lokiAddress || ''
 );
 
-export const selectUploadUsage = createSelector(
-  selectStatus,
-  (status) => status.uploadUsage || 0
+export const selectUploadRate = createSelector(selectStatus, (status) =>
+  makeRate(status.speedHistory.upload[MAX_NUMBER_POINT_HISTORY - 1] || 0)
 );
 
-export const selectDownloadUsage = createSelector(
-  selectStatus,
-  (status) => status.downloadUsage || 0
+export const selectDownloadRate = createSelector(selectStatus, (status) =>
+  makeRate(status.speedHistory.download[MAX_NUMBER_POINT_HISTORY - 1] || 0)
 );
+
+export function makeRate(originalValue: number, forceMBUnit = false): string {
+  let unit_idx = 0;
+  const units = ['B', 'KB', 'MB'];
+
+  if (forceMBUnit) {
+    return `${(originalValue / (1024 * 1024)).toFixed(0)}`;
+  }
+  let value = originalValue;
+  while (value > 1024.0 && unit_idx + 1 < units.length) {
+    value /= 1024.0;
+    unit_idx += 1;
+  }
+  const unitSpeed = ` ${units[unit_idx]}/s`;
+
+  return value.toFixed(2) + unitSpeed;
+}

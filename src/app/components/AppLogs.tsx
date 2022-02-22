@@ -31,10 +31,12 @@ export const AppLogs = (): JSX.Element => {
 
       <Code
         size="xs"
+        fontSize="10px"
         overflowY="auto"
         textAlign="left"
         maxHeight="70vh"
         display="flex"
+        wordBreak="break-all"
         marginLeft={paddingDividers}
         marginRight={paddingDividers}
         padding="10px"

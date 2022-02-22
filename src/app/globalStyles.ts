@@ -11,6 +11,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     overflow-x: hiddden;
     font-weight: 400;
     transition: 0.25s;
+    transition: width 0s;
   }
 
   html {
@@ -23,8 +24,25 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     background: lightGrey;
   }
 
+  ::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: ${({ theme }) => theme.backgroundColor};
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: ${({ theme }) => theme.textColor};
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: ${({ theme }) => theme.textColorSubtle};
+  }
+
   #root {
     height: 100%;
+    overflow-x: hidden;
   }
 
   * {

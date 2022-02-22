@@ -6,10 +6,15 @@ import {
   VictoryChart,
   VictoryGroup,
   VictoryArea,
-  VictoryLegend
+  VictoryAxis,
+  VictoryLabel
 } from 'victory';
-import { selectStatus } from '../../features/statusSlice';
+import { makeRate, selectStatus } from '../../features/statusSlice';
 import { PlusDivider } from './Dividers';
+import {
+  DownSpeedWithPillAndIcon,
+  UpSpeedWithPillAndIcon
+} from './LabelSubtleWithValue';
 
 export type NumberQueue = Array<number>;
 export type SpeedHistoryDataType = {
@@ -21,9 +26,10 @@ export type SpeedHistoryDataType = {
 
 export const MAX_NUMBER_POINT_HISTORY = 60; // 1 minute as there is 2 points per sec currently
 
+export const uploadColorChart = '#37EB19';
+export const downloadColorChart = '#F33232';
+
 export const SpeedChart = (): JSX.Element => {
-  const uploadColor = '#37EB19';
-  const downloadColor = '#F33232';
   const daemonStatus = useSelector(selectStatus);
   const theme = useTheme();
   const uploadCoordinates = daemonStatus.speedHistory.upload.map((y, index) => {
@@ -49,10 +55,12 @@ export const SpeedChart = (): JSX.Element => {
         flexDirection="column"
         width="90%"
         alignItems="center"
-        margin="auto"
+        margin="0 auto"
+        maxWidth="500px"
       >
         <VictoryChart
           animate={false}
+          domainPadding={20}
           theme={{
             axis: {
               style: {
@@ -63,7 +71,28 @@ export const SpeedChart = (): JSX.Element => {
               }
             }
           }}
+          minDomain={{ x: 0, y: 1 }}
+          width={500}
+          height={300}
         >
+          <VictoryAxis
+            dependentAxis={true}
+            tickLabelComponent={<VictoryLabel dx={-10} />}
+            tickFormat={(t) => makeRate(t, true)}
+            label="MB/s"
+            axisLabelComponent={<VictoryLabel angle={0} dx={-20} />}
+            fixLabelOverlap={true}
+          />
+
+          <VictoryAxis
+            domain={[-60, 0]}
+            padding={30}
+            dependentAxis={false}
+            tickLabelComponent={<VictoryLabel dy={10} />}
+            tickFormat={(t) => {
+              return t === 60 ? 'now' : t === 10 ? 'a minute ago' : '';
+            }}
+          />
           <VictoryGroup
             style={{
               data: { fillOpacity: 0 }
@@ -71,29 +100,28 @@ export const SpeedChart = (): JSX.Element => {
           >
             <VictoryArea
               style={{
-                data: { stroke: downloadColor, fill: downloadColor }
+                data: { stroke: downloadColorChart, fill: downloadColorChart }
               }}
               data={downloadCoordinates}
             />
             <VictoryArea
               style={{
-                data: { stroke: uploadColor, fill: uploadColor }
+                data: { stroke: uploadColorChart, fill: uploadColorChart }
               }}
               data={uploadCoordinates}
             />
           </VictoryGroup>
         </VictoryChart>
-
-        <VictoryLegend
-          orientation="horizontal"
-          height={60}
-          style={{ labels: { fill: theme.textColor } }}
-          // containerComponent={<VictoryContainer responsive={false} />}
-          data={[
-            { name: 'Upload (kb/s)', symbol: { fill: uploadColor } },
-            { name: 'Download (kb/s)', symbol: { fill: downloadColor } }
-          ]}
-        />
+        <Flex
+          direction="row"
+          width="100%"
+          alignSelf="center"
+          padding="0 0 15px 0"
+          justifyContent="space-evenly"
+        >
+          <UpSpeedWithPillAndIcon />
+          <DownSpeedWithPillAndIcon />
+        </Flex>
       </Flex>
     </Flex>
   );

@@ -9,7 +9,6 @@ import {
 } from '../../features/exitStatusSlice';
 import { useAppDispatch } from '../hooks';
 import { paddingDividers } from './Dividers';
-import { EnableExitToggle } from './EnableExitToggle';
 
 const ExitInput = styled(Input)`
   background-color: ${(props) => props.theme.inputBackground};
@@ -19,20 +18,20 @@ const ExitInput = styled(Input)`
   font-weight: 400;
   border-radius: 3px;
   border: none;
-  font-size: 1rem;
+  font-size: 1.1rem;
   padding: 5px;
   outline: none;
   transition: 0.5s;
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'auto')};
 `;
 
 const InputLabel = styled.div`
   font-family: Archivo;
   font-style: normal;
   font-weight: 500;
-  font-size: 1rem;
+  font-size: 1.1rem;
   text-align: start;
   user-select: none;
-  padding: 15px 0px 5px 0;
 `;
 
 export const ExitPanel = (): JSX.Element => {
@@ -91,7 +90,6 @@ export const ExitPanel = (): JSX.Element => {
             marginBottom={2}
             noOfLines={1}
           />
-          <EnableExitToggle />
         </Flex>
       </Stack>
     </Flex>

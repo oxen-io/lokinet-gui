@@ -24,6 +24,7 @@ export const MainTab = (): JSX.Element => {
         justifyContent="space-between"
         paddingLeft={paddingDividers}
         paddingRight={paddingDividers}
+        minWidth="300px"
       >
         <RoutersStats
           activePaths={daemonStatus.numPathsBuilt}

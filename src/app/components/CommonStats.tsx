@@ -16,6 +16,8 @@ export const StatsSection = styled.div`
   width: 50%;
   flex-direction: column;
   justify-items: start;
+  padding-bottom: 15px;
+  flex-shrink: 0;
 `;
 
 export const StatsHeading = ({ title }: { title: string }): JSX.Element => {

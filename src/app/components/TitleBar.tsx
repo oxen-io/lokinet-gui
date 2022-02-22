@@ -9,11 +9,15 @@ import { selectedTheme, setTheme } from '../../features/uiStatusSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 const Container = styled.div`
+  background: ${(props) => props.theme.backgroundColor};
+
+  position: sticky;
+  top: 0;
+  overflow-y: auto;
   display: flex;
   font-size: 2rem;
   -webkit-app-region: drag;
-  padding-inline-start: 0.6rem;
-  padding-inline-end: 0.6rem;
+  padding: 0.2rem 1rem;
 `;
 
 const StyledIconButton = styled.button`
