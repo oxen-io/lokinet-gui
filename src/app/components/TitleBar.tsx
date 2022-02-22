@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 
 const Container = styled.div`
   background: ${(props) => props.theme.backgroundColor};
+  z-index: 99;
 
   position: sticky;
   top: 0;
@@ -17,7 +18,8 @@ const Container = styled.div`
   display: flex;
   font-size: 2rem;
   -webkit-app-region: drag;
-  padding: 0.2rem 1rem;
+
+  padding: 0.5rem 1rem;
 `;
 
 const StyledIconButton = styled.button`

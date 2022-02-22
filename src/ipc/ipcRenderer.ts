@@ -270,6 +270,11 @@ export const parseSummaryStatus = (
 ): DaemonSummaryStatus => {
   let stats = null;
 
+  if (!payload || _.isEmpty(payload)) {
+    console.warn('Empty payload fot for summary status');
+    return defaultDaemonSummaryStatus;
+  }
+
   // We can either have an error of communication, or an error on the returned JSON
   if (!error) {
     try {

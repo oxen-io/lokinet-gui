@@ -149,7 +149,7 @@ export function makeRate(originalValue: number, forceMBUnit = false): string {
   const units = ['B', 'KB', 'MB'];
 
   if (forceMBUnit) {
-    return `${(originalValue / (1024 * 1024)).toFixed(0)}`;
+    return `${(originalValue / (1024 * 1024)).toFixed(2)} ${units[2]}/s`;
   }
   let value = originalValue;
   while (value > 1024.0 && unit_idx + 1 < units.length) {
@@ -158,5 +158,5 @@ export function makeRate(originalValue: number, forceMBUnit = false): string {
   }
   const unitSpeed = ` ${units[unit_idx]}/s`;
 
-  return value.toFixed(2) + unitSpeed;
+  return value.toFixed(1) + unitSpeed;
 }

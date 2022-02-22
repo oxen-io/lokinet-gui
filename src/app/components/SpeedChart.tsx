@@ -74,14 +74,15 @@ export const SpeedChart = (): JSX.Element => {
           minDomain={{ x: 0, y: 1 }}
           width={500}
           height={300}
+          padding={{ left: 80, top: 20, right: 0, bottom: 30 }}
         >
           <VictoryAxis
             dependentAxis={true}
+            domain={[0, 1]}
+            minDomain={1}
+            tickCount={3}
             tickLabelComponent={<VictoryLabel dx={-10} />}
             tickFormat={(t) => makeRate(t, true)}
-            label="MB/s"
-            axisLabelComponent={<VictoryLabel angle={0} dx={-20} />}
-            fixLabelOverlap={true}
           />
 
           <VictoryAxis

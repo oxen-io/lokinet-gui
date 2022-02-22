@@ -16,6 +16,15 @@ const ButtonRow = styled.div`
   margin-top: 20px;
 `;
 
+const Timestamp = styled.span`
+  font-size: 10px;
+  color: ${(props) => props.theme.textColorSubtle};
+`;
+
+const Content = styled(Timestamp)`
+  color: ${(props) => props.theme.textColor};
+`;
+
 export const AppLogs = (): JSX.Element => {
   const { appLogs } = useAppSelector(selectAppLogs);
   const hasLogLine = Boolean(appLogs.length);
@@ -31,7 +40,6 @@ export const AppLogs = (): JSX.Element => {
 
       <Code
         size="xs"
-        fontSize="10px"
         overflowY="auto"
         textAlign="left"
         maxHeight="70vh"
@@ -46,11 +54,15 @@ export const AppLogs = (): JSX.Element => {
         backgroundColor={theme.inputBackground}
       >
         {hasLogLine ? (
-          appLogs.map((logLine, index) => {
+          appLogs.map((logLine) => {
+            const separator = logLine.indexOf(':');
+            const timestamp = logLine.substring(0, separator);
+            const content = logLine.substring(separator);
             return (
-              <Text fontSize={12} key={index}>
-                {logLine}
-              </Text>
+              <span>
+                <Timestamp>{timestamp}</Timestamp>
+                <Content>{content}</Content>
+              </span>
             );
           })
         ) : (

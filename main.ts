@@ -16,20 +16,19 @@ function createWindow() {
   const width = 1000; // 450
 
   const isDev = process.env.NODE_ENV === 'development';
-  const factor = screen.getPrimaryDisplay().scaleFactor;
 
   mainWindow = new BrowserWindow({
-    width: width / factor,
-    height: height / factor,
-    minHeight: height / factor,
-    minWidth: 450 / factor,
+    width: width,
+    height: height,
+    minHeight: height,
+    minWidth: 450,
     resizable: true,
     icon: './build/icon.png',
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
       webSecurity: true,
-      zoomFactor: 1.0 / factor
+      zoomFactor: 1.0
     },
     backgroundColor: '#fff',
     autoHideMenuBar: true,

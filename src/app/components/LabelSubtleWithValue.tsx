@@ -134,7 +134,7 @@ const KeyValueWithIconAndPill = (props: {
   const { label, value, icon, pillColor } = props;
 
   return (
-    <Flex justifyContent="start">
+    <Flex justifyContent="start" fontSize="0.8rem">
       {icon}
       <Pill ledColor={pillColor} size="0.8em" />
       <StyledLabelSubtle>{label}: </StyledLabelSubtle>
