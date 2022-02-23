@@ -15,7 +15,10 @@ import { markAsStopped, updateFromDaemonStatus } from '../features/statusSlice';
 import { Provider, useSelector } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch } from './hooks';
-import { markExitNodesFromDaemon } from '../features/exitStatusSlice';
+import {
+  markExitNodesFromDaemon,
+  markInitialLoadingFinished
+} from '../features/exitStatusSlice';
 import { AppLayout } from './components/AppLayout';
 import { appendToApplogs } from '../features/appLogsSlice';
 import { GlobalStyle } from './globalStyles';
@@ -41,9 +44,13 @@ const useSummaryStatusPolling = () => {
       const parsedStatus = parseSummaryStatus(statusAsString);
       // Send the update to the redux store.
       dispatch(updateFromDaemonStatus({ daemonStatus: parsedStatus }));
-      if (
-        store.getState().exitStatus.exitNodeFromDaemon !== parsedStatus.exitNode
-      ) {
+      const hasExitNodeChange =
+        store.getState().exitStatus.exitNodeFromDaemon !==
+        parsedStatus.exitNode;
+      const hasExitAuthChange =
+        store.getState().exitStatus.exitAuthCodeFromDaemon !==
+        parsedStatus.exitAuthCode;
+      if (hasExitNodeChange) {
         dispatch(
           appendToApplogs(
             `exitNode set by daemon: ${parsedStatus.exitNode || ''}`
@@ -51,25 +58,27 @@ const useSummaryStatusPolling = () => {
         );
       }
 
-      if (
-        store.getState().exitStatus.exitAuthCodeFromDaemon !==
-        parsedStatus.exitAuthCode
-      ) {
+      if (hasExitAuthChange) {
         dispatch(
           appendToApplogs(
             `authCode set by daemon: ${parsedStatus.exitAuthCode || ''}`
           )
         );
       }
-      dispatch(
-        markExitNodesFromDaemon({
-          exitNodeFromDaemon: parsedStatus.exitNode,
-          exitAuthCodeFromDaemon: parsedStatus.exitAuthCode
-        })
-      );
+
+      if (hasExitNodeChange || hasExitAuthChange)
+        dispatch(
+          markExitNodesFromDaemon({
+            exitNodeFromDaemon: parsedStatus.exitNode,
+            exitAuthCodeFromDaemon: parsedStatus.exitAuthCode
+          })
+        );
+      dispatch(markInitialLoadingFinished());
     } catch (e) {
       console.log('getSummaryStatus() failed');
       dispatch(markAsStopped());
+      dispatch(markInitialLoadingFinished());
+
       dispatch(
         markExitNodesFromDaemon({
           exitNodeFromDaemon: undefined,

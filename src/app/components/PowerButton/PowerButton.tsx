@@ -97,6 +97,9 @@ export const PowerButton = (): JSX.Element => {
       shadow={shadow}
       bg={buttonContainerBackground}
       onClick={() => {
+        if (connectingStatus === 'connecting') {
+          return;
+        }
         if (connectingStatus === 'connected') {
           turnExitOff(dispatch);
         } else {
