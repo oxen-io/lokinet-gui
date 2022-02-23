@@ -1,13 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Electron, { BrowserWindow, Tray } from 'electron';
 import { initialLokinetRpcDealer } from './lokinetRpcCall';
-import { IPC_CHANNEL_KEY, MINIMIZE_TO_TRAY } from './sharedIpc';
+import {
+  IPC_CHANNEL_KEY,
+  IPC_INIT_LOGS_RENDERER_SIDE,
+  IPC_LOG_LINE,
+  MINIMIZE_TO_TRAY
+} from './sharedIpc';
 const { ipcMain } = Electron;
 
 import * as rpcCalls from './lokinetRpcCall';
 import * as lokinetProcessManager from './lokinetProcessManager';
 
 export const eventsByJobId = Object.create(null);
+
+const logLineBuffers: Array<string> = [];
+let isRendererReady = false;
 
 export async function initializeIpcNodeSide(
   getMainWindow: () => BrowserWindow | null,
@@ -23,6 +31,11 @@ export async function initializeIpcNodeSide(
     if (tray) {
       (tray as any).updateContextMenu();
     }
+  });
+
+  ipcMain.on(IPC_INIT_LOGS_RENDERER_SIDE, (event) => {
+    isRendererReady = true;
+    event.sender.send(IPC_INIT_LOGS_RENDERER_SIDE, logLineBuffers);
   });
 
   ipcMain.on(IPC_CHANNEL_KEY, async (event, jobId, callName, ...args) => {
@@ -51,4 +64,14 @@ export async function initializeIpcNodeSide(
       event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, error?.msg || null);
     }
   });
+}
+
+export function logLineToAppSide(logLine: string): void {
+  console.warn('logLine', logLine);
+  const withTimestamp = `${logLine}`;
+  if (isRendererReady) {
+    ipcMain.emit(IPC_LOG_LINE, withTimestamp);
+  } else {
+    logLineBuffers.push(withTimestamp);
+  }
 }

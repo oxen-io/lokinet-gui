@@ -26,7 +26,7 @@ import { ThemeProvider } from 'styled-components';
 import { darkTheme, lightTheme } from './theme';
 import { selectedTheme } from '../features/uiStatusSlice';
 
-initializeIpcRendererSide();
+void initializeIpcRendererSide();
 
 const useSummaryStatusPolling = () => {
   // dispatch is used to make updates to the redux store

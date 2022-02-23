@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { app, BrowserWindow, Tray, screen } from 'electron';
+import { app, BrowserWindow, Tray } from 'electron';
 import { initializeIpcNodeSide } from './ipcNode';
+import {
+  doStartLokinetProcess,
+  doStopLokinetProcess
+} from './lokinetProcessManager';
 import { createTrayIcon } from './trayIcon';
 import { markShouldQuit, shouldQuit } from './windowState';
 
@@ -11,7 +15,7 @@ let ready = false;
 function getMainWindow() {
   return mainWindow;
 }
-function createWindow() {
+async function createWindow() {
   const height = 650; // 650
   const width = 1000; // 450
 
@@ -47,7 +51,7 @@ function createWindow() {
   }
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();
-  void initializeIpcNodeSide(getMainWindow, tray);
+  await initializeIpcNodeSide(getMainWindow, tray);
 
   // Emitted when the window is about to be closed.
   // Note: We do most of our shutdown logic here because all windows are closed by
@@ -70,10 +74,12 @@ function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
+  void doStartLokinetProcess();
 }
 
 app.on('before-quit', () => {
   console.log('before-quit event');
+  void doStopLokinetProcess();
 
   if (tray) {
     tray.destroy();

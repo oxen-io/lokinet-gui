@@ -7,8 +7,12 @@ import crypto from 'crypto';
 import {
   DEBUG_IPC_CALLS,
   DEBUG_IPC_CALLS_GET_STATUS,
-  IPC_CHANNEL_KEY
+  IPC_CHANNEL_KEY,
+  IPC_INIT_LOGS_RENDERER_SIDE,
+  IPC_LOG_LINE
 } from '../../sharedIpc';
+import { store } from '../app/store';
+import { appendToApplogs } from '../features/appLogsSlice';
 
 const IPC_UPDATE_TIMEOUT = 5000; // 5 secs
 
@@ -18,7 +22,8 @@ const channelsToMake = {
   deleteExit,
   setConfig,
   doStartLokinetProcess,
-  doStopLokinetProcess
+  doStopLokinetProcess,
+  initLogsInRenderer
 };
 const channels = {} as any;
 const _jobs = Object.create(null);
@@ -51,6 +56,10 @@ export async function doStartLokinetProcess(): Promise<string | null> {
   return channels.doStartLokinetProcess();
 }
 
+export async function initLogsInRenderer(): Promise<Array<string> | null> {
+  return channels.initLogsInRenderer();
+}
+
 export async function doStopLokinetProcess(): Promise<string | null> {
   return channels.doStopLokinetProcess();
 }
@@ -62,7 +71,7 @@ export async function setConfig(
   return channels.setConfig(section, key, value);
 }
 
-export function initializeIpcRendererSide(): void {
+export async function initializeIpcRendererSide(): Promise<void> {
   // We listen to a lot of events on ipcRenderer, often on the same channel. This prevents
   //   any warnings that might be sent to the console in that case.
   ipcRenderer.setMaxListeners(0);
@@ -70,6 +79,12 @@ export function initializeIpcRendererSide(): void {
   _.forEach(channelsToMake, (fn) => {
     if (_.isFunction(fn)) {
       makeChannel(fn.name);
+    }
+  });
+
+  ipcRenderer.on(IPC_LOG_LINE, (_event, logLine: string) => {
+    if (_.isString(logLine) && !_.isEmpty(logLine)) {
+      store.dispatch(appendToApplogs(logLine));
     }
   });
 
@@ -94,18 +109,20 @@ export function initializeIpcRendererSide(): void {
         );
       }
 
-      if (
-        (fnName === 'getSummaryStatus' && DEBUG_IPC_CALLS_GET_STATUS) ||
-        (fnName !== 'getSummaryStatus' && DEBUG_IPC_CALLS)
-      ) {
-        // console.log(
-        //   `IPC channel job ${jobId} (${fnName}) finished with: ${result}`
-        // );
-      }
-
       return resolve(result);
     }
   );
+  ipcRenderer.once(
+    IPC_INIT_LOGS_RENDERER_SIDE,
+    (event, logLines: Array<string> | null) => {
+      console.warn('after', logLines);
+
+      if (logLines && logLines.length) {
+        logLines.forEach((l) => store.dispatch(appendToApplogs(l)));
+      }
+    }
+  );
+  ipcRenderer.send(IPC_INIT_LOGS_RENDERER_SIDE);
 }
 
 async function _shutdown() {

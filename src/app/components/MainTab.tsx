@@ -6,14 +6,12 @@ import { MinusDivider, paddingDividers, PlusDivider } from './Dividers';
 import { ExitPanel } from './ExitPanel';
 import { RoutersStats } from './RouterStats';
 import { SpeedStats } from './SpeedStats';
-// import { StopAndStart } from './StopAndStartButton';
 
 export const MainTab = (): JSX.Element => {
   // Select (i.e. extract the daemon status from our global redux state)
   const daemonStatus = useSelector(selectStatus);
   return (
     <>
-      {/* <StopAndStart /> */}
       <PlusDivider />
 
       <ExitPanel />
