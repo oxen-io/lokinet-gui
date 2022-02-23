@@ -5,7 +5,7 @@ import { selectedTheme } from '../../features/uiStatusSlice';
 import { useGlobalConnectingStatus } from '../hooks/connectingStatus';
 
 const ConnectedStatusContainer = styled.div`
-  max-height: 50px;
+  height: 40px;
   display: flex;
   line-height: 25px;
   margin-top: 0;
@@ -17,7 +17,7 @@ const ConnectedStatusContainer = styled.div`
 const ConnectedStatusContainerWithLogo = styled(ConnectedStatusContainer)`
   display: block;
   margin-top: 0 !important;
-  line-height: 1rem;
+  height: 40px;
 `;
 
 const ConnectedStatusTitle = styled.span<{ textShadow: string }>`
@@ -39,8 +39,7 @@ const ConnectedStatusLED = styled.span<{ ledColor: string }>`
 `;
 
 const StyledLogoAndTitle = styled.svg`
-  max-height: 100%;
-  max-width: 33%;
+  height: 100%;
   margin-bottom: 0;
   fill: ${(props) => props.theme.textColor};
 `;

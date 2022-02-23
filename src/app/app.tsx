@@ -25,7 +25,7 @@ import { selectedTheme } from '../features/uiStatusSlice';
 
 initializeIpcRendererSide();
 
-const App = () => {
+const useSummaryStatusPolling = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
 
@@ -78,7 +78,10 @@ const App = () => {
       );
     }
   }, POLLING_STATUS_INTERVAL_MS);
+};
 
+const App = () => {
+  useSummaryStatusPolling();
   return <AppLayout />;
 };
 

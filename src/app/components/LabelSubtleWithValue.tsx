@@ -100,17 +100,17 @@ export const LabelSubtleWithValue = (props: {
   );
 };
 
-const UploadInlineIcon = (): JSX.Element => {
+const UploadInlineIcon = (props: { size: string }): JSX.Element => {
   return (
-    <InlineIcon size="15px" title="Upload speed">
+    <InlineIcon size={props.size} title="Upload speed">
       <FiUploadCloud />
     </InlineIcon>
   );
 };
 
-const DownloadInlineIcon = (): JSX.Element => {
+const DownloadInlineIcon = (props: { size: string }): JSX.Element => {
   return (
-    <InlineIcon size="15px" title="Download speed">
+    <InlineIcon size={props.size} title="Download speed">
       <FiDownloadCloud />
     </InlineIcon>
   );
@@ -129,14 +129,15 @@ const KeyValueWithIconAndPill = (props: {
   label: string;
   value: string;
   icon: React.ReactNode;
-  pillColor: string;
+  fontSize: string;
+  pillColor?: string;
 }): JSX.Element => {
   const { label, value, icon, pillColor } = props;
 
   return (
-    <Flex justifyContent="start" fontSize="0.8rem">
+    <Flex justifyContent="start" fontSize={props.fontSize}>
       {icon}
-      <Pill ledColor={pillColor} size="0.8em" />
+      {Boolean(pillColor) && <Pill ledColor={pillColor} size="0.8em" />}
       <StyledLabelSubtle>{label}: </StyledLabelSubtle>
       <StyledValue>{value}</StyledValue>
     </Flex>
@@ -150,8 +151,9 @@ export const UpSpeedWithPillAndIcon = (): JSX.Element => {
     <KeyValueWithIconAndPill
       label="Upload"
       value={upSpeed}
+      fontSize="1rem"
       pillColor={uploadColorChart}
-      icon={<UploadInlineIcon />}
+      icon={<UploadInlineIcon size="15px" />}
     />
   );
 };
@@ -162,8 +164,50 @@ export const DownSpeedWithPillAndIcon = (): JSX.Element => {
     <KeyValueWithIconAndPill
       label="Download"
       value={downSpeed}
+      fontSize="1rem"
       pillColor={downloadColorChart}
-      icon={<DownloadInlineIcon />}
+      icon={<DownloadInlineIcon size="15px" />}
     />
   );
 };
+
+export const UpSpeedWithIcon = (): JSX.Element => {
+  const upSpeed = useSelector(selectUploadRate);
+
+  return (
+    <KeyValueWithIconAndPill
+      label="Upload"
+      fontSize="1rem"
+      value={upSpeed}
+      icon={
+        <>
+          <UploadInlineIcon size="1.2rem" />
+          <HSpacer width="10px" />
+        </>
+      }
+    />
+  );
+};
+
+export const DownSpeedWithIcon = (): JSX.Element => {
+  const downSpeed = useSelector(selectDownloadRate);
+  return (
+    <KeyValueWithIconAndPill
+      label="Download"
+      fontSize="1rem"
+      value={downSpeed}
+      icon={
+        <>
+          <DownloadInlineIcon size="1.2rem" />
+          <HSpacer width="10px" />
+        </>
+      }
+    />
+  );
+};
+
+export const HSpacer = styled.span<{ width: string }>`
+  width: ${(props) => props.width};
+  height: 1px;
+  background: none;
+`;
