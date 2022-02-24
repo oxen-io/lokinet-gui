@@ -47,7 +47,7 @@ async function createWindow() {
 
   if (isDev) {
     mainWindow.loadURL(`http://localhost:4000`);
-    mainWindow.webContents.openDevTools({ mode: 'detach' });
+    mainWindow.webContents.openDevTools({ mode: 'right' });
   } else {
     mainWindow.loadFile('./dist/index.html');
     mainWindow.webContents.openDevTools({ mode: 'right' });

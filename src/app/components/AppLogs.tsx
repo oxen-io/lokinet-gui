@@ -6,7 +6,7 @@ import { useCopyToClipboard } from 'react-use';
 import styled, { useTheme } from 'styled-components';
 import { clearLogs, selectAppLogs } from '../../features/appLogsSlice';
 import { useAppSelector } from '../hooks';
-import { MinusDivider, paddingDividers, PlusDivider } from './Dividers';
+import { MinusDivider, PlusDivider } from './Dividers';
 import { LokinetIconButton } from './LokinetIconButton';
 import { TextButton } from './TextButton';
 

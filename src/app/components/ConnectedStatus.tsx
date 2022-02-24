@@ -2,7 +2,10 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { selectedTheme } from '../../features/uiStatusSlice';
-import { useGlobalConnectingStatus } from '../hooks/connectingStatus';
+import {
+  isGlobalStatusError,
+  useGlobalConnectingStatus
+} from '../hooks/connectingStatus';
 
 const ConnectedStatusContainer = styled.div`
   height: 40px;
@@ -24,7 +27,7 @@ const ConnectedStatusTitle = styled.span<{ textShadow: string }>`
   font-family: Archivo;
   font-style: normal;
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   text-align: center;
   user-select: none;
   text-shadow: ${(props) => props.textShadow};
@@ -45,10 +48,10 @@ const StyledLogoAndTitle = styled.svg`
 `;
 
 export const ConnectedStatus = (): JSX.Element => {
-  const status = useGlobalConnectingStatus();
+  const globalStatus = useGlobalConnectingStatus();
   const themeType = useSelector(selectedTheme);
 
-  if (status === 'error-start-stop' || status === 'error-add-exit') {
+  if (isGlobalStatusError(globalStatus)) {
     const errorText =
       status === 'error-start-stop'
         ? 'FAILED TO START LOKINET'
@@ -61,7 +64,7 @@ export const ConnectedStatus = (): JSX.Element => {
     );
   }
 
-  if (status === 'connecting') {
+  if (globalStatus === 'connecting') {
     return (
       <ConnectedStatusContainer>
         <ConnectedStatusTitle textShadow="">CONNECTING</ConnectedStatusTitle>
@@ -69,7 +72,7 @@ export const ConnectedStatus = (): JSX.Element => {
       </ConnectedStatusContainer>
     );
   }
-  if (status === 'connected') {
+  if (globalStatus === 'connected') {
     return (
       <ConnectedStatusContainer>
         <ConnectedStatusTitle

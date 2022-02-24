@@ -33,10 +33,14 @@ module.exports = {
     ]
   },
   devServer: {
-    static: { directory: path.join(__dirname, './dist'), publicPath: '/' },
+    static: { directory: path.join(__dirname, 'dist') },
     historyApiFallback: true,
-    compress: true,
+    compress: false,
     hot: true,
+    client: {
+      logging: 'info'
+    },
+
     port: 4000
   },
   output: {

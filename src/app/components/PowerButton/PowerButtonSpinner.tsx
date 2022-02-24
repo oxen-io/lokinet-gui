@@ -34,6 +34,7 @@ export const PowerButtonContainerBorder = (props: {
     globalStatus === 'connected' && themeType === 'light'
       ? 'drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.74));'
       : '';
+
   return (
     <StyledBorderContainer borderColor={borderColor} filter={filterShadow}>
       {props.children}
