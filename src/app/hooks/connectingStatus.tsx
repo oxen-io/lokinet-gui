@@ -30,3 +30,9 @@ export const useGlobalConnectingStatus = (): ConnectingStatus => {
   }
   return 'default';
 };
+
+export const isGlobalStatusError = (
+  globalStatus: ConnectingStatus
+): boolean => {
+  return globalStatus.startsWith('error-');
+};

@@ -9,6 +9,7 @@ import {
 import { selectedTheme, ThemeType } from '../../../features/uiStatusSlice';
 import {
   ConnectingStatus,
+  isGlobalStatusError,
   useGlobalConnectingStatus
 } from '../../hooks/connectingStatus';
 import { turnExitOn, turnExitOff } from './PowerButtonActions';
@@ -52,22 +53,22 @@ const getPowerButtonStyles = (
 };
 
 const getPowerButtonContainerShadowStyle = (
-  status: ConnectingStatus,
+  globalStatus: ConnectingStatus,
   themeType: ThemeType
 ) => {
-  if (status === 'error-add-exit' || status === 'error-start-stop') {
+  if (isGlobalStatusError(globalStatus)) {
     return themeType === 'light'
       ? '0px 0px 30px rgba(255, 0, 0, 0.61)'
       : `0px 0px 51px rgba(255, 33, 33, 0.8), 0px 0px 66px #000000`;
   }
 
-  if (status === 'connecting') {
+  if (globalStatus === 'connecting') {
     return themeType === 'light'
       ? '0px 0px 16px rgba(0, 0, 0, 0.12)'
       : `0px 0px 30px rgba(255, 255, 255, 0.18), 0px 0px 66px #000000`;
   }
 
-  if (status === 'connected') {
+  if (globalStatus === 'connected') {
     return themeType === 'light'
       ? '0px 0px 25px rgba(0, 0, 0, 0.55)'
       : `0px 0px 15px rgba(255, 255, 255, 0.48)`;

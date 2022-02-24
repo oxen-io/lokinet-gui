@@ -69,11 +69,10 @@ export const turnExitOn = async (
     dispatchExitFailedToTurnOn(dispatch);
     return;
   }
-  dispatch(
-    appendToApplogs(
-      `TurnExitON with '${exitNode}'; auth code: '${authCode || ''}'`
-    )
-  );
+  const toAppendToLogs = `TurnExitON with '${exitNode} '${
+    authCode ? `and auth code: ${authCode}` : ' and no auth code.'
+  }'`;
+  dispatch(appendToApplogs(toAppendToLogs));
 
   dispatch(markExitIsTurningOn());
   // trigger the IPC+RPC call

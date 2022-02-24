@@ -2,16 +2,20 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 import { selectedTheme } from '../../../features/uiStatusSlice';
-import { useGlobalConnectingStatus } from '../../hooks/connectingStatus';
+import {
+  isGlobalStatusError,
+  useGlobalConnectingStatus
+} from '../../hooks/connectingStatus';
 
 export const PowerButtonContainerBorder = (props: {
   children: React.ReactNode;
 }): JSX.Element => {
-  const status = useGlobalConnectingStatus();
+  const globalStatus = useGlobalConnectingStatus();
+  const globalStatusIsError = isGlobalStatusError(globalStatus);
   const theme = useTheme();
   const themeType = useSelector(selectedTheme);
 
-  if (status === 'connecting') {
+  if (globalStatus === 'connecting') {
     // display the spinner only when connecting
     return (
       <>
@@ -22,14 +26,12 @@ export const PowerButtonContainerBorder = (props: {
   }
 
   const borderColor =
-    status === 'default' ||
-    status === 'error-add-exit' ||
-    status === 'error-start-stop'
+    globalStatus === 'default' || globalStatusIsError
       ? theme.textColorSubtle
       : theme.textColor;
 
   const filterShadow =
-    status === 'connected' && themeType === 'light'
+    globalStatus === 'connected' && themeType === 'light'
       ? 'drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.74));'
       : '';
   return (
