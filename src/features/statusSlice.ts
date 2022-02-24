@@ -1,4 +1,5 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { StatusErrorType } from '../../sharedIpc';
 import {
   MAX_NUMBER_POINT_HISTORY,
   SpeedHistoryDataType
@@ -17,6 +18,7 @@ export interface SummaryStatusState {
   numPathsBuilt: number;
   numRoutersKnown: number;
   ratio: string;
+  globalError: StatusErrorType;
   speedHistory: SpeedHistoryDataType;
 }
 const getDefaultSpeedHistory = (): SpeedHistoryDataType => {
@@ -67,6 +69,10 @@ export const statusSlice = createSlice({
         return state;
       }
 
+      if (state.globalError === 'error-start-stop') {
+        state.globalError = undefined;
+      }
+
       state.downloadUsage = action.payload.daemonStatus?.downloadUsage || 0;
       state.uploadUsage = action.payload.daemonStatus?.uploadUsage || 0;
 
@@ -106,14 +112,19 @@ export const statusSlice = createSlice({
       state.speedHistory = removeFirstElementIfNeeded(state.speedHistory);
       return state;
     },
-    markAsStopped: () => {
-      return initialSummaryStatusState;
+    markAsStopped: (state) => {
+      return { ...initialSummaryStatusState, globalError: state.globalError };
+    },
+    setGlobalError: (state, action: PayloadAction<StatusErrorType>) => {
+      state.globalError = action.payload;
+      return state;
     }
   }
 });
 
 // Action creators are generated for each case reducer function
-export const { updateFromDaemonStatus, markAsStopped } = statusSlice.actions;
+export const { updateFromDaemonStatus, markAsStopped, setGlobalError } =
+  statusSlice.actions;
 export const selectStatus = (state: RootState): SummaryStatusState =>
   state.status;
 export const selectLokinetRunning = createSelector(
@@ -134,6 +145,11 @@ export const selectUptime = createSelector(
 export const selectLokinetAddress = createSelector(
   selectStatus,
   (status) => status.lokiAddress || ''
+);
+
+export const selectGlobalError = createSelector(
+  selectStatus,
+  (status): StatusErrorType => status.globalError || undefined
 );
 
 export const selectUploadRate = createSelector(selectStatus, (status) =>

@@ -48,12 +48,14 @@ export const ConnectedStatus = (): JSX.Element => {
   const status = useGlobalConnectingStatus();
   const themeType = useSelector(selectedTheme);
 
-  if (status === 'error') {
+  if (status === 'error-start-stop' || status === 'error-add-exit') {
+    const errorText =
+      status === 'error-start-stop'
+        ? 'FAILED TO START LOKINET'
+        : 'UNABLE TO CONNECT';
     return (
       <ConnectedStatusContainer>
-        <ConnectedStatusTitle textShadow="">
-          UNABLE TO CONNECT
-        </ConnectedStatusTitle>
+        <ConnectedStatusTitle textShadow="">{errorText}</ConnectedStatusTitle>
         <ConnectedStatusLED ledColor="#F33232" />
       </ConnectedStatusContainer>
     );

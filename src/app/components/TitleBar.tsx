@@ -3,10 +3,9 @@ import { RiCloseFill } from 'react-icons/ri';
 import { HiMoon } from 'react-icons/hi';
 import styled from 'styled-components';
 
-import { ipcRenderer } from 'electron';
-import { MINIMIZE_TO_TRAY } from '../../../sharedIpc';
 import { selectedTheme, setTheme } from '../../features/uiStatusSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { minimizeToTray } from '../../ipc/ipcRenderer';
 
 const Container = styled.div`
   background: ${(props) => props.theme.backgroundColor};
@@ -51,12 +50,7 @@ export const TitleBar = (): JSX.Element => {
         <HiMoon />
       </StyledIconButton>
 
-      <StyledIconButton
-        title="Switch theme dark/white"
-        onClick={() => {
-          ipcRenderer.send(MINIMIZE_TO_TRAY);
-        }}
-      >
+      <StyledIconButton title="Minimize to tray" onClick={minimizeToTray}>
         <RiCloseFill />
       </StyledIconButton>
     </Container>

@@ -1,7 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ipcMain } from 'electron';
-import { Dealer as ZeroMqDealer } from 'zeromq';
+import * as _zmq from 'zeromq/';
+import * as zmq from 'zeromq/v5-compat';
+
+_zmq.context.blocky = false;
+
 import { eventsByJobId } from './ipcNode';
 import { DEBUG_RPC_CALLS, IPC_CHANNEL_KEY } from './sharedIpc';
 
@@ -150,7 +154,7 @@ export const initialLokinetRpcDealer = async (): Promise<void> => {
     throw new Error('RPC Channel is already init.');
   }
 
-  dealer = new ZeroMqDealer();
+  dealer = new _zmq.Dealer();
   // just trigger the loop, non blocking
   void loopDealerReceiving();
 };

@@ -7,23 +7,26 @@ import crypto from 'crypto';
 import {
   DEBUG_IPC_CALLS,
   IPC_CHANNEL_KEY,
-  IPC_INIT_LOGS_RENDERER_SIDE,
-  IPC_LOG_LINE
+  IPC_GLOBAL_ERROR,
+  IPC_LOG_LINE,
+  StatusErrorType
 } from '../../sharedIpc';
-import { store } from '../app/store';
-import { appendToApplogs } from '../features/appLogsSlice';
-import { appendToAppLogsOutsideRedux } from '../app/app';
+import { appendToAppLogsOutsideRedux, setErrorOutsideRedux } from '../app/app';
 
 const IPC_UPDATE_TIMEOUT = 10000; // 5 secs
 
-const channelsToMake = {
+const channelsFromRendererToMainToMake = {
+  // rpc calls (zeromq calls)
   getSummaryStatus,
   addExit,
   deleteExit,
   setConfig,
+  // lokinet process manager calls
   doStartLokinetProcess,
   doStopLokinetProcess,
-  initLogsInRenderer
+  // utility calls
+  markRendererReady,
+  minimizeToTray
 };
 const channels = {} as any;
 const _jobs = Object.create(null);
@@ -56,12 +59,16 @@ export async function doStartLokinetProcess(): Promise<string | null> {
   return channels.doStartLokinetProcess();
 }
 
-export async function initLogsInRenderer(): Promise<Array<string> | null> {
-  return channels.initLogsInRenderer();
-}
-
 export async function doStopLokinetProcess(): Promise<string | null> {
   return channels.doStopLokinetProcess();
+}
+
+export async function markRendererReady(): Promise<void> {
+  channels.markRendererReady();
+}
+
+export async function minimizeToTray(): Promise<void> {
+  channels.minimizeToTray();
 }
 export async function setConfig(
   section: string,
@@ -76,7 +83,7 @@ export async function initializeIpcRendererSide(): Promise<void> {
   //   any warnings that might be sent to the console in that case.
   ipcRenderer.setMaxListeners(0);
 
-  _.forEach(channelsToMake, (fn) => {
+  _.forEach(channelsFromRendererToMainToMake, (fn) => {
     if (_.isFunction(fn)) {
       makeChannel(fn.name);
     }
@@ -84,8 +91,12 @@ export async function initializeIpcRendererSide(): Promise<void> {
 
   ipcRenderer.on(IPC_LOG_LINE, (_event, logLine: string) => {
     if (_.isString(logLine) && !_.isEmpty(logLine)) {
-      store.dispatch(appendToApplogs(logLine));
+      appendToAppLogsOutsideRedux(logLine);
     }
+  });
+
+  ipcRenderer.on(IPC_GLOBAL_ERROR, (_event, globalError: StatusErrorType) => {
+    setErrorOutsideRedux(globalError);
   });
 
   ipcRenderer.on(
@@ -111,15 +122,8 @@ export async function initializeIpcRendererSide(): Promise<void> {
       return resolve(result);
     }
   );
-  ipcRenderer.once(
-    IPC_INIT_LOGS_RENDERER_SIDE,
-    (event, logLines: Array<string> | null) => {
-      if (logLines && logLines.length) {
-        logLines.forEach((l) => store.dispatch(appendToApplogs(l)));
-      }
-    }
-  );
-  ipcRenderer.send(IPC_INIT_LOGS_RENDERER_SIDE);
+
+  channels.markRendererReady();
 }
 
 async function _shutdown() {
@@ -242,6 +246,7 @@ export async function closeRpcConnection(): Promise<void> {
 
 export interface DaemonSummaryStatus {
   isRunning: boolean;
+  globalError: StatusErrorType;
   uptime?: number;
   version?: string;
   numPeersConnected: number;
@@ -257,6 +262,7 @@ export interface DaemonSummaryStatus {
 
 export const defaultDaemonSummaryStatus: DaemonSummaryStatus = {
   isRunning: false,
+  globalError: undefined,
   uptime: undefined,
   version: undefined,
   numPeersConnected: 0,

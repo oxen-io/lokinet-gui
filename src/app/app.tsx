@@ -11,7 +11,11 @@ import {
   parseSummaryStatus,
   POLLING_STATUS_INTERVAL_MS
 } from '../ipc/ipcRenderer';
-import { markAsStopped, updateFromDaemonStatus } from '../features/statusSlice';
+import {
+  markAsStopped,
+  setGlobalError,
+  updateFromDaemonStatus
+} from '../features/statusSlice';
 import { Provider, useSelector } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch } from './hooks';
@@ -25,6 +29,8 @@ import { GlobalStyle } from './globalStyles';
 import { ThemeProvider } from 'styled-components';
 import { darkTheme, lightTheme } from './theme';
 import { selectedTheme } from '../features/uiStatusSlice';
+import { StatusErrorType } from '../../sharedIpc';
+import { useGlobalConnectingStatus } from './hooks/connectingStatus';
 
 void initializeIpcRendererSide();
 
@@ -32,9 +38,15 @@ export function appendToAppLogsOutsideRedux(logline: string): void {
   store.dispatch(appendToApplogs(logline));
 }
 
+export function setErrorOutsideRedux(errorStatus: StatusErrorType): void {
+  store.dispatch(setGlobalError(errorStatus));
+}
+
 const useSummaryStatusPolling = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
+
+  const globalStatus = useGlobalConnectingStatus();
 
   // register an interval for fetching the status of the daemon
   useInterval(async () => {
@@ -70,13 +82,23 @@ const useSummaryStatusPolling = () => {
         );
       }
 
-      if (hasExitNodeChange || hasExitAuthChange)
+      if (hasExitNodeChange || hasExitAuthChange) {
         dispatch(
           markExitNodesFromDaemon({
             exitNodeFromDaemon: parsedStatus.exitNode,
             exitAuthCodeFromDaemon: parsedStatus.exitAuthCode
           })
         );
+        // the daermon told us we have an exit set but our current state says we have an error on the status.
+        // make sure to remove that error from the UI
+        if (
+          hasExitNodeChange &&
+          parsedStatus.exitNode &&
+          globalStatus === 'error-add-exit'
+        ) {
+          dispatch(setGlobalError(undefined));
+        }
+      }
       dispatch(markInitialLoadingFinished());
     } catch (e) {
       console.log('getSummaryStatus() failed');

@@ -22,7 +22,9 @@ export const PowerButtonContainerBorder = (props: {
   }
 
   const borderColor =
-    status === 'default' || status === 'error'
+    status === 'default' ||
+    status === 'error-add-exit' ||
+    status === 'error-start-stop'
       ? theme.textColorSubtle
       : theme.textColor;
 

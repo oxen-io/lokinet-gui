@@ -1,10 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { app, BrowserWindow, Tray } from 'electron';
 import { initializeIpcNodeSide } from './ipcNode';
-import {
-  doStartLokinetProcess,
-  doStopLokinetProcess
-} from './lokinetProcessManager';
+import { doStopLokinetProcess } from './lokinetProcessManager';
 import { closeRpcConnection } from './lokinetRpcCall';
 import { createTrayIcon } from './trayIcon';
 import { markShouldQuit, shouldQuit } from './windowState';
@@ -13,9 +10,14 @@ let mainWindow: BrowserWindow | null;
 let tray: Tray | null = null;
 let ready = false;
 
-function getMainWindow() {
+export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
 }
+
+export function getTrayIcon(): Tray | null {
+  return tray;
+}
+
 async function createWindow() {
   const height = 650; // 650
   const width = 1000; // 450
@@ -52,7 +54,7 @@ async function createWindow() {
   }
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();
-  await initializeIpcNodeSide(getMainWindow, tray);
+  await initializeIpcNodeSide(getMainWindow);
 
   // Emitted when the window is about to be closed.
   // Note: We do most of our shutdown logic here because all windows are closed by
@@ -75,7 +77,6 @@ async function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
-  void doStartLokinetProcess();
 }
 
 app.on('before-quit', () => {

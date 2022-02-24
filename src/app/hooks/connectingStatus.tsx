@@ -1,18 +1,24 @@
 import { useSelector } from 'react-redux';
+import { StatusErrorTypeSet } from '../../../sharedIpc';
 import {
   selectHasExitNodeEnabled,
   selectHasExitNodeChangeLoading
 } from '../../features/exitStatusSlice';
+import { selectGlobalError } from '../../features/statusSlice';
 
-export type ConnectingStatus = 'default' | 'connected' | 'connecting' | 'error';
+export type ConnectingStatus =
+  | 'default'
+  | 'connected'
+  | 'connecting'
+  | StatusErrorTypeSet;
 
 export const useGlobalConnectingStatus = (): ConnectingStatus => {
   const exitIsSet = useSelector(selectHasExitNodeEnabled);
   const exitIsLoading = useSelector(selectHasExitNodeChangeLoading);
-  const error = false; //FIXME
+  const globalError = useSelector(selectGlobalError);
 
-  if (error) {
-    return 'error';
+  if (globalError) {
+    return globalError;
   }
 
   if (exitIsLoading) {

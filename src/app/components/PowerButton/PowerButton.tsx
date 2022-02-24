@@ -55,7 +55,7 @@ const getPowerButtonContainerShadowStyle = (
   status: ConnectingStatus,
   themeType: ThemeType
 ) => {
-  if (status === 'error') {
+  if (status === 'error-add-exit' || status === 'error-start-stop') {
     return themeType === 'light'
       ? '0px 0px 30px rgba(255, 0, 0, 0.61)'
       : `0px 0px 51px rgba(255, 33, 33, 0.8), 0px 0px 66px #000000`;
@@ -97,7 +97,10 @@ export const PowerButton = (): JSX.Element => {
       shadow={shadow}
       bg={buttonContainerBackground}
       onClick={() => {
-        if (connectingStatus === 'connecting') {
+        if (
+          connectingStatus === 'connecting' ||
+          connectingStatus === 'error-start-stop'
+        ) {
           return;
         }
         if (connectingStatus === 'connected') {

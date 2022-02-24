@@ -1,8 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { ILokinetProcessManager, invoke } from './lokinetProcessManager';
 import util from 'util';
 import { exec } from 'child_process';
 import { logLineToAppSide } from './ipcNode';
-import { appendToAppLogsOutsideRedux } from './src/app/app';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const execPromisified = util.promisify(exec);
@@ -22,7 +22,7 @@ export const isSystemD = async (): Promise<boolean> => {
     logLineToAppSide(`The current system is NOT using systemd: ${stderr}`);
 
     return false;
-  } catch (e) {
+  } catch (e: any) {
     logLineToAppSide(`The current system is NOT using systemd: ${e.message}`);
 
     console.error(e); // should contain code (exit code) and signal (that caused the termination).
@@ -44,7 +44,7 @@ export class LokinetSystemDProcessManager implements ILokinetProcessManager {
         logLineToAppSide('SystemD: lokinet is already running');
         return true;
       }
-    } catch (e) {
+    } catch (e: any) {
       if (e?.stdout?.trim() === 'inactive') {
         logLineToAppSide(
           'SystemD: lokinet service is not running. About to try to start it'
@@ -73,7 +73,7 @@ export class LokinetSystemDProcessManager implements ILokinetProcessManager {
     ]);
 
     if (!result) {
-      appendToAppLogsOutsideRedux('SystemD: lokinet service started');
+      logLineToAppSide('SystemD: lokinet service started');
     }
     return result;
   }

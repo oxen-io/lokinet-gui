@@ -1,11 +1,30 @@
+import { Dispatch } from 'react';
 import { appendToApplogs } from '../../../features/appLogsSlice';
 import {
   markExitIsTurningOff,
   markExitFailedToLoad,
   markExitIsTurningOn
 } from '../../../features/exitStatusSlice';
+import { setGlobalError } from '../../../features/statusSlice';
 import { addExit, deleteExit } from '../../../ipc/ipcRenderer';
-import { AppDispatch } from '../../store';
+import { AppDispatch, store } from '../../store';
+
+const dispatchExitFailedToTurnOn = (dispatch: Dispatch<any>) => {
+  dispatch(markExitFailedToLoad());
+  // if we were are already in error for another issue, do not override that error value
+
+  if (store.getState().status.globalError === undefined) {
+    dispatch(setGlobalError('error-add-exit'));
+  }
+};
+
+const dispatchExitFailedToTurnOff = (dispatch: Dispatch<any>) => {
+  dispatch(markExitFailedToLoad());
+  // if we were in error based on the exit, just remove that error as we did turn off the exit
+  if (store.getState().status.globalError === 'error-add-exit') {
+    dispatch(setGlobalError(undefined));
+  }
+};
 
 export const turnExitOff = async (dispatch: AppDispatch): Promise<void> => {
   dispatch(appendToApplogs('TurnExitOFF =>'));
@@ -17,13 +36,13 @@ export const turnExitOff = async (dispatch: AppDispatch): Promise<void> => {
     try {
       const parsed = JSON.parse(deleteExitResult);
       if (parsed.error) {
-        dispatch(markExitFailedToLoad());
+        dispatchExitFailedToTurnOff(dispatch);
         dispatch(appendToApplogs(`TurnExitOFF <= ${parsed.error}`));
 
         return;
       }
       if (parsed.result !== 'OK') {
-        dispatch(markExitFailedToLoad());
+        dispatchExitFailedToTurnOff(dispatch);
         dispatch(appendToApplogs(`TurnExitOFF <= ${parsed}`));
       } else {
         // Do nothing. At this point we are waiting for the next getSummaryStatus call
@@ -31,7 +50,7 @@ export const turnExitOff = async (dispatch: AppDispatch): Promise<void> => {
         dispatch(appendToApplogs(`TurnExitOFF OK? <= ${parsed.result}`));
       }
     } catch (e) {
-      dispatch(markExitFailedToLoad());
+      dispatchExitFailedToTurnOff(dispatch);
       dispatch(appendToApplogs(`TurnExitOFF: <= ${deleteExitResult}`));
 
       return;
@@ -47,7 +66,7 @@ export const turnExitOn = async (
   if (!exitNode) {
     dispatch(appendToApplogs(`TurnExitON => Please enter an Exit Node first`));
 
-    dispatch(markExitFailedToLoad());
+    dispatchExitFailedToTurnOn(dispatch);
     return;
   }
   dispatch(
@@ -64,13 +83,13 @@ export const turnExitOn = async (
     try {
       const parsed = JSON.parse(addExitResult);
       if (parsed.error) {
-        dispatch(markExitFailedToLoad());
+        dispatchExitFailedToTurnOn(dispatch);
         dispatch(appendToApplogs(`TurnExitON <= '${parsed.error}'`));
 
         return;
       }
       if (!parsed.result || !parsed.result.startsWith('OK: connected to')) {
-        dispatch(markExitFailedToLoad());
+        dispatchExitFailedToTurnOn(dispatch);
         dispatch(appendToApplogs(`TurnExitON <= ${parsed}`));
       } else {
         dispatch(appendToApplogs(`TurnExitON <= ${parsed.result}`));
@@ -78,7 +97,7 @@ export const turnExitOn = async (
         // to send us the exit node set from the daemon.
       }
     } catch (e) {
-      dispatch(markExitFailedToLoad());
+      dispatchExitFailedToTurnOn(dispatch);
       dispatch(appendToApplogs(`TurnExitON <= ${addExitResult}`));
 
       return;

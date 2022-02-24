@@ -1,5 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import util from 'util';
-import { eventsByJobId, logLineToAppSide } from './ipcNode';
+import {
+  getEventByJobId,
+  logLineToAppSide,
+  sendGlobalErrorToAppSide
+} from './ipcNode';
 import { LokinetLinuxProcessManager } from './lokinetProcessManagerLinux';
 import {
   LokinetSystemDProcessManager,
@@ -45,15 +50,6 @@ export const invoke = async (
   return null;
 };
 
-const getEventByJobId = (jobId: string) => {
-  const event = eventsByJobId[jobId];
-
-  if (!event) {
-    throw new Error(`Could not find the event for jobId ${jobId}`);
-  }
-  return event;
-};
-
 export interface ILokinetProcessManager {
   doStartLokinetProcess: () => Promise<string | null>;
   doStopLokinetProcess: () => Promise<string | null>;
@@ -94,29 +90,42 @@ const getLokinetProcessManager = async () => {
   );
 };
 
-export const doStartLokinetProcess = async (): Promise<void> => {
+export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
+  let result: string | undefined;
+
   try {
     logLineToAppSide('About to start Lokinet process');
 
     const manager = await getLokinetProcessManager();
-    await manager.doStartLokinetProcess();
-  } catch (e) {
+    const startStopResult = await manager.doStartLokinetProcess();
+
+    if (startStopResult) {
+      sendGlobalErrorToAppSide('error-start-stop');
+    }
+  } catch (e: any) {
     logLineToAppSide(`Lokinet process start failed with ${e.message}`);
     console.warn('doStartLokinetProcess failed with', e);
+    sendGlobalErrorToAppSide('error-start-stop');
   }
+
+  const event = getEventByJobId(jobId);
+  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
-export const doStopLokinetProcess = async (): Promise<void> => {
+export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
+  let result: string | undefined;
   try {
     logLineToAppSide('About to stop Lokinet process');
 
     const manager = await getLokinetProcessManager();
     await manager.doStopLokinetProcess();
-  } catch (e) {
+  } catch (e: any) {
     logLineToAppSide(`Lokinet process stop failed with ${e.message}`);
 
     console.warn('doStopLokinetProcess failed with', e);
   }
+  const event = getEventByJobId(jobId);
+  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
 export const doForciblyStopLokinetProcess = async (
