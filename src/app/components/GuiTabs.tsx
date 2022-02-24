@@ -36,7 +36,7 @@ export const GuiTabs = (): JSX.Element => {
       onChange={(index: number) => {
         dispatch(setTabSelected(index as TabIndex));
       }}
-      isLazy={true}
+      isLazy={false}
       variant="unstyled"
     >
       <TabList justifyContent="space-evenly">

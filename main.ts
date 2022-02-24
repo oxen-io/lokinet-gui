@@ -5,6 +5,7 @@ import {
   doStartLokinetProcess,
   doStopLokinetProcess
 } from './lokinetProcessManager';
+import { closeRpcConnection } from './lokinetRpcCall';
 import { createTrayIcon } from './trayIcon';
 import { markShouldQuit, shouldQuit } from './windowState';
 
@@ -79,6 +80,7 @@ async function createWindow() {
 
 app.on('before-quit', () => {
   console.log('before-quit event');
+  void closeRpcConnection();
   void doStopLokinetProcess();
 
   if (tray) {

@@ -28,6 +28,10 @@ import { selectedTheme } from '../features/uiStatusSlice';
 
 void initializeIpcRendererSide();
 
+export function appendToAppLogsOutsideRedux(logline: string): void {
+  store.dispatch(appendToApplogs(logline));
+}
+
 const useSummaryStatusPolling = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();

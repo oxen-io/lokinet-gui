@@ -45,8 +45,6 @@ export const AppLogs = (): JSX.Element => {
         maxHeight="70vh"
         display="flex"
         wordBreak="break-all"
-        marginLeft={paddingDividers}
-        marginRight={paddingDividers}
         padding="10px"
         borderRadius="8px"
         flexDirection="column-reverse"

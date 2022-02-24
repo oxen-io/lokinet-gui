@@ -14,6 +14,11 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     transition: width 0s;
   }
 
+  code {
+    white-space: pre-wrap;
+
+  }
+
   html {
     height: 100%;
     font-size: 12px;

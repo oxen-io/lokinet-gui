@@ -9,8 +9,11 @@ import {
 import { LokinetWindowsProcessManager } from './lokinetProcessManagerWindows';
 
 import { IPC_CHANNEL_KEY } from './sharedIpc';
+import { exec } from 'child_process';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const exec = util.promisify(require('child_process').exec);
+const execPromisified = util.promisify(exec);
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 
 const LINUX = 'linux';
 const WIN = 'win32';
@@ -23,7 +26,7 @@ export const invoke = async (
   const cmdWithArgs = `${cmd} ${args.join(' ')}`;
   console.log('running cmdWithArgs', cmdWithArgs);
   try {
-    const result = await exec(cmdWithArgs);
+    const result = await execPromisified(cmdWithArgs);
     if (result && (result.stdout || result.stderr)) {
       console.warn(`Failed to invoke: '${cmdWithArgs}'`);
       console.warn(`result: `, result);
@@ -35,6 +38,7 @@ export const invoke = async (
     const stderr = e.stderr ? e.stderr : '';
     const stdout = e.stdout ? e.stdout : '';
     const cmd = e.cmd ? `${e.cmd}: ` : '';
+    logLineToAppSide(`invoke failed with: ${e}`);
     return `${cmd}${stdout}  ${stderr}`;
   }
 

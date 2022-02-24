@@ -76,10 +76,16 @@ export const setConfig = async (
   await invoke('llarp.config', reply_tag, { override: obj, reload: true });
 };
 
-export const close = (): void => {
+export const closeRpcConnection = (): void => {
   isRunning = false;
+  console.info('stopping rpc dealer');
   if (dealer) {
-    dealer.close();
+    try {
+      dealer.close();
+      dealer = null;
+    } catch (e) {
+      console.warn(e);
+    }
   }
 };
 
@@ -130,10 +136,12 @@ const loopDealerReceiving = async (): Promise<void> => {
       }
     }
   } catch (e) {
-    console.error(
-      `Got an exception while trying to bind to ${RPC_ZMQ_ADDRESS}:`,
-      e
-    );
+    if (isRunning) {
+      console.error(
+        `Got an exception while trying to bind to ${RPC_ZMQ_ADDRESS}:`,
+        e
+      );
+    }
   }
 };
 

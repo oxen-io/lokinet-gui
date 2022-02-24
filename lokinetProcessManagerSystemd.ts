@@ -2,19 +2,20 @@ import { ILokinetProcessManager, invoke } from './lokinetProcessManager';
 import util from 'util';
 import { exec } from 'child_process';
 import { logLineToAppSide } from './ipcNode';
+import { appendToAppLogsOutsideRedux } from './src/app/app';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const execPromisified = util.promisify(exec);
 
 export const isSystemD = async (): Promise<boolean> => {
   try {
-    logLineToAppSide('Checking for systemd.');
+    logLineToAppSide('Checking for SystemD.');
 
     const { stdout, stderr } = await execPromisified(
       'ps --no-headers -o comm 1'
     );
     if (stdout && stdout.trim() === 'systemd') {
-      logLineToAppSide('The current system is using systemd.');
+      logLineToAppSide('SystemD: The current system is using systemd.');
       return true;
     }
     console.log('isSystemD stderr:', stderr);
@@ -32,36 +33,49 @@ export const isSystemD = async (): Promise<boolean> => {
 const lokinetService = 'lokinet.service';
 
 export class LokinetSystemDProcessManager implements ILokinetProcessManager {
-  async doStartLokinetProcess(): Promise<string | null> {
-    const cmdWithArgs = `systemctl is-active ${lokinetService}`;
-    let isRunning = false;
+  async checkForActiveLokinetService(): Promise<boolean> {
     let result;
     try {
       logLineToAppSide('SystemD: checking if lokinet is already running');
+      const cmdWithArgs = `systemctl is-active ${lokinetService}`;
 
       result = await execPromisified(cmdWithArgs);
       if (result?.stdout?.trim() === 'active') {
         logLineToAppSide('SystemD: lokinet is already running');
-
-        isRunning = true;
-        console.warn('result', result);
+        return true;
       }
     } catch (e) {
-      if (result?.stdout?.trim() === 'inactive') {
-        logLineToAppSide('SystemD: lokinet is not running');
+      if (e?.stdout?.trim() === 'inactive') {
+        logLineToAppSide(
+          'SystemD: lokinet service is not running. About to try to start it'
+        );
       } else {
         logLineToAppSide(
-          `SystemD: checking if lokinet is running failed with: ${e.message}`
+          `SystemD: checking if lokinet is running failed with: ${e}`
         );
 
         console.warn(e);
       }
     }
+    return false;
+  }
+
+  async doStartLokinetProcess(): Promise<string | null> {
+    const isRunning = await this.checkForActiveLokinetService();
 
     if (isRunning) {
       return null;
     }
-    return invoke('systemctl', ['--no-block', 'start', lokinetService]);
+    const result = await invoke('systemctl', [
+      '--no-block',
+      'start',
+      lokinetService
+    ]);
+
+    if (!result) {
+      appendToAppLogsOutsideRedux('SystemD: lokinet service started');
+    }
+    return result;
   }
 
   async doStopLokinetProcess(): Promise<string | null> {

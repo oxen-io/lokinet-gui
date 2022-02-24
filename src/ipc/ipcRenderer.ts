@@ -6,15 +6,15 @@ import _ from 'lodash';
 import crypto from 'crypto';
 import {
   DEBUG_IPC_CALLS,
-  DEBUG_IPC_CALLS_GET_STATUS,
   IPC_CHANNEL_KEY,
   IPC_INIT_LOGS_RENDERER_SIDE,
   IPC_LOG_LINE
 } from '../../sharedIpc';
 import { store } from '../app/store';
 import { appendToApplogs } from '../features/appLogsSlice';
+import { appendToAppLogsOutsideRedux } from '../app/app';
 
-const IPC_UPDATE_TIMEOUT = 5000; // 5 secs
+const IPC_UPDATE_TIMEOUT = 10000; // 5 secs
 
 const channelsToMake = {
   getSummaryStatus,
@@ -98,7 +98,6 @@ export async function initializeIpcRendererSide(): Promise<void> {
         );
         return;
       }
-
       const { resolve, reject, fnName } = job;
 
       if (errorForDisplay) {
@@ -115,8 +114,6 @@ export async function initializeIpcRendererSide(): Promise<void> {
   ipcRenderer.once(
     IPC_INIT_LOGS_RENDERER_SIDE,
     (event, logLines: Array<string> | null) => {
-      console.warn('after', logLines);
-
       if (logLines && logLines.length) {
         logLines.forEach((l) => store.dispatch(appendToApplogs(l)));
       }
@@ -158,7 +155,7 @@ async function _shutdown() {
 }
 
 function _makeJob(fnName: string) {
-  if (_shuttingDown && fnName !== 'close') {
+  if (_shuttingDown && fnName !== 'closeRpcConnection') {
     throw new Error(
       `Rejecting IPC channel job (${fnName}); application is shutting down`
     );
@@ -166,9 +163,6 @@ function _makeJob(fnName: string) {
 
   const jobId = crypto.randomBytes(15).toString('hex');
 
-  if (DEBUG_IPC_CALLS) {
-    // console.log(`IPC channel job ${jobId} (${fnName}) started`);
-  }
   _jobs[jobId] = {
     fnName
   };
@@ -194,11 +188,6 @@ function _updateJob(id: string, data: any) {
 }
 
 function _removeJob(id: string) {
-  if (DEBUG_IPC_CALLS) {
-    _jobs[id].complete = true;
-    return;
-  }
-
   if (_jobs[id].timer) {
     clearTimeout(_jobs[id].timer);
     _jobs[id].timer = null;
@@ -232,11 +221,11 @@ function makeChannel(fnName: string) {
         args: DEBUG_IPC_CALLS ? args : null
       });
 
-      _jobs[jobId].timer = setTimeout(
-        () =>
-          reject(new Error(`IPC channel job ${jobId} (${fnName}) timed out`)),
-        IPC_UPDATE_TIMEOUT
-      );
+      _jobs[jobId].timer = setTimeout(() => {
+        const logline = `IPC channel job ${jobId}: ${fnName} timed out`;
+        appendToAppLogsOutsideRedux(logline);
+        reject(new Error(logline));
+      }, IPC_UPDATE_TIMEOUT);
     });
   };
 }
@@ -244,11 +233,11 @@ function makeChannel(fnName: string) {
 export async function shutdown(): Promise<void> {
   // Stop accepting new SQL jobs, flush outstanding queue
   await _shutdown();
-  await close();
+  await closeRpcConnection();
 }
 // Note: will need to restart the app after calling this, to set up afresh
-export async function close(): Promise<void> {
-  await channels.close();
+export async function closeRpcConnection(): Promise<void> {
+  await channels.closeRpcConnection();
 }
 
 export interface DaemonSummaryStatus {

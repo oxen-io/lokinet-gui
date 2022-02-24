@@ -17,11 +17,14 @@ export const eventsByJobId = Object.create(null);
 const logLineBuffers: Array<string> = [];
 let isRendererReady = false;
 
+let getMainWindowLocal: () => BrowserWindow | null;
+
 export async function initializeIpcNodeSide(
   getMainWindow: () => BrowserWindow | null,
   tray: Tray
 ): Promise<void> {
   await initialLokinetRpcDealer();
+  getMainWindowLocal = getMainWindow;
 
   ipcMain.on(MINIMIZE_TO_TRAY, () => {
     const mainWindow = getMainWindow();
@@ -67,11 +70,14 @@ export async function initializeIpcNodeSide(
 }
 
 export function logLineToAppSide(logLine: string): void {
-  console.warn('logLine', logLine);
+  // console.warn('logLine', logLine);
   const withTimestamp = `${logLine}`;
   if (isRendererReady) {
-    ipcMain.emit(IPC_LOG_LINE, withTimestamp);
+    console.warn(`logLine ready "${logLine}`);
+    getMainWindowLocal()?.webContents.send(IPC_LOG_LINE, withTimestamp);
   } else {
+    console.warn(`logLine buffered "${logLine}`);
+
     logLineBuffers.push(withTimestamp);
   }
 }
