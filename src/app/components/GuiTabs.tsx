@@ -26,7 +26,7 @@ export const GuiTabs = (): JSX.Element => {
 
   return (
     <Tabs
-      maxHeight="100%"
+      height="0px"
       width="100%"
       padding="20px 5px 0 5px"
       display="flex"
@@ -46,11 +46,11 @@ export const GuiTabs = (): JSX.Element => {
         <Tab _selected={selectedStyle}>CHART</Tab>
         <Tab _selected={selectedStyle}>LOGS</Tab>
       </TabList>
-      <TabPanels flexGrow={1} padding={1}>
-        <TabPanel flexGrow={1} padding={2} height="100%">
+      <TabPanels flexGrow={1} padding={1} height="0px">
+        <TabPanel flexGrow={1} padding={2}>
           <MainTab />
         </TabPanel>
-        <TabPanel flexGrow={1} padding={2} height="100%">
+        <TabPanel flexGrow={1} padding={2}>
           <SpeedChart />
         </TabPanel>
         <TabPanel flexGrow={1} padding={2} height="100%">

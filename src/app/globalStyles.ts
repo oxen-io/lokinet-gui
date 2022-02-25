@@ -10,7 +10,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     font-family: "IBM Plex Mono";
     overflow-x: hiddden;
     font-weight: 400;
-    transition: 0.25s;
+    transition: 0.25s linear;
     transition: width 0s;
   }
 
@@ -30,14 +30,15 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
   }
 
   ::-webkit-scrollbar {
-    width: 5px;
+    width: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: ${({ theme }) => theme.backgroundColor};
+    // no bg to keep the border-radius of the <code> container
   }
 
   ::-webkit-scrollbar-thumb {
+    border-radius: 10px;
     background: ${({ theme }) => theme.textColor};
   }
 
@@ -72,7 +73,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     border-bottom: 3px solid transparent;
     padding: 0 5px 5px 5px;
     user-select: none;
-    transition: 0.25s;
+    transition: 0.25s linear;
   }
 
 

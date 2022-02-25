@@ -38,7 +38,7 @@ const InlineIconButton = styled.button<{ size: string; theme: DefaultTheme }>`
   border: none;
   cursor: pointer;
 
-  transition: 0.25s;
+  transition: 0.25s linear;
   border-radius: 7px;
 
   :hover {

@@ -10,7 +10,7 @@ const StyledIconButton = styled.button<{ size: string; theme: DefaultTheme }>`
   border: none;
   cursor: pointer;
   background: none;
-  transition: 0.25s;
+  transition: 0.25s linear;
   border-radius: 7px;
   padding: 5px;
   :hover {

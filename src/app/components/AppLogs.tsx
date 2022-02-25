@@ -49,6 +49,7 @@ export const AppLogs = (): JSX.Element => {
         borderRadius="8px"
         flexDirection="column-reverse"
         flexGrow={1}
+        flexShrink={300}
         backgroundColor={theme.inputBackground}
       >
         {hasLogLine ? (

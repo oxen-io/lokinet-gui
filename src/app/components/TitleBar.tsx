@@ -18,7 +18,7 @@ const Container = styled.div`
   font-size: 2rem;
   -webkit-app-region: drag;
   -webkit-user-select: none;
-
+  flex-shrink: 0;
   padding: 0.5rem 1rem;
 `;
 
@@ -29,6 +29,7 @@ const StyledIconButton = styled.button`
   cursor: pointer;
   background: none;
   -webkit-app-region: no-drag;
+  flex-shrink: 0;
 
   transition: 0.25s;
   :hover {
