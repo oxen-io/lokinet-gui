@@ -33,13 +33,13 @@ export const invoke = async (
   try {
     const result = await execPromisified(cmdWithArgs);
     if (result && (result.stdout || result.stderr)) {
-      console.warn(`Failed to invoke: '${cmdWithArgs}'`);
-      console.warn(`result: `, result);
+      console.info(`Failed to invoke: '${cmdWithArgs}'`);
+      console.info(`result: `, result);
       return result.stdout || result.stderr || null;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (e: any) {
-    console.warn('invoke failed with', e);
+    console.info('invoke failed with', e);
     const stderr = e.stderr ? e.stderr : '';
     const stdout = e.stdout ? e.stdout : '';
     const cmd = e.cmd ? `${e.cmd}: ` : '';
@@ -104,7 +104,7 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
       }
     } catch (e: any) {
       logLineToAppSide(`Lokinet process start failed with ${e.message}`);
-      console.warn('doStartLokinetProcess failed with', e);
+      console.info('doStartLokinetProcess failed with', e);
       sendGlobalErrorToAppSide('error-start-stop');
     }
   } else {
@@ -129,7 +129,7 @@ export const doStopLokinetProcess = async (): Promise<void> => {
   } catch (e: any) {
     logLineToAppSide(`Lokinet process stop failed with ${e.message}`);
 
-    console.warn('doStopLokinetProcess failed with', e);
+    console.info('doStopLokinetProcess failed with', e);
   }
 };
 

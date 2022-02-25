@@ -85,7 +85,7 @@ export const closeRpcConnection = (): void => {
       dealer.close();
       dealer = null;
     } catch (e) {
-      console.warn(e);
+      console.info(e);
     }
   }
 };

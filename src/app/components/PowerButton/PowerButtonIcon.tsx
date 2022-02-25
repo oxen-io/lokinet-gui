@@ -4,23 +4,25 @@ import styled, { useTheme } from 'styled-components';
 import { selectedTheme } from '../../../features/uiStatusSlice';
 import { useGlobalConnectingStatus } from '../../hooks/connectingStatus';
 
-export const PowerButtonIcon = (): JSX.Element => {
+export const PowerButtonIcon = (props: { isHovered: boolean }): JSX.Element => {
+  const isHovered = props.isHovered;
   const globalStatus = useGlobalConnectingStatus();
   const theme = useTheme();
   const themeType = useSelector(selectedTheme);
 
-  let buttonColor = theme.textColorSubtle;
+  let buttonColor = isHovered ? theme.textColor : theme.textColorSubtle;
   let dropShadow = '';
 
   if (globalStatus === 'connecting' || globalStatus === 'connected') {
-    buttonColor = theme.textColor;
-    if (globalStatus === 'connected') {
+    buttonColor = isHovered ? theme.textColorSubtle : theme.textColor;
+    if (globalStatus === 'connected' && !isHovered) {
       dropShadow =
         themeType === 'light'
           ? 'drop-shadow(rgba(0, 0, 0, 0.16) 0px 0px 1px)'
           : 'drop-shadow(0px 0px 6px #FFFFFF)';
     }
   }
+
   return (
     <StyledPowerIcon buttonColor={buttonColor} dropShadow={dropShadow}>
       {svgPower}
@@ -37,6 +39,8 @@ const StyledPowerIcon = styled.div<{ buttonColor: string; dropShadow: string }>`
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
+  transition: inherit;
+
   svg {
     height: 100%;
     width: 100%;

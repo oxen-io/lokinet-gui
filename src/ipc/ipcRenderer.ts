@@ -99,7 +99,7 @@ export async function initializeIpcRendererSide(): Promise<void> {
     (event, jobId, errorForDisplay, result: string | null) => {
       const job = _getJob(jobId);
       if (!job) {
-        console.warn(
+        console.info(
           `Received IPC channel reply to job ${jobId}, but did not have it in our registry!`
         );
         return;
@@ -293,14 +293,14 @@ export const parseSummaryStatus = (
   // if we got an error, just return isRunning false.
   // the redux store will reset all values to their default.
   if (error || stats.error) {
-    console.warn('We got an error for Status: ', error || stats.error);
+    console.info('We got an error for Status: ', error || stats.error);
     return defaultDaemonSummaryStatus;
   }
   const statsResult = stats.result;
   const parsedSummaryStatus: DaemonSummaryStatus = defaultDaemonSummaryStatus;
 
   if (!statsResult || _.isEmpty(statsResult)) {
-    console.warn('We got an empty statsResult');
+    console.info('We got an empty statsResult');
     return parsedSummaryStatus;
   }
 

@@ -87,18 +87,18 @@ export async function initializeIpcNodeSide(
 export function logLineToAppSide(logLine: string): void {
   const withTimestamp = `${logLine}`;
   if (utilityIPCCalls.getRendererReady()) {
-    console.warn(`logLine ready "${logLine}`);
+    console.info(`logLine ready "${logLine}`);
     getMainWindowLocal()?.webContents.send(IPC_LOG_LINE, withTimestamp);
   } else {
-    console.warn('logLineToAppSide : renderer is not ready');
+    console.info('logLineToAppSide : renderer is not ready');
   }
 }
 
 export function sendGlobalErrorToAppSide(globalError: StatusErrorType): void {
   if (utilityIPCCalls.getRendererReady()) {
-    console.warn(`global error "${globalError}`);
+    console.info(`global error "${globalError}`);
     getMainWindowLocal()?.webContents.send(IPC_GLOBAL_ERROR, globalError);
   } else {
-    console.warn('sendGlobalErrorToAppSide : renderer is not ready');
+    console.info('sendGlobalErrorToAppSide : renderer is not ready');
   }
 }

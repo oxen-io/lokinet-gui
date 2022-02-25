@@ -9,7 +9,9 @@ import {
 
 export const PowerButtonContainerBorder = (props: {
   children: React.ReactNode;
+  isHovered: boolean;
 }): JSX.Element => {
+  const isHovered = props.isHovered;
   const globalStatus = useGlobalConnectingStatus();
   const globalStatusIsError = isGlobalStatusError(globalStatus);
   const theme = useTheme();
@@ -27,11 +29,15 @@ export const PowerButtonContainerBorder = (props: {
 
   const borderColor =
     globalStatus === 'default' || globalStatusIsError
+      ? isHovered
+        ? theme.textColor
+        : theme.textColorSubtle
+      : isHovered
       ? theme.textColorSubtle
       : theme.textColor;
 
   const filterShadow =
-    globalStatus === 'connected' && themeType === 'light'
+    !isHovered && globalStatus === 'connected' && themeType === 'light'
       ? 'drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.74));'
       : '';
 
@@ -48,6 +54,8 @@ const StyledBorderContainer = styled.div<{
 }>`
   width: 100%;
   height: 100%;
+  transition: 0.25s;
+
   border: 2px solid ${(props) => props.borderColor};
   filter: ${(props) => props.filter};
   border-radius: 50%;

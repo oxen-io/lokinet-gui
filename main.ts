@@ -19,8 +19,9 @@ export function getTrayIcon(): Tray | null {
 }
 
 async function createWindow() {
-  const height = 650; // 650
-  const width = 1000; // 450
+  const openDevTools = false;
+  const height = 850; // 850
+  const width = openDevTools ? 1000 : 450; // 450
 
   const isDev = process.env.NODE_ENV === 'development';
 
@@ -47,10 +48,14 @@ async function createWindow() {
 
   if (isDev) {
     mainWindow.loadURL(`http://localhost:4000`);
-    mainWindow.webContents.openDevTools({ mode: 'right' });
+    if (openDevTools) {
+      mainWindow.webContents.openDevTools({ mode: 'right' });
+    }
   } else {
     mainWindow.loadFile('./dist/index.html');
-    mainWindow.webContents.openDevTools({ mode: 'right' });
+    if (openDevTools) {
+      mainWindow.webContents.openDevTools({ mode: 'right' });
+    }
   }
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();

@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useHover } from 'react-use';
 import styled from 'styled-components';
 import {
   selectAuthCodeFromUser,
@@ -43,9 +44,6 @@ const StyledPowerButton = styled.div`
 
   transition: 0.25s;
 
-  &:hover {
-    background-color: ${(props) => props.theme.inputBackground};
-  }
 `;
 
 const getPowerButtonStyles = (
@@ -88,6 +86,8 @@ const getPowerButtonContainerShadowStyle = (
 export const PowerButton = (): JSX.Element => {
   const themeType = useSelector(selectedTheme);
 
+  const [isHovered, setIsHovered] = useState(false);
+
   const connectingStatus = useGlobalConnectingStatus();
   const dispatch = useDispatch();
 
@@ -103,6 +103,12 @@ export const PowerButton = (): JSX.Element => {
     <StyledPowerButtonContainer
       shadow={shadow}
       bg={buttonContainerBackground}
+      onMouseEnter={() => {
+        setIsHovered(true);
+      }}
+      onMouseLeave={() => {
+        setIsHovered(false);
+      }}
       onClick={() => {
         if (
           connectingStatus === 'connecting' ||
@@ -118,8 +124,8 @@ export const PowerButton = (): JSX.Element => {
       }}
     >
       <StyledPowerButton>
-        <PowerButtonContainerBorder>
-          <PowerButtonIcon />
+        <PowerButtonContainerBorder isHovered={isHovered}>
+          <PowerButtonIcon isHovered={isHovered} />
         </PowerButtonContainerBorder>
       </StyledPowerButton>
     </StyledPowerButtonContainer>

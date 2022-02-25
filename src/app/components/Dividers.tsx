@@ -1,7 +1,5 @@
 import React from 'react';
 import styled from 'styled-components';
-import { AiOutlinePlus } from 'react-icons/ai';
-
 export const paddingDividers = '30px';
 
 const StyledBorderIcon = styled.div`
@@ -16,10 +14,33 @@ const StyledBorderIcon = styled.div`
   }
 `;
 
+const StyledSvgPlusIcon = styled.svg`
+  padding: 4px;
+`;
+
 const BorderPLusIcon = (): JSX.Element => {
   return (
     <StyledBorderIcon>
-      <AiOutlinePlus />
+      <StyledSvgPlusIcon
+        xmlns="http://www.w3.org/2000/svg"
+        width="17"
+        height="16"
+        viewBox="0 0 17 16"
+        fill="none"
+      >
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M8.45834 16V0H9.45834V16H8.45834Z"
+          fill="currentColor"
+        />
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M0.921997 7.50262H17V8.50262H0.921997V7.50262Z"
+          fill="currentColor"
+        />
+      </StyledSvgPlusIcon>
     </StyledBorderIcon>
   );
 };

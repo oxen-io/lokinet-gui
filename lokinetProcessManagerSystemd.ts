@@ -54,7 +54,7 @@ export class LokinetSystemDProcessManager implements ILokinetProcessManager {
           `SystemD: checking if lokinet is running failed with: ${e}`
         );
 
-        console.warn(e);
+        console.info(e);
       }
     }
     return false;

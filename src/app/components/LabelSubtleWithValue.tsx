@@ -130,30 +130,50 @@ const KeyValueWithIconAndPill = (props: {
   value: string;
   icon: React.ReactNode;
   fontSize: string;
+  marginBottom?: string;
   pillColor?: string;
 }): JSX.Element => {
   const { label, value, icon, pillColor } = props;
 
   return (
-    <Flex justifyContent="start" fontSize={props.fontSize}>
+    <Flex
+      justifyContent="start"
+      fontSize={props.fontSize}
+      marginBottom={props.marginBottom}
+    >
       {icon}
-      {Boolean(pillColor) && <Pill ledColor={pillColor} size="0.8em" />}
+      {!!pillColor && <Pill ledColor={pillColor} size="0.8em" />}
       <StyledLabelSubtle>{label}: </StyledLabelSubtle>
       <StyledValue>{value}</StyledValue>
     </Flex>
   );
 };
 
-export const UpSpeedWithPillAndIcon = (): JSX.Element => {
-  const upSpeed = useSelector(selectUploadRate);
-
+const SpeedWithPillAndIcon = (props: {
+  label: string;
+  value: string;
+  pillColor: string;
+  icon: React.ReactNode;
+}): JSX.Element => {
   return (
     <KeyValueWithIconAndPill
-      label="Upload"
-      value={upSpeed}
-      fontSize="1rem"
+      fontSize="0.9rem"
+      label={props.label}
+      value={props.value}
+      icon={props.icon}
+      pillColor={props.pillColor}
+    />
+  );
+};
+
+export const UpSpeedWithPillAndIcon = (): JSX.Element => {
+  const upSpeed = useSelector(selectUploadRate);
+  return (
+    <SpeedWithPillAndIcon
       pillColor={uploadColorChart}
       icon={<UploadInlineIcon size="15px" />}
+      label="Upload"
+      value={upSpeed}
     />
   );
 };
@@ -161,12 +181,27 @@ export const UpSpeedWithPillAndIcon = (): JSX.Element => {
 export const DownSpeedWithPillAndIcon = (): JSX.Element => {
   const downSpeed = useSelector(selectDownloadRate);
   return (
-    <KeyValueWithIconAndPill
-      label="Download"
-      value={downSpeed}
-      fontSize="1rem"
+    <SpeedWithPillAndIcon
       pillColor={downloadColorChart}
       icon={<DownloadInlineIcon size="15px" />}
+      label="Download"
+      value={downSpeed}
+    />
+  );
+};
+
+const SpeedWithIcon = (props: {
+  label: string;
+  value: string;
+  icon: React.ReactNode;
+}): JSX.Element => {
+  return (
+    <KeyValueWithIconAndPill
+      label={props.label}
+      fontSize="1rem"
+      marginBottom="0.5rem"
+      value={props.value}
+      icon={props.icon}
     />
   );
 };
@@ -175,9 +210,8 @@ export const UpSpeedWithIcon = (): JSX.Element => {
   const upSpeed = useSelector(selectUploadRate);
 
   return (
-    <KeyValueWithIconAndPill
+    <SpeedWithIcon
       label="Upload"
-      fontSize="1rem"
       value={upSpeed}
       icon={
         <>
@@ -191,10 +225,10 @@ export const UpSpeedWithIcon = (): JSX.Element => {
 
 export const DownSpeedWithIcon = (): JSX.Element => {
   const downSpeed = useSelector(selectDownloadRate);
+
   return (
-    <KeyValueWithIconAndPill
+    <SpeedWithIcon
       label="Download"
-      fontSize="1rem"
       value={downSpeed}
       icon={
         <>

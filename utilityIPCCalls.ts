@@ -7,6 +7,7 @@ let isRendererReady = false;
 
 export function markRendererReady(jobId: string): void {
   isRendererReady = true;
+
   void lokinetProcessManager.doStartLokinetProcess(jobId);
 }
 
