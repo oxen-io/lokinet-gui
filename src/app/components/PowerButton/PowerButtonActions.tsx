@@ -6,6 +6,7 @@ import {
   markExitIsTurningOn
 } from '../../../features/exitStatusSlice';
 import { setGlobalError } from '../../../features/statusSlice';
+import { setTabSelected } from '../../../features/uiStatusSlice';
 import { addExit, deleteExit } from '../../../ipc/ipcRenderer';
 import { AppDispatch, store } from '../../store';
 
@@ -15,6 +16,7 @@ const dispatchExitFailedToTurnOn = (dispatch: Dispatch<any>) => {
 
   if (store.getState().status.globalError === undefined) {
     dispatch(setGlobalError('error-add-exit'));
+    dispatch(setTabSelected('logs'));
   }
 };
 

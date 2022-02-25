@@ -17,10 +17,12 @@ export const uiSlice = createSlice({
   name: 'ui',
   initialState: initialGeneralInfosState,
   reducers: {
-    setTabSelected(state, action: PayloadAction<TabIndex>) {
+    setTabSelected(state, action: PayloadAction<'main' | 'chart' | 'logs'>) {
+      const tabSelected =
+        action.payload === 'main' ? 0 : action.payload === 'chart' ? 1 : 2;
       return {
         ...state,
-        tabSelected: action.payload
+        tabSelected
       };
     },
     setTheme(state, action: PayloadAction<ThemeType>) {

@@ -22,7 +22,6 @@ const channelsFromRendererToMainToMake = {
   deleteExit,
   setConfig,
   // lokinet process manager calls
-  doStartLokinetProcess,
   doStopLokinetProcess,
   // utility calls
   markRendererReady,
@@ -53,10 +52,6 @@ export async function addExit(
 
 export async function deleteExit(): Promise<string> {
   return channels.deleteExit();
-}
-
-export async function doStartLokinetProcess(): Promise<string | null> {
-  return channels.doStartLokinetProcess();
 }
 
 export async function doStopLokinetProcess(): Promise<string | null> {
@@ -226,7 +221,7 @@ function makeChannel(fnName: string) {
       });
 
       _jobs[jobId].timer = setTimeout(() => {
-        const logline = `IPC channel job ${jobId}: ${fnName} timed out`;
+        const logline = `IPC channel job ${jobId}: ${fnName} timed out at ${Date.now()}`;
         appendToAppLogsOutsideRedux(logline);
         reject(new Error(logline));
       }, IPC_UPDATE_TIMEOUT);
@@ -283,7 +278,7 @@ export const parseSummaryStatus = (
   let stats = null;
 
   if (!payload || _.isEmpty(payload)) {
-    console.warn('Empty payload fot for summary status');
+    console.info('Empty payload for summary status');
     return defaultDaemonSummaryStatus;
   }
 

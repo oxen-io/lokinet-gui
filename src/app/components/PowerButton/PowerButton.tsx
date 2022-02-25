@@ -40,6 +40,12 @@ const StyledPowerButton = styled.div`
   border: 2px solid ${(props) => props.theme.textColor}
   position: absolute;
   border-radius: 50%;
+
+  transition: 0.25s;
+
+  &:hover {
+    background-color: ${(props) => props.theme.inputBackground};
+  }
 `;
 
 const getPowerButtonStyles = (

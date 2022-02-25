@@ -7,7 +7,7 @@ import * as zmq from 'zeromq/v5-compat';
 _zmq.context.blocky = false;
 
 import { eventsByJobId } from './ipcNode';
-import { DEBUG_RPC_CALLS, IPC_CHANNEL_KEY } from './sharedIpc';
+import { IPC_CHANNEL_KEY } from './sharedIpc';
 
 const RPC_BOUND_PORT = 1190;
 const RPC_BOUND_IP = '127.0.0.1';
@@ -20,7 +20,7 @@ let isRunning = false;
 const request = async (
   cmd: string,
   reply_tag: string,
-  _opts: any
+  args: string
 ): Promise<void> => {
   if (!cmd) {
     throw new Error(`Missing cmd`);
@@ -28,10 +28,7 @@ const request = async (
   if (!reply_tag) {
     throw new Error(`You must use a reply tag for cmd ${cmd}`);
   }
-  if (DEBUG_RPC_CALLS) {
-    console.info(`\t====> sending RPC  cmd:${cmd};  reply_tag:${reply_tag}`);
-  }
-  await dealer.send([cmd, reply_tag, _opts]);
+  await dealer.send([cmd, reply_tag, args]);
 };
 
 // LokinetApiClient::invoke
@@ -40,8 +37,8 @@ const invoke = async (
   reply_tag: string,
   args: Record<string, unknown>
 ) => {
-  const req = JSON.stringify(args);
-  await request(endpoint, reply_tag, req);
+  const argsStringified = JSON.stringify(args);
+  await request(endpoint, reply_tag, argsStringified);
 };
 
 export const getSummaryStatus = async (reply_tag: string): Promise<void> => {
@@ -113,11 +110,6 @@ const loopDealerReceiving = async (): Promise<void> => {
           if (!event) {
             throw new Error(`Could not find the event for jobId ${jobId}`);
           }
-          if (DEBUG_RPC_CALLS) {
-            console.info(
-              `\t<==== received RPC  jobId:${jobId};  content:${content}`
-            );
-          }
           event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, content);
           delete eventsByJobId[jobId];
         } else {
@@ -154,7 +146,7 @@ export const initialLokinetRpcDealer = async (): Promise<void> => {
     throw new Error('RPC Channel is already init.');
   }
 
-  dealer = new _zmq.Dealer();
+  dealer = new _zmq.Dealer({ sendTimeout: 10000 });
   // just trigger the loop, non blocking
   void loopDealerReceiving();
 };

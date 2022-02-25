@@ -34,7 +34,9 @@ export const GuiTabs = (): JSX.Element => {
       flexGrow={1}
       index={selectedTab}
       onChange={(index: number) => {
-        dispatch(setTabSelected(index as TabIndex));
+        dispatch(
+          setTabSelected(index === 0 ? 'main' : index === 1 ? 'chart' : 'logs')
+        );
       }}
       isLazy={false}
       variant="unstyled"

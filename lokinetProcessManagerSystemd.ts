@@ -79,12 +79,12 @@ export class LokinetSystemDProcessManager implements ILokinetProcessManager {
   }
 
   async doStopLokinetProcess(): Promise<string | null> {
-    return invoke('systemctl', ['--no-block', 'stop', lokinetService]);
-  }
+    const isRunning = await this.checkForActiveLokinetService();
 
-  async doForciblyStopLokinetProcess(): Promise<string | null> {
-    // systemd's "stop" is a managed stop -- it will do its own forceful kill
-    return this.doStopLokinetProcess();
+    if (!isRunning) {
+      return null;
+    }
+    return invoke('systemctl', ['--no-block', 'stop', lokinetService]);
   }
 
   getDefaultBootstrapFileLocation(): string {

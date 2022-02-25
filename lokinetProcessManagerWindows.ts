@@ -9,10 +9,6 @@ export class LokinetWindowsProcessManager implements ILokinetProcessManager {
     return invoke('net', ['stop', 'lokinet']);
   }
 
-  doForciblyStopLokinetProcess(): Promise<string | null> {
-    return this.doStopLokinetProcess();
-  }
-
   getDefaultBootstrapFileLocation(): string {
     return 'C:\\ProgramData\\lokinet\\bootstrap.signed';
   }

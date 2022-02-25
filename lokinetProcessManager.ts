@@ -53,7 +53,6 @@ export const invoke = async (
 export interface ILokinetProcessManager {
   doStartLokinetProcess: () => Promise<string | null>;
   doStopLokinetProcess: () => Promise<string | null>;
-  doForciblyStopLokinetProcess: () => Promise<string | null>;
 
   // /var/lib/lokinet/bootstrap.signed for MacOS
   getDefaultBootstrapFileLocation: () => string;
@@ -112,8 +111,11 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
   event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
-export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
-  let result: string | undefined;
+/**
+ * doStopLokinetProcess is only called when exiting the app so there is no point to wait
+ * for the event return and so no jobId argument required
+ */
+export const doStopLokinetProcess = async (): Promise<void> => {
   try {
     logLineToAppSide('About to stop Lokinet process');
 
@@ -124,24 +126,6 @@ export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
 
     console.warn('doStopLokinetProcess failed with', e);
   }
-  const event = getEventByJobId(jobId);
-  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
-};
-
-export const doForciblyStopLokinetProcess = async (
-  jobId: string
-): Promise<void> => {
-  let result: string | null = null;
-
-  try {
-    const manager = await getLokinetProcessManager();
-    result = await manager.doForciblyStopLokinetProcess();
-  } catch (e) {
-    console.warn('doForciblyStopLokinetProcess failed with', e);
-  }
-
-  const event = getEventByJobId(jobId);
-  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
 export const doGetProcessPid = (): number => {
