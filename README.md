@@ -41,3 +41,8 @@ They will be saved under `./release`.
 ### CI Builds
 
 builds from ci can be obtained from our [ci server](https://oxen.rocks)
+
+### Env variables
+
+To avoid being asked to start/stop the lokinet daemon on every start of this GUI you can set the environment variable
+`DISABLE_AUTO_START_STOP=anything` on your system or before starting the GUI.

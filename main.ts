@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { app, BrowserWindow, Tray } from 'electron';
-import { initializeIpcNodeSide } from './ipcNode';
+import { initializeIpcNodeSide, logLineToAppSide } from './ipcNode';
 import { doStopLokinetProcess } from './lokinetProcessManager';
 import { closeRpcConnection } from './lokinetRpcCall';
 import { createTrayIcon } from './trayIcon';
@@ -82,7 +82,13 @@ async function createWindow() {
 app.on('before-quit', () => {
   console.log('before-quit event');
   void closeRpcConnection();
-  void doStopLokinetProcess();
+  if (!process.env.DISABLE_AUTO_START_STOP) {
+    void doStopLokinetProcess();
+  } else {
+    logLineToAppSide(
+      'ENV "DISABLE_AUTO_START_STOP" is set, not auto starting lokinet daemon'
+    );
+  }
 
   if (tray) {
     tray.destroy();
