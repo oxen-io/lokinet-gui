@@ -1,10 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { app, BrowserWindow, Tray } from 'electron';
+import { app, BrowserWindow, screen, Tray } from 'electron';
 import { initializeIpcNodeSide, logLineToAppSide } from './ipcNode';
 import { doStopLokinetProcess } from './lokinetProcessManager';
 import { closeRpcConnection } from './lokinetRpcCall';
 import { createTrayIcon } from './trayIcon';
 import { markShouldQuit, shouldQuit } from './windowState';
+
+import ElectronStore from 'electron-store';
+
+let store: ElectronStore | undefined;
+const configScreenIndex = 'SCREEN_INDEX';
 
 let mainWindow: BrowserWindow | null;
 let tray: Tray | null = null;
@@ -19,28 +24,62 @@ export function getTrayIcon(): Tray | null {
 }
 
 async function createWindow() {
+  if (!store) {
+    store = new ElectronStore();
+  }
+
+  let validScreenIndexToUse: number | undefined;
+
+  const allDisplays = screen.getAllDisplays();
+  if (store.has(configScreenIndex)) {
+    const screenIndexFromStore = store.get(configScreenIndex) as
+      | number
+      | undefined;
+
+    if (
+      screenIndexFromStore !== undefined &&
+      allDisplays.length <= screenIndexFromStore
+    ) {
+      validScreenIndexToUse = screenIndexFromStore;
+    }
+  }
   const openDevTools = false;
-  const height = 850; // 850
-  const width = openDevTools ? 1000 : 450; // 450
+  const defaultHeight = 850; // 850
+  const defaultWidth = openDevTools ? 1000 : 450; // 450
 
   const isDev = process.env.NODE_ENV === 'development';
+  const indexToUse = validScreenIndexToUse || 1;
+  const sz = allDisplays[indexToUse].size;
+  const bounds = allDisplays[indexToUse].bounds;
+
+  const displayWidth = Math.max(sz.width, sz.height);
+  const displayHeight = Math.min(sz.width, sz.height);
+
+  const scaleFactorDiy = Math.min(displayWidth / 1920, displayHeight / 1080);
+  console.warn(scaleFactorDiy);
+
+  const width = defaultWidth * scaleFactorDiy;
+  const height = defaultHeight * scaleFactorDiy;
 
   mainWindow = new BrowserWindow({
-    width: width,
-    height: height,
+    width,
+    height,
     minHeight: height,
     minWidth: 450,
     resizable: true,
+
     icon: './build/icon.png',
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
       webSecurity: true,
-      zoomFactor: 1.0
+      zoomFactor: scaleFactorDiy
     },
     backgroundColor: '#fff',
     autoHideMenuBar: true,
-    frame: false
+    frame: false,
+    x: Math.floor(bounds.x + bounds.width / 2 - width / 2),
+    y: Math.floor(bounds.y + bounds.height / 2 - height / 2)
   });
   ready = true;
 
