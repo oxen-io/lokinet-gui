@@ -48,7 +48,7 @@ async function createWindow() {
   const defaultWidth = openDevTools ? 1000 : 450; // 450
 
   const isDev = process.env.NODE_ENV === 'development';
-  const indexToUse = validScreenIndexToUse || 1;
+  const indexToUse = validScreenIndexToUse || 0;
   const sz = allDisplays[indexToUse].size;
   const bounds = allDisplays[indexToUse].bounds;
 
