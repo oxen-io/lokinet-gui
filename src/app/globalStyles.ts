@@ -12,6 +12,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     font-weight: 400;
     transition: 0.25s linear;
     transition: width 0s;
+    text-rendering: optimizeLegibility;
   }
 
   code {
