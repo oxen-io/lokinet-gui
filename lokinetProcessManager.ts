@@ -15,6 +15,7 @@ import { LokinetWindowsProcessManager } from './lokinetProcessManagerWindows';
 
 import { IPC_CHANNEL_KEY } from './sharedIpc';
 import { exec } from 'child_process';
+import { LokinetMacOSProcessManager } from './lokinetProcessManagerMacOS';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const execPromisified = util.promisify(exec);
@@ -22,7 +23,7 @@ const execPromisified = util.promisify(exec);
 
 const LINUX = 'linux';
 const WIN = 'win32';
-// const MACOS = 'darwin';
+const MACOS = 'darwin';
 
 export const invoke = async (
   cmd: string,
@@ -69,6 +70,13 @@ const getLokinetProcessManager = async () => {
     logLineToAppSide('Current system is windows');
 
     lokinetProcessManager = new LokinetWindowsProcessManager();
+    return lokinetProcessManager;
+  }
+
+  if (process.platform === MACOS) {
+    logLineToAppSide('Current system is macos');
+
+    lokinetProcessManager = new LokinetMacOSProcessManager();
     return lokinetProcessManager;
   }
 
