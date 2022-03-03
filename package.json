@@ -71,7 +71,6 @@
     "@types/react-redux": "^7.1.16",
     "@types/styled-components": "^5.1.22",
     "@types/victory": "^33.1.4",
-    "@typescript-eslint/eslint-plugin": "^4.15.1",
     "@typescript-eslint/parser": "^4.15.1",
     "babel-loader": "^8.2.2",
     "concurrently": "^7.0.0",
