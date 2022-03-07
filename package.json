@@ -37,8 +37,13 @@
       "category": "public.app-category.utilities"
     },
     "win": {
-      "target": "nsis",
-      "requestedExecutionLevel": "requireAdministrator"
+      "target": [
+        "portable"
+      ]
+    },
+    "portable": {
+      "artifactName": "LOKINET-GUI_portable.exe",
+      "requestExecutionLevel": "admin"
     },
     "nsis": {
       "include": "build-scripts/nsis-installer.nsh"
