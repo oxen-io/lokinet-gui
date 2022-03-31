@@ -73,7 +73,7 @@ local windows_cross_pipeline(name, image,
                 "yarn --version",
                 "node --version",
                 "yarn install --frozen-lockfile --cache-folder $CCACHE_DIR/yarn",
-                "WINEDEBUG=-all WINEPREFIX=$(pwd)/wineprefix yarn win32 --cache-folder $CCACHE_DIR/yarn"
+                "WINEDEBUG=-all WINEPREFIX=$(pwd)/wineprefix yarn --cache-folder $CCACHE_DIR/yarn win32"
             ] + extra_cmds,
         }
     ],
