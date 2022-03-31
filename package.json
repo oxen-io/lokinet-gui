@@ -23,9 +23,9 @@
     "dist": "rimraf -f dist release && yarn compile && yarn electron-builder",
     "postinstall": "yarn patch-package ",
     "win32": "rimraf -f dist release && yarn compile && electron-builder --windows portable",
-    "deb": "rimraf -f dist release && yarn compile && electron-builder --linux deb",
-    "appImage": "rimraf -f dist release && yarn compile && electron-builder --linux appImage",
-    "appImageFromPack": "electron-builder  --prepackaged ./release/linux-unpacked --linux appImage",
+    "deb": "rimraf -f dist release && yarn compile && electron-builder --linux deb --publish=never",
+    "appImage": "rimraf -f dist release && yarn compile && electron-builder --linux appImage --publish=never",
+    "appImageFromPack": "electron-builder  --prepackaged ./release/linux-unpacked --linux appImage --publish=never",
     "dist": "yarn appImage && yarn win32 && yarn deb"
   },
   "build": {
