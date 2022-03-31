@@ -51,7 +51,6 @@ elif [ -e release/*.AppImage ]; then
     archive="$base-appimage.tar.xz"
     tar cJvf "$archive" "$base"
 fi
-fi
 
 upload_to="oxen.rocks/${DRONE_REPO// /_}/${DRONE_BRANCH// /_}"
 
