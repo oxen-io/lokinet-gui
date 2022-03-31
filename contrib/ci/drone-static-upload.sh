@@ -43,8 +43,14 @@ if [ -e release/*.exe ]; then
 elif [ -e release/*.deb ]; then
     cp -av release/*.deb "$base"
     # tar dat shiz up yo
-    archive="$base.tar.xz"
+    archive="$base-deb.tar.xz"
     tar cJvf "$archive" "$base"
+elif [ -e release/*.AppImage ]; then
+    cp -av release/*.AppImage "$base"
+    # tar dat shiz up yo
+    archive="$base-appimage.tar.xz"
+    tar cJvf "$archive" "$base"
+fi
 fi
 
 upload_to="oxen.rocks/${DRONE_REPO// /_}/${DRONE_BRANCH// /_}"

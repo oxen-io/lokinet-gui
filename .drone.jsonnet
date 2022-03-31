@@ -15,9 +15,7 @@ local debian_pipeline(name, image,
         arch='amd64',
         deps=default_deps,
         build_type='Release',
-        lto=false,
-        werror=true,
-        cmake_extra='',
+        target='deb',
         extra_cmds=[],
         loki_repo=false,
         allow_fail=false) = {
@@ -39,7 +37,10 @@ local debian_pipeline(name, image,
                 apt_get_quiet + ' update',
                 apt_get_quiet + ' install -y eatmydata',
                 'eatmydata ' + apt_get_quiet + ' dist-upgrade -y',
-                'yarn install --frozen-lockfile && yarn deb'
+                "yarn --version",
+                "node --version",
+                "yarn install --frozen-lockfile --cache-folder $CCACHE_DIR/yarn",
+                "yarn --cache-folder $CCACHE_DIR/yarn " + target
             ] + extra_cmds,
         }
     ],
@@ -48,10 +49,6 @@ local debian_pipeline(name, image,
 local windows_cross_pipeline(name, image,
         arch='amd64',
         build_type='Release',
-        lto=false,
-        werror=false,
-        cmake_extra='',
-        toolchain='32',
         extra_cmds=[],
         allow_fail=false) = {
     kind: 'pipeline',
@@ -65,7 +62,7 @@ local windows_cross_pipeline(name, image,
             name: 'build',
             image: image,
             [if allow_fail then "failure"]: "ignore",
-            environment: { SSH_KEY: { from_secret: "SSH_KEY" }, WINDOWS_BUILD_NAME: toolchain+"bit" },
+            environment: { SSH_KEY: { from_secret: "SSH_KEY" }, WINDOWS_BUILD_NAME: "x64" },
             commands: [
                 'echo "Building on ${DRONE_STAGE_MACHINE}"',
                 'echo "man-db man-db/auto-update boolean false" | debconf-set-selections',
@@ -74,9 +71,8 @@ local windows_cross_pipeline(name, image,
                 'eatmydata ' + apt_get_quiet + ' dist-upgrade -y',
                 "yarn --version",
                 "node --version",
-                "npm config set cache $CCACHE_DIR/yarn --global",
-                "npm install --force",
-                "WINEDEBUG=-all WINEPREFIX=$(pwd)/wineprefix npm run win32"
+                "yarn install --frozen-lockfile --cache-folder $CCACHE_DIR/yarn",
+                "WINEDEBUG=-all WINEPREFIX=$(pwd)/wineprefix yarn win32 --cache-folder $CCACHE_DIR/yarn"
             ] + extra_cmds,
         }
     ],
@@ -100,7 +96,7 @@ local mac_builder(name, build_type='Release', werror=true, cmake_extra='', extra
                 // basic system headers.  WTF apple:
                 'export SDKROOT="$(xcrun --sdk macosx --show-sdk-path)"',
                 'ulimit -n 1024', // because macos sets ulimit to 256 for some reason yeah idk
-                'yarn install --frozen-lockfile && yarn release',
+                'yarn install --frozen-lockfile && yarn macos',
             ] + extra_cmds,
         }
     ]
@@ -108,11 +104,11 @@ local mac_builder(name, build_type='Release', werror=true, cmake_extra='', extra
 
 
 [
-    // Windows builds (x64)
-    windows_cross_pipeline("Windows (amd64)", docker_image,
+    windows_cross_pipeline("Windows (x64)", docker_image,
        extra_cmds=[
            './contrib/ci/drone-static-upload.sh'
        ]),
 
-    debian_pipeline("Linux (deb)", docker_image, extra_cmds=["./contrib/ci/drone-static-upload.sh"])
+    debian_pipeline("Linux (appimage)", docker_image, target='appImage', extra_cmds=["./contrib/ci/drone-static-upload.sh"]),
+    debian_pipeline("Linux (deb)", docker_image, target='deb', extra_cmds=["./contrib/ci/drone-static-upload.sh"])
 ]

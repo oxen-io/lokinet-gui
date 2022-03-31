@@ -25,7 +25,8 @@
     "win32": "rimraf -f dist release && yarn compile && electron-builder --windows portable",
     "deb": "rimraf -f dist release && yarn compile && electron-builder --linux deb",
     "appImage": "rimraf -f dist release && yarn compile && electron-builder --linux appImage",
-    "appImageFromPack": "electron-builder  --prepackaged ./release/linux-unpacked --linux appImage"
+    "appImageFromPack": "electron-builder  --prepackaged ./release/linux-unpacked --linux appImage",
+    "dist": "yarn appImage && yarn win32 && yarn deb"
   },
   "build": {
     "appId": "com.electron.lokinet.gui",
