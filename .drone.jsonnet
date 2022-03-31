@@ -39,6 +39,7 @@ local debian_pipeline(name, image,
                 'eatmydata ' + apt_get_quiet + ' dist-upgrade -y',
                 "yarn --version",
                 "node --version",
+                "mkdir -p $CCACHE_DIR/yarn",
                 "yarn install --frozen-lockfile --cache-folder $CCACHE_DIR/yarn",
                 "yarn --cache-folder $CCACHE_DIR/yarn " + target
             ] + extra_cmds,
