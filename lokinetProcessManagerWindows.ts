@@ -1,16 +1,12 @@
 import { ILokinetProcessManager, invoke } from './lokinetProcessManager';
 
 export class LokinetWindowsProcessManager implements ILokinetProcessManager {
-  doStartLokinetProcess(): Promise<boolean> {
+  doStartLokinetProcess(): Promise<string | null> {
     return invoke('net', ['start', 'lokinet']);
   }
 
-  doStopLokinetProcess(): Promise<boolean> {
+  doStopLokinetProcess(): Promise<string | null> {
     return invoke('net', ['stop', 'lokinet']);
-  }
-
-  doForciblyStopLokinetProcess(): Promise<boolean> {
-    return this.doStopLokinetProcess();
   }
 
   getDefaultBootstrapFileLocation(): string {

@@ -1,14 +1,38 @@
-import { Flex, Input, Text, Stack } from '@chakra-ui/react';
+import { Flex, Stack, Input } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
+import styled from 'styled-components';
 import {
   onUserAuthCodeSet,
   onUserExitNodeSet,
   selectExitStatus
 } from '../../features/exitStatusSlice';
 import { useAppDispatch } from '../hooks';
-import { EnableExitToggle } from './EnableExitToggle';
-import { VerticalDivider } from './VerticalDivider';
+import { paddingDividers } from './Dividers';
+
+const ExitInput = styled(Input)`
+  background-color: ${(props) => props.theme.inputBackground};
+  color: ${(props) => props.theme.textColor};
+  outline-color: transparent;
+  font-family: 'IBM Plex Mono';
+  font-weight: 400;
+  border-radius: 3px;
+  border: none;
+  font-size: 1.1rem;
+  padding: 5px;
+  outline: none;
+  transition: 0.5s;
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'auto')};
+`;
+
+const InputLabel = styled.div`
+  font-family: Archivo;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 1.1rem;
+  text-align: start;
+  user-select: none;
+`;
 
 export const ExitPanel = (): JSX.Element => {
   const exitStatus = useSelector(selectExitStatus);
@@ -25,20 +49,16 @@ export const ExitPanel = (): JSX.Element => {
     : exitStatus.exitNodeFromUser;
 
   return (
-    <Flex flexDirection="column" flexGrow={1}>
-      <Text alignSelf="flex-start" fontWeight={700}>
-        Exit node
-      </Text>
-      <Stack
-        direction="row"
-        alignSelf="center"
-        width="100%"
-        height="100%"
-        p={2}
-      >
-        <VerticalDivider />
+    <Flex
+      flexDirection="column"
+      flexGrow={1}
+      paddingLeft={paddingDividers}
+      paddingRight={paddingDividers}
+    >
+      <Stack direction="row" alignSelf="center" width="100%" height="100%">
         <Flex flexDirection="column" flexGrow={1}>
-          <Input
+          <InputLabel>EXIT NODE</InputLabel>
+          <ExitInput
             disabled={disableInputEdits}
             onChange={(e) =>
               dispatch(onUserExitNodeSet(e?.currentTarget?.value))
@@ -49,13 +69,15 @@ export const ExitPanel = (): JSX.Element => {
             size="sm"
             variant="flushed"
             marginBottom={2}
+            spellCheck={false}
             noOfLines={1}
-            placeholder="Exit address"
-            _placeholder={{ color: '#a7a7a7' }}
             value={exitToUse || ''}
           />
-          <Input
+          <InputLabel>AUTH CODE</InputLabel>
+
+          <ExitInput
             disabled={disableInputEdits}
+            spellCheck={false}
             onChange={(e) =>
               dispatch(onUserAuthCodeSet(e?.currentTarget?.value))
             }
@@ -65,12 +87,9 @@ export const ExitPanel = (): JSX.Element => {
             size="sm"
             variant="flushed"
             value={exitStatus.exitAuthCodeFromUser || ''}
-            placeholder="Auth code"
-            _placeholder={{ color: '#a7a7a7' }}
             marginBottom={2}
             noOfLines={1}
           />
-          <EnableExitToggle />
         </Flex>
       </Stack>
     </Flex>

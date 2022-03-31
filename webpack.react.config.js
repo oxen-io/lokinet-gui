@@ -15,7 +15,7 @@ module.exports = {
     rules: [
       {
         test: /\.(js|ts|tsx)$/,
-        use: [{ loader: 'babel-loader', options: { cacheDirectory: false } }],
+        use: [{ loader: 'babel-loader' }],
         exclude: /node_modules/
       },
       {
@@ -33,16 +33,20 @@ module.exports = {
     ]
   },
   devServer: {
-    static: { directory: path.join(__dirname, './dist'), publicPath: '/' },
+    static: { directory: path.join(__dirname, 'dist') },
     historyApiFallback: true,
-    compress: true,
+    compress: false,
     hot: true,
+    client: {
+      logging: 'info'
+    },
+
     port: 4000
   },
   output: {
     path: path.resolve(__dirname, './dist'),
     filename: 'js/[name].js',
-    publicPath: '/'
+    publicPath: './' //needs to be "./" for releases
   },
   plugins: [new HtmlWebpackPlugin({ title: 'Lokinet GUI' })],
   optimization: {

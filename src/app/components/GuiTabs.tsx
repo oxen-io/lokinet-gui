@@ -1,6 +1,7 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/react';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useTheme } from 'styled-components';
 import {
   selectSelectedTab,
   setTabSelected,
@@ -13,34 +14,46 @@ import { SpeedChart } from './SpeedChart';
 export const GuiTabs = (): JSX.Element => {
   const selectedTab = useSelector(selectSelectedTab);
   const dispatch = useDispatch();
+
+  const theme = useTheme();
+  const fgSelected = theme.textColor;
+
+  const selectedStyle = {
+    color: fgSelected,
+    borderBottom: `3px solid ${fgSelected}}`,
+    fontWeight: 700
+  };
+
   return (
     <Tabs
-      maxHeight="100%"
+      height="0px"
       width="100%"
-      variant="soft-rounded"
-      colorScheme="green"
-      padding={3}
+      padding="20px 5px 0 5px"
       display="flex"
       flexDir="column"
       flexGrow={1}
       index={selectedTab}
-      onChange={(index) => {
-        dispatch(setTabSelected(index as TabIndex));
+      onChange={(index: number) => {
+        dispatch(
+          setTabSelected(index === 0 ? 'main' : index === 1 ? 'chart' : 'logs')
+        );
       }}
+      isLazy={false}
+      variant="unstyled"
     >
-      <TabList justifyContent="center">
-        <Tab>Main</Tab>
-        <Tab>Chart</Tab>
-        <Tab>Logs</Tab>
+      <TabList justifyContent="space-evenly">
+        <Tab _selected={selectedStyle}>MAIN</Tab>
+        <Tab _selected={selectedStyle}>CHART</Tab>
+        <Tab _selected={selectedStyle}>LOGS</Tab>
       </TabList>
-      <TabPanels flexGrow={1} padding={1}>
-        <TabPanel padding={2}>
+      <TabPanels flexGrow={1} padding={1} height="0px">
+        <TabPanel flexGrow={1} padding={2}>
           <MainTab />
         </TabPanel>
-        <TabPanel padding={2}>
+        <TabPanel flexGrow={1} padding={2}>
           <SpeedChart />
         </TabPanel>
-        <TabPanel padding={2}>
+        <TabPanel flexGrow={1} padding={2} height="100%">
           <AppLogs />
         </TabPanel>
       </TabPanels>

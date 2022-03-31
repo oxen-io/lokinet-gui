@@ -1,9 +1,13 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ipcMain } from 'electron';
-import { Dealer as ZeroMqDealer } from 'zeromq';
+import * as _zmq from 'zeromq/';
+import * as zmq from 'zeromq/v5-compat';
+
+_zmq.context.blocky = false;
+
 import { eventsByJobId } from './ipcNode';
-import { DEBUG_RPC_CALLS, IPC_CHANNEL_KEY } from './sharedIpc';
+import { IPC_CHANNEL_KEY } from './sharedIpc';
 
 const RPC_BOUND_PORT = 1190;
 const RPC_BOUND_IP = '127.0.0.1';
@@ -16,7 +20,7 @@ let isRunning = false;
 const request = async (
   cmd: string,
   reply_tag: string,
-  _opts: any
+  args: string
 ): Promise<void> => {
   if (!cmd) {
     throw new Error(`Missing cmd`);
@@ -24,10 +28,7 @@ const request = async (
   if (!reply_tag) {
     throw new Error(`You must use a reply tag for cmd ${cmd}`);
   }
-  if (DEBUG_RPC_CALLS) {
-    console.info(`\t====> sending RPC  cmd:${cmd};  reply_tag:${reply_tag}`);
-  }
-  await dealer.send([cmd, reply_tag, _opts]);
+  await dealer.send([cmd, reply_tag, args]);
 };
 
 // LokinetApiClient::invoke
@@ -36,16 +37,12 @@ const invoke = async (
   reply_tag: string,
   args: Record<string, unknown>
 ) => {
-  const req = JSON.stringify(args);
-  await request(endpoint, reply_tag, req);
+  const argsStringified = JSON.stringify(args);
+  await request(endpoint, reply_tag, argsStringified);
 };
 
-export const getUpTimeAndVersion = async (reply_tag: string): Promise<void> => {
-  await invoke('llarp.version', reply_tag, {});
-};
-
-export const getStatus = async (reply_tag: string): Promise<void> => {
-  await invoke('llarp.status', reply_tag, {});
+export const getSummaryStatus = async (reply_tag: string): Promise<void> => {
+  await invoke('llarp.get_status', reply_tag, {});
 };
 
 export const addExit = async (
@@ -80,10 +77,16 @@ export const setConfig = async (
   await invoke('llarp.config', reply_tag, { override: obj, reload: true });
 };
 
-export const close = (): void => {
+export const closeRpcConnection = (): void => {
   isRunning = false;
+  console.info('stopping rpc dealer');
   if (dealer) {
-    dealer.close();
+    try {
+      dealer.close();
+      dealer = null;
+    } catch (e) {
+      console.info(e);
+    }
   }
 };
 
@@ -107,11 +110,6 @@ const loopDealerReceiving = async (): Promise<void> => {
           if (!event) {
             throw new Error(`Could not find the event for jobId ${jobId}`);
           }
-          if (DEBUG_RPC_CALLS) {
-            console.info(
-              `\t<==== received RPC  jobId:${jobId};  content:${content}`
-            );
-          }
           event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, content);
           delete eventsByJobId[jobId];
         } else {
@@ -134,10 +132,12 @@ const loopDealerReceiving = async (): Promise<void> => {
       }
     }
   } catch (e) {
-    console.error(
-      `Got an exception while trying to bind to ${RPC_ZMQ_ADDRESS}:`,
-      e
-    );
+    if (isRunning) {
+      console.error(
+        `Got an exception while trying to bind to ${RPC_ZMQ_ADDRESS}:`,
+        e
+      );
+    }
   }
 };
 
@@ -146,7 +146,7 @@ export const initialLokinetRpcDealer = async (): Promise<void> => {
     throw new Error('RPC Channel is already init.');
   }
 
-  dealer = new ZeroMqDealer();
+  dealer = new _zmq.Dealer({ sendTimeout: 10000 });
   // just trigger the loop, non blocking
   void loopDealerReceiving();
 };

@@ -1,64 +1,18 @@
-import { Flex, Icon, Stack, Text } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { selectStatus } from '../../features/statusSlice';
-import { FiUploadCloud, FiDownloadCloud } from 'react-icons/fi';
-import { VerticalDivider } from './VerticalDivider';
-
-function makeRate(value: number): string {
-  let unit_idx = 0;
-  const units = ['B', 'KB', 'MB'];
-  while (value > 1024.0 && unit_idx + 1 < units.length) {
-    value /= 1024.0;
-    unit_idx += 1;
-  }
-  const unitSpeed = ` ${units[unit_idx]}/s`;
-  return (
-    (value < 10
-      ? Math.round(value * 100) / 100
-      : value < 100
-      ? Math.round(value * 10) / 10
-      : Math.round(value)) + unitSpeed
-  );
-}
-
-const SpeedStatsFlex = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <Flex width="100%" justifyContent="space-between">
-      {children}
-    </Flex>
-  );
-};
+import {
+  selectUploadRate,
+  selectDownloadRate
+} from '../../features/statusSlice';
+import { StatsHeading, StatsSection } from './CommonStats';
+import { DownSpeedWithIcon, UpSpeedWithIcon } from './LabelSubtleWithValue';
 
 export const SpeedStats = (): JSX.Element => {
-  const daemonStatus = useSelector(selectStatus);
-  const upSpeed = makeRate(daemonStatus.uploadUsage);
-  const downSpeed = makeRate(daemonStatus.downloadUsage);
-
   return (
-    <Flex flexDirection="column" flexGrow={1}>
-      <Text alignSelf="flex-start" fontWeight={700}>
-        Speeds
-      </Text>
-      <Stack
-        direction="row"
-        alignSelf="center"
-        width="100%"
-        height="100%"
-        p={2}
-      >
-        <VerticalDivider />
-        <Flex flexDirection="column" flexGrow={1}>
-          <SpeedStatsFlex>
-            <Icon margin="5px" as={FiUploadCloud} />
-            <Text>{upSpeed}</Text>
-          </SpeedStatsFlex>
-          <SpeedStatsFlex>
-            <Icon margin="5px" as={FiDownloadCloud} />
-            <Text>{downSpeed}</Text>
-          </SpeedStatsFlex>
-        </Flex>
-      </Stack>
-    </Flex>
+    <StatsSection>
+      <StatsHeading title="SPEEDS" />
+      <UpSpeedWithIcon />
+      <DownSpeedWithIcon />
+    </StatsSection>
   );
 };

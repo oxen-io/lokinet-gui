@@ -3,96 +3,108 @@ import React from 'react';
 import ReactDom from 'react-dom';
 import 'focus-visible/dist/focus-visible';
 
-import { ChakraProvider, extendTheme, useInterval } from '@chakra-ui/react';
+import { useInterval } from '@chakra-ui/react';
 
 import {
-  getStatus,
-  getUpTimeAndVersion,
+  getSummaryStatus,
   initializeIpcRendererSide,
-  parseGeneralInfos,
-  parseStateResults,
-  POLLING_GENERAL_INFOS_INTERVAL_MS,
+  parseSummaryStatus,
   POLLING_STATUS_INTERVAL_MS
 } from '../ipc/ipcRenderer';
-import { markAsStopped, updateFromDaemonStatus } from '../features/statusSlice';
-import { Provider } from 'react-redux';
+import {
+  markAsStopped,
+  setGlobalError,
+  updateFromDaemonStatus
+} from '../features/statusSlice';
+import { Provider, useSelector } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch } from './hooks';
-import { updateFromDaemonGeneralInfos } from '../features/generalInfosSlice';
-import { markExitNodesFromDaemon } from '../features/exitStatusSlice';
+import {
+  markExitNodesFromDaemon,
+  markInitialLoadingFinished
+} from '../features/exitStatusSlice';
 import { AppLayout } from './components/AppLayout';
 import { appendToApplogs } from '../features/appLogsSlice';
+import { GlobalStyle } from './globalStyles';
+import { ThemeProvider } from 'styled-components';
+import { darkTheme, lightTheme } from './theme';
+import { selectedTheme } from '../features/uiStatusSlice';
+import { StatusErrorType } from '../../sharedIpc';
+import { useGlobalConnectingStatus } from './hooks/connectingStatus';
 
-initializeIpcRendererSide();
+void initializeIpcRendererSide();
 
-const App = () => {
+export function appendToAppLogsOutsideRedux(logline: string): void {
+  store.dispatch(appendToApplogs(logline));
+}
+
+export function setErrorOutsideRedux(errorStatus: StatusErrorType): void {
+  store.dispatch(setGlobalError(errorStatus));
+}
+
+const useSummaryStatusPolling = () => {
   // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
-  const styles = {
-    global: () => ({
-      body: {
-        color: 'black',
-        bg: 'white',
-        height: '100%',
-        width: '100vw'
-      },
-      html: {
-        height: '100%'
-      }
-    })
-  };
 
-  const theme = extendTheme({
-    config: {
-      initialColorMode: 'light'
-    },
-    colors: {
-      green: {
-        200: 'red'
-      }
-    },
-    styles
-  });
+  const globalStatus = useGlobalConnectingStatus();
 
   // register an interval for fetching the status of the daemon
   useInterval(async () => {
-    // getStatus sends an IPC call to our node environment
+    // getSummaryStatus sends an IPC call to our node environment
     // once on the node environment, it will trigger and wait for the RPC call to finish
     // or timeout before returning.
     try {
-      const statusAsString = await getStatus();
+      const statusAsString = await getSummaryStatus();
       // The status we get is a plain string. Extract the details we care from it and build
       // the state we will send as update to the redux store
-      const parsedStatus = parseStateResults(statusAsString);
+      const parsedStatus = parseSummaryStatus(statusAsString);
       // Send the update to the redux store.
       dispatch(updateFromDaemonStatus({ daemonStatus: parsedStatus }));
-      if (
-        store.getState().exitStatus.exitNodeFromDaemon !== parsedStatus.exitNode
-      ) {
-        dispatch(
-          appendToApplogs(`exitNode set by daemon: ${parsedStatus.exitNode}`)
-        );
-      }
-
-      if (
+      const hasExitNodeChange =
+        store.getState().exitStatus.exitNodeFromDaemon !==
+        parsedStatus.exitNode;
+      const hasExitAuthChange =
         store.getState().exitStatus.exitAuthCodeFromDaemon !==
-        parsedStatus.exitAuthCode
-      ) {
+        parsedStatus.exitAuthCode;
+      if (hasExitNodeChange) {
         dispatch(
           appendToApplogs(
-            `authCode set by daemon: ${parsedStatus.exitAuthCode}`
+            `exitNode set by daemon: ${parsedStatus.exitNode || ''}`
           )
         );
       }
-      dispatch(
-        markExitNodesFromDaemon({
-          exitNodeFromDaemon: parsedStatus.exitNode,
-          exitAuthCodeFromDaemon: parsedStatus.exitAuthCode
-        })
-      );
+
+      if (hasExitAuthChange) {
+        dispatch(
+          appendToApplogs(
+            `authCode set by daemon: ${parsedStatus.exitAuthCode || ''}`
+          )
+        );
+      }
+
+      if (hasExitNodeChange || hasExitAuthChange) {
+        dispatch(
+          markExitNodesFromDaemon({
+            exitNodeFromDaemon: parsedStatus.exitNode,
+            exitAuthCodeFromDaemon: parsedStatus.exitAuthCode
+          })
+        );
+        // the daermon told us we have an exit set but our current state says we have an error on the status.
+        // make sure to remove that error from the UI
+        if (
+          hasExitNodeChange &&
+          parsedStatus.exitNode &&
+          globalStatus === 'error-add-exit'
+        ) {
+          dispatch(setGlobalError(undefined));
+        }
+      }
+      dispatch(markInitialLoadingFinished());
     } catch (e) {
-      console.log('getStatus() failed');
+      console.log('getSummaryStatus() failed');
       dispatch(markAsStopped());
+      dispatch(markInitialLoadingFinished());
+
       dispatch(
         markExitNodesFromDaemon({
           exitNodeFromDaemon: undefined,
@@ -101,32 +113,32 @@ const App = () => {
       );
     }
   }, POLLING_STATUS_INTERVAL_MS);
+};
 
-  // register an interval for fetching the version and uptime of the daemon.
-  // Note: With react, no refresh is triggered if the change made does not make a change
-  useInterval(async () => {
-    try {
-      const generalInfos = await getUpTimeAndVersion();
-      const parsedInfos = parseGeneralInfos(generalInfos);
-      dispatch(updateFromDaemonGeneralInfos({ generalsInfos: parsedInfos }));
-    } catch (e) {
-      console.log('getUpTimeAndVersion() failed');
+const App = () => {
+  useSummaryStatusPolling();
+  return <AppLayout />;
+};
 
-      dispatch(updateFromDaemonGeneralInfos({}));
-    }
-  }, POLLING_GENERAL_INFOS_INTERVAL_MS);
+ReactDom.render(<div id="root" />, document.body);
 
+const LokinetThemeProvider = (props: { children: React.ReactNode }) => {
+  const currentTheme = useSelector(selectedTheme);
   return (
-    <ChakraProvider resetCSS={true} theme={theme}>
-      <AppLayout />
-    </ChakraProvider>
+    <ThemeProvider theme={currentTheme === 'light' ? lightTheme : darkTheme}>
+      {props.children}
+    </ThemeProvider>
   );
 };
 
 // Make the Redux store available to all sub components of <App/>
 ReactDom.render(
   <Provider store={store}>
-    <App />
+    <LokinetThemeProvider>
+      <GlobalStyle />
+
+      <App />
+    </LokinetThemeProvider>
   </Provider>,
-  document.body
+  document.getElementById('root')
 );

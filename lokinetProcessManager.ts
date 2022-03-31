@@ -1,5 +1,10 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import util from 'util';
-import { eventsByJobId } from './ipcNode';
+import {
+  getEventByJobId,
+  logLineToAppSide,
+  sendGlobalErrorToAppSide
+} from './ipcNode';
 import { LokinetLinuxProcessManager } from './lokinetProcessManagerLinux';
 import {
   LokinetSystemDProcessManager,
@@ -9,47 +14,46 @@ import {
 import { LokinetWindowsProcessManager } from './lokinetProcessManagerWindows';
 
 import { IPC_CHANNEL_KEY } from './sharedIpc';
+import { exec } from 'child_process';
+import { LokinetMacOSProcessManager } from './lokinetProcessManagerMacOS';
+
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const exec = util.promisify(require('child_process').exec);
+const execPromisified = util.promisify(exec);
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 
 const LINUX = 'linux';
 const WIN = 'win32';
-// const MACOS = 'darwin';
+const MACOS = 'darwin';
 
 export const invoke = async (
   cmd: string,
   args: Array<string>
-): Promise<boolean> => {
+): Promise<string | null> => {
   const cmdWithArgs = `${cmd} ${args.join(' ')}`;
   console.log('running cmdWithArgs', cmdWithArgs);
   try {
-    const result = await exec(cmdWithArgs);
+    const result = await execPromisified(cmdWithArgs);
     if (result && (result.stdout || result.stderr)) {
-      console.warn(`Failed to invoke: '${cmdWithArgs}'`);
-      console.warn(`result: `, result);
-      return false;
+      console.info(`Failed to invoke: '${cmdWithArgs}'`);
+      console.info(`result: `, result);
+      return result.stdout || result.stderr || null;
     }
-  } catch (e) {
-    console.warn('invoke failed with', e);
-    return false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (e: any) {
+    console.info('invoke failed with', e);
+    const stderr = e.stderr ? e.stderr : '';
+    const stdout = e.stdout ? e.stdout : '';
+    const cmd = e.cmd ? `${e.cmd}: ` : '';
+    logLineToAppSide(`invoke failed with: ${e}`);
+    return `${cmd}${stdout}  ${stderr}`;
   }
 
-  return true;
-};
-
-const getEventByJobId = (jobId: string) => {
-  const event = eventsByJobId[jobId];
-
-  if (!event) {
-    throw new Error(`Could not find the event for jobId ${jobId}`);
-  }
-  return event;
+  return null;
 };
 
 export interface ILokinetProcessManager {
-  doStartLokinetProcess: () => Promise<boolean>;
-  doStopLokinetProcess: () => Promise<boolean>;
-  doForciblyStopLokinetProcess: () => Promise<boolean>;
+  doStartLokinetProcess: () => Promise<string | null>;
+  doStopLokinetProcess: () => Promise<string | null>;
 
   // /var/lib/lokinet/bootstrap.signed for MacOS
   getDefaultBootstrapFileLocation: () => string;
@@ -63,7 +67,16 @@ const getLokinetProcessManager = async () => {
   }
 
   if (process.platform === WIN) {
+    logLineToAppSide('Current system is windows');
+
     lokinetProcessManager = new LokinetWindowsProcessManager();
+    return lokinetProcessManager;
+  }
+
+  if (process.platform === MACOS) {
+    logLineToAppSide('Current system is macos');
+
+    lokinetProcessManager = new LokinetMacOSProcessManager();
     return lokinetProcessManager;
   }
 
@@ -72,9 +85,12 @@ const getLokinetProcessManager = async () => {
       lokinetProcessManager = new LokinetSystemDProcessManager();
       return lokinetProcessManager;
     }
+    logLineToAppSide('Current system is linux but not systemd');
+
     lokinetProcessManager = new LokinetLinuxProcessManager();
     return lokinetProcessManager;
   }
+  logLineToAppSide('Current system is UNSUPPORTED');
 
   throw new Error(
     `LokinetProcessManager not implemented for ${process.platform}`
@@ -82,47 +98,47 @@ const getLokinetProcessManager = async () => {
 };
 
 export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
-  let result = false;
+  let result: string | undefined;
 
-  try {
-    const manager = await getLokinetProcessManager();
-    result = await manager.doStartLokinetProcess();
-  } catch (e) {
-    console.warn('doStartLokinetProcess failed with', e);
+  if (!process.env.DISABLE_AUTO_START_STOP) {
+    try {
+      logLineToAppSide('About to start Lokinet process');
+
+      const manager = await getLokinetProcessManager();
+      const startStopResult = await manager.doStartLokinetProcess();
+
+      if (startStopResult) {
+        sendGlobalErrorToAppSide('error-start-stop');
+      }
+    } catch (e: any) {
+      logLineToAppSide(`Lokinet process start failed with ${e.message}`);
+      console.info('doStartLokinetProcess failed with', e);
+      sendGlobalErrorToAppSide('error-start-stop');
+    }
+  } else {
+    logLineToAppSide(
+      'ENV "DISABLE_AUTO_START_STOP" is set, not auto starting lokinet daemon'
+    );
   }
-
   const event = getEventByJobId(jobId);
   event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
-export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
-  let result = false;
-
+/**
+ * doStopLokinetProcess is only called when exiting the app so there is no point to wait
+ * for the event return and so no jobId argument required
+ */
+export const doStopLokinetProcess = async (): Promise<void> => {
   try {
+    logLineToAppSide('About to stop Lokinet process');
+
     const manager = await getLokinetProcessManager();
-    result = await manager.doStopLokinetProcess();
-  } catch (e) {
-    console.warn('doStopLokinetProcess failed with', e);
+    await manager.doStopLokinetProcess();
+  } catch (e: any) {
+    logLineToAppSide(`Lokinet process stop failed with ${e.message}`);
+
+    console.info('doStopLokinetProcess failed with', e);
   }
-
-  const event = getEventByJobId(jobId);
-  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
-};
-
-export const doForciblyStopLokinetProcess = async (
-  jobId: string
-): Promise<void> => {
-  let result = false;
-
-  try {
-    const manager = await getLokinetProcessManager();
-    result = await manager.doForciblyStopLokinetProcess();
-  } catch (e) {
-    console.warn('doForciblyStopLokinetProcess failed with', e);
-  }
-
-  const event = getEventByJobId(jobId);
-  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
 export const doGetProcessPid = (): number => {

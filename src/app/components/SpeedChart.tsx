@@ -1,15 +1,20 @@
 import { Flex } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
+import { useTheme } from 'styled-components';
 import {
   VictoryChart,
-  VictoryTheme,
   VictoryGroup,
   VictoryArea,
-  VictoryLegend,
-  VictoryContainer
+  VictoryAxis,
+  VictoryLabel
 } from 'victory';
-import { selectStatus } from '../../features/statusSlice';
+import { makeRate, selectStatus } from '../../features/statusSlice';
+import { PlusDivider } from './Dividers';
+import {
+  DownSpeedWithPillAndIcon,
+  UpSpeedWithPillAndIcon
+} from './LabelSubtleWithValue';
 
 export type NumberQueue = Array<number>;
 export type SpeedHistoryDataType = {
@@ -21,11 +26,12 @@ export type SpeedHistoryDataType = {
 
 export const MAX_NUMBER_POINT_HISTORY = 60; // 1 minute as there is 2 points per sec currently
 
-export const SpeedChart = (): JSX.Element => {
-  const uploadColor = 'var(--chakra-colors-green-500)';
-  const downloadColor = 'var(--chakra-colors-red-500)';
-  const daemonStatus = useSelector(selectStatus);
+export const uploadColorChart = '#37EB19';
+export const downloadColorChart = '#F33232';
 
+export const SpeedChart = (): JSX.Element => {
+  const daemonStatus = useSelector(selectStatus);
+  const theme = useTheme();
   const uploadCoordinates = daemonStatus.speedHistory.upload.map((y, index) => {
     return {
       x: index,
@@ -44,12 +50,50 @@ export const SpeedChart = (): JSX.Element => {
 
   return (
     <Flex flexDirection="column" height="100%">
-      <Flex flexDirection="column" width="100%" alignItems="center">
+      <PlusDivider />
+      <Flex
+        flexDirection="column"
+        width="90%"
+        alignItems="center"
+        margin="0 auto"
+        maxWidth="500px"
+      >
         <VictoryChart
           animate={false}
-          theme={VictoryTheme.material}
-          containerComponent={<VictoryContainer responsive={false} />}
+          domainPadding={20}
+          theme={{
+            axis: {
+              style: {
+                axis: { stroke: theme.textColor },
+                axisLabel: { stroke: theme.textColor },
+                tickLabels: { fill: theme.textColor },
+                grid: { stroke: 'none' }
+              }
+            }
+          }}
+          minDomain={{ x: 0, y: 1 }}
+          width={500}
+          height={300}
+          padding={{ left: 80, top: 20, right: 0, bottom: 30 }}
         >
+          <VictoryAxis
+            dependentAxis={true}
+            domain={[0, 1]}
+            minDomain={1}
+            tickCount={3}
+            tickLabelComponent={<VictoryLabel dx={-10} />}
+            tickFormat={(t) => makeRate(t, true)}
+          />
+
+          <VictoryAxis
+            domain={[-60, 0]}
+            padding={30}
+            dependentAxis={false}
+            tickLabelComponent={<VictoryLabel dy={10} />}
+            tickFormat={(t) => {
+              return t === 60 ? 'now' : t === 10 ? 'a minute ago' : '';
+            }}
+          />
           <VictoryGroup
             style={{
               data: { fillOpacity: 0 }
@@ -57,29 +101,28 @@ export const SpeedChart = (): JSX.Element => {
           >
             <VictoryArea
               style={{
-                data: { stroke: downloadColor, fill: downloadColor }
+                data: { stroke: downloadColorChart, fill: downloadColorChart }
               }}
               data={downloadCoordinates}
             />
             <VictoryArea
               style={{
-                data: { stroke: uploadColor, fill: uploadColor }
+                data: { stroke: uploadColorChart, fill: uploadColorChart }
               }}
               data={uploadCoordinates}
             />
           </VictoryGroup>
         </VictoryChart>
-
-        <VictoryLegend
-          orientation="vertical"
-          width={200}
-          height={60}
-          containerComponent={<VictoryContainer responsive={false} />}
-          data={[
-            { name: 'Upload Speed (kb/s)', symbol: { fill: uploadColor } },
-            { name: 'Download Speed (kb/s)', symbol: { fill: downloadColor } }
-          ]}
-        />
+        <Flex
+          direction="row"
+          width="100%"
+          alignSelf="center"
+          padding="0 0 15px 0"
+          justifyContent="space-evenly"
+        >
+          <UpSpeedWithPillAndIcon />
+          <DownSpeedWithPillAndIcon />
+        </Flex>
       </Flex>
     </Flex>
   );

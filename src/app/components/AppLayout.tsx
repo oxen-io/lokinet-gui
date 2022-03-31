@@ -1,15 +1,36 @@
-import { Flex, Stack } from '@chakra-ui/react';
+import { Stack } from '@chakra-ui/react';
 import React from 'react';
-import { AppTitle } from './AppTitle';
+import styled from 'styled-components';
+import { ConnectedStatus } from './ConnectedStatus';
+import { GeneralInfos } from './GeneralInfos';
 import { GuiTabs } from './GuiTabs';
+import { PowerButton } from './PowerButton/PowerButton';
+import { TitleBar } from './TitleBar';
+
+const Container = styled.div`
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+`;
 
 export const AppLayout = (): JSX.Element => {
   return (
-    <Flex width="100%" height="100%">
-      <Stack padding="10px" textAlign="center" minWidth="400px">
-        <AppTitle />
+    <Container>
+      <TitleBar />
+      <Stack
+        padding="0px 10px 0 10px"
+        textAlign="center"
+        width="100%"
+        height="0px"
+        flexGrow={1}
+      >
+        <ConnectedStatus />
+        <PowerButton />
+        <GeneralInfos />
+
         <GuiTabs />
       </Stack>
-    </Flex>
+    </Container>
   );
 };

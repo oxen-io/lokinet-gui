@@ -6,38 +6,39 @@ import _ from 'lodash';
 import crypto from 'crypto';
 import {
   DEBUG_IPC_CALLS,
-  DEBUG_IPC_CALLS_GET_STATUS,
-  IPC_CHANNEL_KEY
+  IPC_CHANNEL_KEY,
+  IPC_GLOBAL_ERROR,
+  IPC_LOG_LINE,
+  StatusErrorType
 } from '../../sharedIpc';
+import { appendToAppLogsOutsideRedux, setErrorOutsideRedux } from '../app/app';
 
-const IPC_UPDATE_TIMEOUT = 5000; // 5 secs
+const IPC_UPDATE_TIMEOUT = 10000; // 5 secs
 
-const channelsToMake = {
-  getUpTimeAndVersion,
-  getStatus,
+const channelsFromRendererToMainToMake = {
+  // rpc calls (zeromq calls)
+  getSummaryStatus,
   addExit,
   deleteExit,
   setConfig,
-  doStartLokinetProcess,
-  doStopLokinetProcess
+  // lokinet process manager calls
+  doStopLokinetProcess,
+  // utility calls
+  markRendererReady,
+  minimizeToTray
 };
 const channels = {} as any;
 const _jobs = Object.create(null);
 
 export const POLLING_STATUS_INTERVAL_MS = 500;
-export const POLLING_GENERAL_INFOS_INTERVAL_MS = 1000;
 
 // shutting down clean handling
 let _shuttingDown = false;
 let _shutdownCallback: any = null;
 let _shutdownPromise: any = null;
 
-export async function getUpTimeAndVersion(): Promise<string> {
-  return channels.getUpTimeAndVersion();
-}
-
-export async function getStatus(): Promise<string> {
-  return channels.getStatus();
+export async function getSummaryStatus(): Promise<string> {
+  return channels.getSummaryStatus();
 }
 export async function addExit(
   exitAddress: string,
@@ -53,12 +54,16 @@ export async function deleteExit(): Promise<string> {
   return channels.deleteExit();
 }
 
-export async function doStartLokinetProcess(): Promise<boolean> {
-  return channels.doStartLokinetProcess();
+export async function doStopLokinetProcess(): Promise<string | null> {
+  return channels.doStopLokinetProcess();
 }
 
-export async function doStopLokinetProcess(): Promise<boolean> {
-  return channels.doStopLokinetProcess();
+export async function markRendererReady(): Promise<void> {
+  channels.markRendererReady();
+}
+
+export async function minimizeToTray(): Promise<void> {
+  channels.minimizeToTray();
 }
 export async function setConfig(
   section: string,
@@ -68,28 +73,37 @@ export async function setConfig(
   return channels.setConfig(section, key, value);
 }
 
-export function initializeIpcRendererSide(): void {
+export async function initializeIpcRendererSide(): Promise<void> {
   // We listen to a lot of events on ipcRenderer, often on the same channel. This prevents
   //   any warnings that might be sent to the console in that case.
   ipcRenderer.setMaxListeners(0);
 
-  _.forEach(channelsToMake, (fn) => {
+  _.forEach(channelsFromRendererToMainToMake, (fn) => {
     if (_.isFunction(fn)) {
       makeChannel(fn.name);
     }
   });
 
+  ipcRenderer.on(IPC_LOG_LINE, (_event, logLine: string) => {
+    if (_.isString(logLine) && !_.isEmpty(logLine)) {
+      appendToAppLogsOutsideRedux(logLine);
+    }
+  });
+
+  ipcRenderer.on(IPC_GLOBAL_ERROR, (_event, globalError: StatusErrorType) => {
+    setErrorOutsideRedux(globalError);
+  });
+
   ipcRenderer.on(
     `${IPC_CHANNEL_KEY}-done`,
-    (event, jobId, errorForDisplay, result) => {
+    (event, jobId, errorForDisplay, result: string | null) => {
       const job = _getJob(jobId);
       if (!job) {
-        console.warn(
+        console.info(
           `Received IPC channel reply to job ${jobId}, but did not have it in our registry!`
         );
         return;
       }
-
       const { resolve, reject, fnName } = job;
 
       if (errorForDisplay) {
@@ -100,18 +114,11 @@ export function initializeIpcRendererSide(): void {
         );
       }
 
-      if (
-        (fnName === 'getStatus' && DEBUG_IPC_CALLS_GET_STATUS) ||
-        (fnName !== 'getStatus' && DEBUG_IPC_CALLS)
-      ) {
-        // console.log(
-        //   `IPC channel job ${jobId} (${fnName}) finished with: ${result}`
-        // );
-      }
-
       return resolve(result);
     }
   );
+
+  channels.markRendererReady();
 }
 
 async function _shutdown() {
@@ -147,7 +154,7 @@ async function _shutdown() {
 }
 
 function _makeJob(fnName: string) {
-  if (_shuttingDown && fnName !== 'close') {
+  if (_shuttingDown && fnName !== 'closeRpcConnection') {
     throw new Error(
       `Rejecting IPC channel job (${fnName}); application is shutting down`
     );
@@ -155,9 +162,6 @@ function _makeJob(fnName: string) {
 
   const jobId = crypto.randomBytes(15).toString('hex');
 
-  if (DEBUG_IPC_CALLS) {
-    // console.log(`IPC channel job ${jobId} (${fnName}) started`);
-  }
   _jobs[jobId] = {
     fnName
   };
@@ -183,11 +187,6 @@ function _updateJob(id: string, data: any) {
 }
 
 function _removeJob(id: string) {
-  if (DEBUG_IPC_CALLS) {
-    _jobs[id].complete = true;
-    return;
-  }
-
   if (_jobs[id].timer) {
     clearTimeout(_jobs[id].timer);
     _jobs[id].timer = null;
@@ -221,11 +220,11 @@ function makeChannel(fnName: string) {
         args: DEBUG_IPC_CALLS ? args : null
       });
 
-      _jobs[jobId].timer = setTimeout(
-        () =>
-          reject(new Error(`IPC channel job ${jobId} (${fnName}) timed out`)),
-        IPC_UPDATE_TIMEOUT
-      );
+      _jobs[jobId].timer = setTimeout(() => {
+        const logline = `IPC channel job ${jobId}: ${fnName} timed out at ${Date.now()}`;
+        appendToAppLogsOutsideRedux(logline);
+        reject(new Error(logline));
+      }, IPC_UPDATE_TIMEOUT);
     });
   };
 }
@@ -233,33 +232,18 @@ function makeChannel(fnName: string) {
 export async function shutdown(): Promise<void> {
   // Stop accepting new SQL jobs, flush outstanding queue
   await _shutdown();
-  await close();
+  await closeRpcConnection();
 }
 // Note: will need to restart the app after calling this, to set up afresh
-export async function close(): Promise<void> {
-  await channels.close();
+export async function closeRpcConnection(): Promise<void> {
+  await channels.closeRpcConnection();
 }
 
-const forEachSession = (visit: any, stats: any) => {
-  const st = stats.result;
-  for (const idx in st.links) {
-    if (!st.links[idx]) continue;
-    else {
-      const links = st.links[idx];
-      for (const l_idx in links) {
-        const link = links[l_idx];
-        if (!link) continue;
-        const peers = link.sessions.established;
-        for (const p_idx in peers) {
-          visit(peers[p_idx]);
-        }
-      }
-    }
-  }
-};
-
-export interface DaemonStatus {
+export interface DaemonSummaryStatus {
   isRunning: boolean;
+  globalError: StatusErrorType;
+  uptime?: number;
+  version?: string;
   numPeersConnected: number;
   uploadUsage: number;
   downloadUsage: number;
@@ -271,13 +255,11 @@ export interface DaemonStatus {
   exitAuthCode?: string;
 }
 
-export interface ParsedGeneralInfosFromDaemon {
-  uptime: number;
-  version: string;
-}
-
-export const defaultDaemonStatus = {
+export const defaultDaemonSummaryStatus: DaemonSummaryStatus = {
   isRunning: false,
+  globalError: undefined,
+  uptime: undefined,
+  version: undefined,
   numPeersConnected: 0,
   uploadUsage: 0,
   downloadUsage: 0,
@@ -289,143 +271,79 @@ export const defaultDaemonStatus = {
   exitAuthCode: undefined
 };
 
-export const defaultParsedGeneralInfosFromDaemon = {
-  version: '',
-  uptime: 0
-};
-
-export const parseStateResults = (
+export const parseSummaryStatus = (
   payload: string,
   error?: string
-): DaemonStatus => {
+): DaemonSummaryStatus => {
   let stats = null;
-  const parsedState: DaemonStatus = defaultDaemonStatus;
+
+  if (!payload || _.isEmpty(payload)) {
+    console.info('Empty payload for summary status');
+    return defaultDaemonSummaryStatus;
+  }
 
   // We can either have an error of communication, or an error on the returned JSON
   if (!error) {
     try {
       stats = JSON.parse(payload);
     } catch (e) {
-      console.log("Couldn't parse 'stateResult' JSON-RPC payload", e);
+      console.log("Couldn't parse 'summaryStatus' JSON-RPC payload", e);
     }
   }
-
   // if we got an error, just return isRunning false.
   // the redux store will reset all values to their default.
   if (error || stats.error) {
-    console.warn('We got an error for Status: ', error || stats.error);
-    return parsedState;
+    console.info('We got an error for Status: ', error || stats.error);
+    return defaultDaemonSummaryStatus;
+  }
+  const statsResult = stats.result;
+  const parsedSummaryStatus: DaemonSummaryStatus = defaultDaemonSummaryStatus;
+
+  if (!statsResult || _.isEmpty(statsResult)) {
+    console.info('We got an empty statsResult');
+    return parsedSummaryStatus;
   }
 
-  let txRate = 0;
-  let rxRate = 0;
-  let peers = 0;
-  try {
-    forEachSession((s: any) => {
-      txRate += s.tx;
-      rxRate += s.rx;
-      peers += 1;
-    }, stats);
-    parsedState.numPeersConnected = peers;
-  } catch (err) {
-    parsedState.numPeersConnected = 0;
-    console.log("Couldn't pull tx/rx of payload", err);
-  }
-
+  parsedSummaryStatus.numPeersConnected = statsResult.numPeersConnected;
   // we're polling every 500ms, so our per-second rate is half of the
   // rate we tallied up in this sample
-  parsedState.uploadUsage = (txRate * POLLING_STATUS_INTERVAL_MS) / 1000;
-  parsedState.downloadUsage = (rxRate * POLLING_STATUS_INTERVAL_MS) / 1000;
+  const txRate = statsResult.txRate || 0;
+  const rxRate = statsResult.rxRate || 0;
+  parsedSummaryStatus.uploadUsage =
+    (txRate * POLLING_STATUS_INTERVAL_MS) / 1000;
+  parsedSummaryStatus.downloadUsage =
+    (rxRate * POLLING_STATUS_INTERVAL_MS) / 1000;
 
-  parsedState.isRunning = stats?.result?.running || false;
-  parsedState.numRoutersKnown = stats?.result?.numNodesKnown || 0;
+  parsedSummaryStatus.isRunning = statsResult.running || false;
+  parsedSummaryStatus.numRoutersKnown = statsResult.numRoutersKnown || 0;
 
-  parsedState.lokiAddress = stats?.result?.services?.default?.identity || '';
+  parsedSummaryStatus.lokiAddress = statsResult.lokiAddress || '';
+  parsedSummaryStatus.uptime = statsResult.uptime || 0;
+  parsedSummaryStatus.version = statsResult.version || '';
 
-  const exitMap = stats?.result?.services?.default?.exitMap;
+  const exitMap = statsResult.exitMap;
   if (exitMap) {
     // exitMap should be of length 1 only, but it's an object with keys an IP (not as string)
     // so easier to parse it like this
     for (const k in exitMap) {
-      parsedState.exitNode = exitMap[k];
+      parsedSummaryStatus.exitNode = exitMap[k];
     }
   } else {
-    parsedState.exitNode = undefined;
+    parsedSummaryStatus.exitNode = undefined;
   }
-  const authCodes = stats?.result?.services?.default?.authCodes || undefined;
+  const authCodes = statsResult?.authCodes || undefined;
 
   if (authCodes) {
     for (const lokiExit in authCodes) {
-      const auth = stats?.result?.services?.default?.authCodes[lokiExit];
-      parsedState.exitAuthCode = auth;
+      const auth = statsResult?.authCodes[lokiExit];
+      parsedSummaryStatus.exitAuthCode = auth;
     }
   } else {
-    parsedState.exitAuthCode = undefined;
+    parsedSummaryStatus.exitAuthCode = undefined;
   }
 
-  // compute all stats on all path builders on the default endpoint
-  // Merge snodeSessions, remoteSessions and default into a single array
-  const builders = new Array<any>();
-  const snodeSessions = stats?.result?.services?.default?.snodeSessions || [];
-  snodeSessions.forEach((session: any) => {
-    builders.push(session);
-  });
+  parsedSummaryStatus.ratio = `${Math.ceil(statsResult?.ratio * 100 || 0)}%`;
 
-  const remoteSessions = stats?.result?.services?.default?.remoteSessions || [];
-  remoteSessions.forEach((session: any) => {
-    builders.push(session);
-  });
-
-  const defaultService = stats?.result?.services?.default;
-  if (defaultService) {
-    builders.push(defaultService);
-  }
-
-  // Iterate over all items on this array to build the global pathStats
-  const pathStats = builders.reduce(
-    (accumulator, currentItem) => {
-      accumulator.paths += currentItem?.paths?.length || 0;
-      accumulator.success += currentItem?.buildStats?.success || 0;
-      accumulator.attempts += currentItem?.buildStats?.attempts || 0;
-      return accumulator;
-    },
-    {
-      paths: 0,
-      success: 0,
-      attempts: 0
-    }
-  );
-  const ratio = (pathStats.success * 100) / (pathStats.attempts + 1);
-  parsedState.ratio = `${Math.ceil(ratio)}%`;
-
-  parsedState.numPathsBuilt = pathStats.paths;
-  return parsedState;
-};
-
-export const parseGeneralInfos = (
-  payload: string,
-  error?: string
-): ParsedGeneralInfosFromDaemon => {
-  let stats = null;
-  const parsedGeneralsInfos: ParsedGeneralInfosFromDaemon =
-    defaultParsedGeneralInfosFromDaemon;
-
-  if (!error) {
-    try {
-      stats = JSON.parse(payload);
-    } catch (e) {
-      console.log("Couldn't parse 'stateResult' JSON-RPC payload", e);
-    }
-  }
-
-  // if we got an error, just return isRunning false.
-  // the redux store will reset all values to their default.
-  if (error || stats.error) {
-    console.warn('We got an error for GeneralsInfos: ', error || stats.error);
-    return parsedGeneralsInfos;
-  }
-
-  parsedGeneralsInfos.uptime = stats?.result?.uptime || 0;
-  parsedGeneralsInfos.version = stats?.result?.version || '';
-  return parsedGeneralsInfos;
+  parsedSummaryStatus.numPathsBuilt = statsResult.numPathsBuilt;
+  return parsedSummaryStatus;
 };
