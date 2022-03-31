@@ -39,9 +39,10 @@ local debian_pipeline(name, image,
                 'eatmydata ' + apt_get_quiet + ' dist-upgrade -y',
                 "yarn --version",
                 "node --version",
+                "mkdir -p $CCACHE_DIR/electron-builder",
                 "mkdir -p $CCACHE_DIR/yarn",
                 "yarn install --frozen-lockfile --cache-folder $CCACHE_DIR/yarn",
-                "yarn --cache-folder $CCACHE_DIR/yarn " + target
+                "ELECTRON_BUILDER_CACHE=$CCACHE_DIR/electron-builder yarn --cache-folder $CCACHE_DIR/yarn " + target
             ] + extra_cmds,
         }
     ],
@@ -72,8 +73,10 @@ local windows_cross_pipeline(name, image,
                 'eatmydata ' + apt_get_quiet + ' dist-upgrade -y',
                 "yarn --version",
                 "node --version",
+                "mkdir -p $CCACHE_DIR/electron-builder",
+                "mkdir -p $CCACHE_DIR/yarn",
                 "yarn install --frozen-lockfile --cache-folder $CCACHE_DIR/yarn",
-                "WINEDEBUG=-all WINEPREFIX=$(pwd)/wineprefix yarn --cache-folder $CCACHE_DIR/yarn win32"
+                "ELECTRON_BUILDER_CACHE=$CCACHE_DIR/electron-builder WINEDEBUG=-all WINEPREFIX=$(pwd)/wineprefix yarn --cache-folder $CCACHE_DIR/yarn win32"
             ] + extra_cmds,
         }
     ],
