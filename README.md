@@ -9,10 +9,24 @@ Build deps:
 * [nvm](https://github.com/nvm-sh/nvm) or [asdf](https://github.com/asdf-vm/asdf)
 * git
 * wine (for windows builds)
- 
+
+For node related deps:
+
+* nodejs 17.x with npm and yarn
+
+OR
+
+* [nvm](https://github.com/nvm-sh/nvm) or [asdf](https://github.com/asdf-vm/asdf)
+
+
 Clone the repo:
 
-    $ git clone https://github.com/oxen-io/lokinet-gui
+    $ git clone --recursive https://github.com/oxen-io/lokinet-gui
+    $ cd lokinet-gui
+
+If using asdf:
+
+    $ asdf install
 
 Build the project:
 
