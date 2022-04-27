@@ -1,0 +1,33 @@
+{
+  "appId": "com.electron.lokinet.gui",
+  "directories": {
+    "output": "release/"
+  },
+  "asar": true,
+  "mac": {
+    "target": "zip",
+    "category": "public.app-category.utilities",
+  },
+  "win": {
+    "target": ["portable"]
+  },
+  "portable": {
+    "artifactName": "LOKINET-GUI_portable.exe",
+    "requestExecutionLevel": "admin"
+  },
+  "linux": {
+    "target": ["deb"]
+  },
+  "deb": {
+    "afterInstall": "build-scripts/deb-postinstall.sh"
+  },
+  "files": [
+    "dist/**/*",
+    "dist/*",
+    "build-scripts/*",
+    "icons/*",
+    "fonts/*",
+    "images/*",
+    "js/main.js"
+  ]
+}

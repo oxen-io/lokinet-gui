@@ -2,7 +2,7 @@
   "name": "lokinet-gui",
   "productName": "Lokinet-GUI",
   "description": "A Control panel for Lokinet",
-  "version": "1.0.0",
+  "version": "0.9.9",
   "license": "GPL-3.0",
   "author": {
     "name": "Loki Project",

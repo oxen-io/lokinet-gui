@@ -112,7 +112,10 @@ local mac_builder(name, build_type='Release', werror=true, cmake_extra='', extra
        extra_cmds=[
            './contrib/ci/drone-static-upload.sh'
        ]),
-
+    mac_builder("MacOS (unsigned)", 
+       extra_cmds=[
+           './contrib/ci/drone-static-upload.sh'
+       ]),
     debian_pipeline("Linux (appimage)", docker_image, target='appImage', extra_cmds=["./contrib/ci/drone-static-upload.sh"]),
     debian_pipeline("Linux (deb)", docker_image, target='deb', extra_cmds=["./contrib/ci/drone-static-upload.sh"])
 ]
