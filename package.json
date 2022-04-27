@@ -10,62 +10,25 @@
   },
   "main": "./dist/main.js",
   "scripts": {
+    "cleanup": "rimraf -f dist release",
     "lint": "eslint . --ext .ts --ext .tsx",
-    "format": "prettier --config .prettierrc './**/*.tsx' './**/*.ts' --write",
+    "format": "prettier --config .prettierrc './**/*.tsx' './**/*.ts' 'contrib/electron-builder-*.json' --write",
     "format-and-lint": "yarn format && yarn lint",
-    "dev": "yarn concurrently \"yarn dev:electron\" \"yarn dev:react\"",
-    "dev:electron": "cross-env NODE_ENV=development webpack --config webpack.electron.config.js --mode development && electron .",
-    "dev:react": "cross-env NODE_ENV=development webpack serve --config webpack.react.config.js  --mode development",
-    "compile:electron": "cross-env NODE_ENV=production webpack --config webpack.electron.config.js --mode production",
-    "compile:react": "cross-env NODE_ENV=production webpack --config webpack.react.config.js --mode production",
+    "dev:electron": "cross-env BUILD_TYPE=$BUILD_TYPE NODE_ENV=development webpack --config webpack.electron.config.js --mode development && electron .",
+    "dev:react": "cross-env BUILD_TYPE=$BUILD_TYPE NODE_ENV=development webpack serve --config webpack.react.config.js --mode development",
+    "compile:electron": "cross-env BUILD_TYPE=$BUILD_TYPE NODE_ENV=production webpack --config webpack.electron.config.js --mode production",
+    "compile:react": "cross-env BUILD_TYPE=$BUILD_TYPE NODE_ENV=production webpack --config webpack.react.config.js --mode production",
     "compile": "yarn compile:electron && yarn compile:react",
-    "pack": "rimraf -f dist release && yarn compile && electron-builder --dir",
-    "dist": "rimraf -f dist release && yarn compile && yarn electron-builder",
-    "postinstall": "yarn patch-package ",
-    "win32": "rimraf -f dist release && yarn compile && electron-builder --windows portable",
-    "deb": "rimraf -f dist release && yarn compile && electron-builder --linux deb --publish=never",
-    "appImage": "rimraf -f dist release && yarn compile && electron-builder --linux appImage --publish=never",
-    "appImageFromPack": "electron-builder  --prepackaged ./release/linux-unpacked --linux appImage --publish=never",
-    "dist": "yarn appImage && yarn win32 && yarn deb"
+    "pack": "yarn compile && electron-builder --dir --publish=never --config=contrib/electron-builder-release.json",
+    "postinstall": "yarn patch-package && electron-builder install-app-deps",
+    "macos": "yarn cleanup && yarn pack",
+    "win32": "yarn cleanup && yarn compile && electron-builder --windows portable --publish=never --config=contrib/electron-builder-release.json",
+    "deb": "yarn cleanup && yarn compile && electron-builder --linux deb --publish=never --config=contrib/electron-builder-release.json",
+    "appImage": "yarn cleanup && yarn compile && electron-builder --linux appImage --publish=never --config=contrib/electron-builder-release.json",
+    "dist": "yarn appImage && yarn deb && yarn win32"
   },
-  "build": {
-    "appId": "com.electron.lokinet.gui",
-    "directories": {
-      "output": "release/"
-    },
-    "asar": true,
-    "mac": {
-      "category": "public.app-category.utilities"
-    },
-    "win": {
-      "target": [
-        "portable"
-      ]
-    },
-    "portable": {
-      "artifactName": "LOKINET-GUI_portable.exe",
-      "requestExecutionLevel": "admin"
-    },
-    "nsis": {
-      "include": "build-scripts/nsis-installer.nsh"
-    },
-    "linux": {
-      "target": [
-        "deb"
-      ]
-    },
-    "deb": {
-      "afterInstall": "build-scripts/deb-postinstall.sh"
-    },
-    "files": [
-      "dist/**/*",
-      "dist/*",
-      "build-scripts/*",
-      "icons/*",
-      "fonts/*",
-      "images/*",
-      "js/main.js"
-    ]
+  "config": {
+    "pubkey": null
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
