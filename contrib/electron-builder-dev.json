@@ -6,8 +6,8 @@
   "asar": true,
   "mac": {
     "target": "mas",
-      "type": "development",
-      "hardenedRuntime": false,
+    "type": "development",
+    "hardenedRuntime": false,
     "category": "public.app-category.utilities",
     "entitlementsInherit": "./external/lokinet/contrib/macos/lokinet-extension.entitlements.plist",
     "provisioningProfile": "./external/lokinet/contrib/macos/lokinet-extension.provisionprofile",
