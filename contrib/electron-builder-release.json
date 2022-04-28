@@ -5,8 +5,9 @@
   },
   "asar": true,
   "mac": {
+    "identity": null,
     "target": "zip",
-    "category": "public.app-category.utilities",
+    "category": "public.app-category.utilities"
   },
   "win": {
     "target": ["portable"]

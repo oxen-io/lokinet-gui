@@ -50,9 +50,9 @@ elif [ -e release/*.AppImage ]; then
     # tar dat shiz up yo
     archive="$base-appimage.tar.xz"
     tar cJvf "$archive" "$base"
-elif [ -e lokinet-gui-*.tgz ]; then
-    archive="$base-unsigned.tar.gz"
-    cp lokinet-gui-*.tgz $archive
+elif [ -e release/*-mac.zip ]; then
+    archive="$base-unsigned.zip"
+    cp release/*-mac.zip $archive
 fi
 
 upload_to="oxen.rocks/${DRONE_REPO// /_}/${DRONE_BRANCH// /_}"
