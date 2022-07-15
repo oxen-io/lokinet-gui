@@ -22,7 +22,8 @@
   "deb": {
     "afterInstall": "build-scripts/deb-postinstall.sh"
   },
-  "files": [
+    "files": [
+        "node_modules/*/build/Release/*.node",
     "dist/**/*",
     "dist/*",
     "build-scripts/*",
