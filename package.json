@@ -1,12 +1,12 @@
 {
   "name": "lokinet-gui",
-  "productName": "Lokinet-GUI",
+  "productName": "lokinet-gui",
   "description": "A Control panel for Lokinet",
   "version": "0.9.9",
   "license": "GPL-3.0",
   "author": {
-    "name": "Loki Project",
-    "email": "team@loki.network"
+    "name": "OPTF",
+    "email": "team@oxen.io"
   },
   "main": "./dist/main.js",
   "scripts": {
