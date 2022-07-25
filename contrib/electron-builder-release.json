@@ -6,7 +6,7 @@
   "asar": true,
   "mac": {
     "identity": null,
-    "target": "zip",
+    "target": "dmg",
     "category": "public.app-category.utilities"
   },
   "win": {
