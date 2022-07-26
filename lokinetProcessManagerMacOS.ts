@@ -11,7 +11,7 @@ export class LokinetMacOSProcessManager implements ILokinetProcessManager {
   }
 
   getLokinetBinLocation(): string {
-      return app.getPath("lokinet");
+      return app.getPath("Lokinet");
   }
 
   getDefaultBootstrapFileLocation(): string {
