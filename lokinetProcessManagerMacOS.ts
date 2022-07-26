@@ -1,21 +1,20 @@
 import { ILokinetProcessManager, invoke } from './lokinetProcessManager';
+import { app } from 'electron';
 
 export class LokinetMacOSProcessManager implements ILokinetProcessManager {
   doStartLokinetProcess(): Promise<string | null> {
-    const startNotification =
-      '-e \'display notification "We should start LOKINET mac extension"\'';
-    return invoke('osascript', [startNotification]);
+      return invoke(getLokinetBinLocation(), ["--start"]);
   }
 
   doStopLokinetProcess(): Promise<string | null> {
-    const stopNotification =
-      '-e \'display notification "We should stop LOKINET mac extension"\'';
+      return invoke(getLokinetBinLocation(), ["--stop"]);
+  }
 
-    return invoke('osascript', [stopNotification]);
+  getLokinetBinLocation(): string {
+      return app.getPath("lokinet");
   }
 
   getDefaultBootstrapFileLocation(): string {
-    throw new Error('FIXME');
-    return 'C:\\ProgramData\\lokinet\\bootstrap.signed';
+      return "";
   }
 }
