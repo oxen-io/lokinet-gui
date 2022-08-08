@@ -30,7 +30,7 @@
     "target": ["portable"]
   },
   "portable": {
-    "artifactName": "LOKINET-GUI_portable.exe",
+    "artifactName": "Lokinet-GUI_portable-dev.exe",
     "requestExecutionLevel": "admin"
   },
   "linux": {
