@@ -8,8 +8,4 @@ export class LokinetLinuxProcessManager implements ILokinetProcessManager {
   async doStopLokinetProcess(): Promise<string | null> {
     throw new Error('Not systemd: not supported yet');
   }
-
-  getDefaultBootstrapFileLocation(): string {
-    throw new Error('getDefaultBootstrapFileLocation TODO for Linux');
-  }
 }

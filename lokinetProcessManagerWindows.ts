@@ -8,8 +8,4 @@ export class LokinetWindowsProcessManager implements ILokinetProcessManager {
   doStopLokinetProcess(): Promise<string | null> {
     return invoke('net', ['stop', 'lokinet']);
   }
-
-  getDefaultBootstrapFileLocation(): string {
-    return 'C:\\ProgramData\\lokinet\\bootstrap.signed';
-  }
 }

@@ -1,30 +1,17 @@
 {
-  "appId": "com.electron.lokinet.gui",
+  "appId": "org.lokinet.gui",
   "directories": {
     "output": "release/"
   },
   "asar": true,
   "mac": {
-    "target": "mas",
+    "identity": null,
+    "target": "dmg",
     "type": "development",
     "hardenedRuntime": false,
     "category": "public.app-category.utilities",
-    "entitlementsInherit": "./external/lokinet/contrib/macos/lokinet-extension.entitlements.plist",
-    "provisioningProfile": "./external/lokinet/contrib/macos/lokinet-extension.provisionprofile",
-    "extraFiles": [
-      {
-        "from": "./external/lokinet/build-mac/daemon/lokinet.app/Contents/Plugins",
-        "to": "Plugins"
-      },
-      {
-        "from": "./external/lokinet/build-mac/daemon/lokinet.app/Contents/MacOS",
-        "to": "MacOS"
-      }
-    ],
-    "binaries": [
-      "./release/mas/Lokinet-GUI.app/Contents/Plugins/lokinet-extension.appex",
-      "./release/mas/Lokinet-GUI.app/Contents/MacOS/lokinet"
-    ]
+    "minimumSystemVersion": "10.15",
+    "executableName": "Lokinet-GUI"
   },
   "win": {
     "target": ["portable"]

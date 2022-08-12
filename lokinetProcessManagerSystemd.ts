@@ -86,8 +86,4 @@ export class LokinetSystemDProcessManager implements ILokinetProcessManager {
     }
     return invoke('systemctl', ['--no-block', 'stop', lokinetService]);
   }
-
-  getDefaultBootstrapFileLocation(): string {
-    throw new Error('getDefaultBootstrapFileLocation TODO for Systemd');
-  }
 }
