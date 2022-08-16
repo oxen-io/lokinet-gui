@@ -1,0 +1,38 @@
+{
+  "appId": "org.lokinet.gui",
+  "directories": {
+    "output": "release/"
+  },
+  "asar": true,
+  "mac": {
+    "identity": null,
+    "target": "dmg",
+    "type": "development",
+    "hardenedRuntime": false,
+    "category": "public.app-category.utilities",
+    "minimumSystemVersion": "10.15",
+    "executableName": "Lokinet-GUI"
+  },
+  "win": {
+    "target": ["portable"]
+  },
+  "portable": {
+    "artifactName": "Lokinet-GUI_portable-dev.exe",
+    "requestExecutionLevel": "admin"
+  },
+  "linux": {
+    "target": ["deb"]
+  },
+  "deb": {
+    "afterInstall": "build-scripts/deb-postinstall.sh"
+  },
+  "files": [
+    "dist/**/*",
+    "dist/*",
+    "build-scripts/*",
+    "icons/*",
+    "fonts/*",
+    "images/*",
+    "js/main.js"
+  ]
+}

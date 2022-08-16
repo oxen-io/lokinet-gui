@@ -2,70 +2,34 @@
   "name": "lokinet-gui",
   "productName": "Lokinet-GUI",
   "description": "A Control panel for Lokinet",
-  "version": "1.0.0",
-  "license": "GPL-3.0",
+  "version": "0.9.9",
+  "license": "GPL-3.0-or-later",
   "author": {
-    "name": "Loki Project",
-    "email": "team@loki.network"
+    "name": "The Oxen Project",
+    "email": "team@oxen.io"
   },
   "main": "./dist/main.js",
   "scripts": {
+    "cleanup": "rimraf -f dist release",
     "lint": "eslint . --ext .ts --ext .tsx",
-    "format": "prettier --config .prettierrc './**/*.tsx' './**/*.ts' --write",
+    "format": "prettier --config .prettierrc './**/*.tsx' './**/*.ts' 'contrib/electron-builder-*.json' --write",
     "format-and-lint": "yarn format && yarn lint",
-    "dev": "yarn concurrently \"yarn dev:electron\" \"yarn dev:react\"",
     "dev:electron": "cross-env NODE_ENV=development webpack --config webpack.electron.config.js --mode development && electron .",
-    "dev:react": "cross-env NODE_ENV=development webpack serve --config webpack.react.config.js  --mode development",
+    "dev:react": "cross-env NODE_ENV=development webpack serve --config webpack.react.config.js --mode development",
     "compile:electron": "cross-env NODE_ENV=production webpack --config webpack.electron.config.js --mode production",
     "compile:react": "cross-env NODE_ENV=production webpack --config webpack.react.config.js --mode production",
     "compile": "yarn compile:electron && yarn compile:react",
-    "pack": "rimraf -f dist release && yarn compile && electron-builder --dir",
-    "dist": "rimraf -f dist release && yarn compile && yarn electron-builder",
-    "postinstall": "yarn patch-package ",
-    "win32": "rimraf -f dist release && yarn compile && electron-builder --windows portable",
-    "deb": "rimraf -f dist release && yarn compile && electron-builder --linux deb --publish=never",
-    "appImage": "rimraf -f dist release && yarn compile && electron-builder --linux appImage --publish=never",
-    "appImageFromPack": "electron-builder  --prepackaged ./release/linux-unpacked --linux appImage --publish=never",
-    "dist": "yarn appImage && yarn win32 && yarn deb"
+    "pack": "yarn compile && electron-builder --dir --publish=never --config=contrib/electron-builder-release.json",
+    "postinstall": "yarn patch-package && electron-builder install-app-deps",
+    "macos": "yarn cleanup && yarn compile && electron-builder --mac --publish=never --config=contrib/electron-builder-release.json",
+    "macos:raw": "yarn cleanup && yarn compile && electron-builder --mac dir --publish=never --config=contrib/electron-builder-release.json",
+    "win32": "yarn cleanup && yarn compile && electron-builder --windows portable --publish=never --config=contrib/electron-builder-release.json",
+    "deb": "yarn cleanup && yarn compile && electron-builder --linux deb --publish=never --config=contrib/electron-builder-release.json",
+    "appImage": "yarn cleanup && yarn compile && electron-builder --linux appImage --publish=never --config=contrib/electron-builder-release.json",
+    "dist": "yarn appImage && yarn deb && yarn win32"
   },
-  "build": {
-    "appId": "com.electron.lokinet.gui",
-    "directories": {
-      "output": "release/"
-    },
-    "asar": true,
-    "mac": {
-      "category": "public.app-category.utilities"
-    },
-    "win": {
-      "target": [
-        "portable"
-      ]
-    },
-    "portable": {
-      "artifactName": "LOKINET-GUI_portable.exe",
-      "requestExecutionLevel": "admin"
-    },
-    "nsis": {
-      "include": "build-scripts/nsis-installer.nsh"
-    },
-    "linux": {
-      "target": [
-        "deb"
-      ]
-    },
-    "deb": {
-      "afterInstall": "build-scripts/deb-postinstall.sh"
-    },
-    "files": [
-      "dist/**/*",
-      "dist/*",
-      "build-scripts/*",
-      "icons/*",
-      "fonts/*",
-      "images/*",
-      "js/main.js"
-    ]
+  "config": {
+    "pubkey": null
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
@@ -83,7 +47,7 @@
     "cross-env": "^7.0.3",
     "css-loader": "^5.0.2",
     "electron": "^11.2.3",
-    "electron-builder": "22.14.13",
+    "electron-builder": "^23.0.6",
     "eslint": "^7.20.0",
     "eslint-config-prettier": "^7.2.0",
     "eslint-plugin-prettier": "^3.3.1",

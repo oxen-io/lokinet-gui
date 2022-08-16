@@ -54,9 +54,6 @@ export const invoke = async (
 export interface ILokinetProcessManager {
   doStartLokinetProcess: () => Promise<string | null>;
   doStopLokinetProcess: () => Promise<string | null>;
-
-  // /var/lib/lokinet/bootstrap.signed for MacOS
-  getDefaultBootstrapFileLocation: () => string;
 }
 
 let lokinetProcessManager: ILokinetProcessManager;

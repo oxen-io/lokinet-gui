@@ -1,21 +1,20 @@
 import { ILokinetProcessManager, invoke } from './lokinetProcessManager';
+import { app } from 'electron';
+import { dirname } from 'path';
+
+function getLokinetControlLocation() {
+    // We will be at: Lokinet.app/Contents/Helpers/Lokinet-GUI.app/Contents/MacOS/Lokinet-GUI, we want to back to
+    // Lokinet.app/Contents/MacOS/Lokinet:
+    return dirname(dirname(dirname(dirname(dirname(app.getPath("exe")))))) + "/MacOS/Lokinet";
+}
+
 
 export class LokinetMacOSProcessManager implements ILokinetProcessManager {
   doStartLokinetProcess(): Promise<string | null> {
-    const startNotification =
-      '-e \'display notification "We should start LOKINET mac extension"\'';
-    return invoke('osascript', [startNotification]);
+      return invoke(getLokinetControlLocation(), ["--start"]);
   }
 
   doStopLokinetProcess(): Promise<string | null> {
-    const stopNotification =
-      '-e \'display notification "We should stop LOKINET mac extension"\'';
-
-    return invoke('osascript', [stopNotification]);
-  }
-
-  getDefaultBootstrapFileLocation(): string {
-    throw new Error('FIXME');
-    return 'C:\\ProgramData\\lokinet\\bootstrap.signed';
+      return invoke(getLokinetControlLocation(), ["--stop"]);
   }
 }

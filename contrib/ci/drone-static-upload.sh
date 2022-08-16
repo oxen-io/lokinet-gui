@@ -50,6 +50,9 @@ elif [ -e release/*.AppImage ]; then
     # tar dat shiz up yo
     archive="$base-appimage.tar.xz"
     tar cJvf "$archive" "$base"
+elif [ -e release/*-mac.zip ]; then
+    archive="$base-unsigned.zip"
+    cp release/*-mac.zip $archive
 fi
 
 upload_to="oxen.rocks/${DRONE_REPO// /_}/${DRONE_BRANCH// /_}"
