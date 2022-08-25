@@ -1,6 +1,6 @@
 local default_deps="npm yarn";
 local default_windows_deps='zip nsis npm yarn';
-local docker_image = 'registry.oxen.rocks/lokinet-ci-nodejs';
+local docker_image = 'registry.oxen.rocks/lokinet-ci-nodejs-lts';
 
 local submodules = {
     name: 'submodules',
