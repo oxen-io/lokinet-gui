@@ -128,25 +128,20 @@ async function createWindow() {
   });
 }
 
-app.on('before-quit', async () => {
+app.on('before-quit', () => {
   console.log('before-quit event');
-  await closeRpcConnection();
+  closeRpcConnection();
 
   const todoOnExit: OnExitStopSetting =
     (store?.get(
       SETTINGS_ID_STOP_ON_EXIT,
       getDefaultOnExitDo()
     ) as OnExitStopSetting) || getDefaultOnExitDo();
-  console.warn('todoOnExit', todoOnExit);
-  // if (!process.env.DISABLE_AUTO_START_STOP) {
+  console.info('todoOnExit', todoOnExit);
   if (todoOnExit === 'stop_everything') {
-    void doStopLokinetProcess();
+    void doStopLokinetProcess(true);
   }
-  // } else {
-  //   logLineToAppSide(
-  //     'ENV "DISABLE_AUTO_START_STOP" is set, not auto stopping lokinet daemon'
-  //   );
-  // }
+
 
   if (tray) {
     tray.destroy();

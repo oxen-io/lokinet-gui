@@ -53,7 +53,7 @@ export const invoke = async (
 
 export interface ILokinetProcessManager {
   doStartLokinetProcess: () => Promise<string | null>;
-  doStopLokinetProcess: () => Promise<string | null>;
+  doStopLokinetProcess: (duringAppExit: boolean) => Promise<string | null>;
 }
 
 let lokinetProcessManager: ILokinetProcessManager;
@@ -125,12 +125,14 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
  * doStopLokinetProcess is only called when exiting the app so there is no point to wait
  * for the event return and so no jobId argument required
  */
-export const doStopLokinetProcess = async (): Promise<void> => {
+export const doStopLokinetProcess = async (
+  duringAppExit = false
+): Promise<void> => {
   try {
     logLineToAppSide('About to stop Lokinet process');
 
     const manager = await getLokinetProcessManager();
-    await manager.doStopLokinetProcess();
+    await manager.doStopLokinetProcess(duringAppExit);
   } catch (e: any) {
     logLineToAppSide(`Lokinet process stop failed with ${e.message}`);
 

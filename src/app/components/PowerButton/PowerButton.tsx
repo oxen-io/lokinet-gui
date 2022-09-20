@@ -1,18 +1,17 @@
-import React, {  useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useState } from 'react';
+import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {
-  selectAuthCodeFromUser,
-  selectExitNodeFromUser
-} from '../../../features/exitStatusSlice';
 
 import { selectedTheme, ThemeType } from '../../../features/uiStatusSlice';
+import {
+  doStopLokinetProcess,
+  markRendererReady
+} from '../../../ipc/ipcRenderer';
 import {
   ConnectingStatus,
   isGlobalStatusError,
   useGlobalConnectingStatus
 } from '../../hooks/connectingStatus';
-import { turnExitOn, turnExitOff } from './PowerButtonActions';
 import { PowerButtonIcon } from './PowerButtonIcon';
 import { PowerButtonContainerBorder } from './PowerButtonSpinner';
 
@@ -65,13 +64,13 @@ const getPowerButtonContainerShadowStyle = (
       : `0px 0px 51px rgba(255, 33, 33, 0.8), 0px 0px 66px #000000`;
   }
 
-  if (globalStatus === 'connecting') {
+  if (globalStatus === 'exit-connecting' || globalStatus === 'daemon-loading') {
     return themeType === 'light'
       ? '0px 0px 16px rgba(0, 0, 0, 0.12)'
       : `0px 0px 30px rgba(255, 255, 255, 0.18), 0px 0px 66px #000000`;
   }
 
-  if (globalStatus === 'connected') {
+  if (globalStatus === 'exit-connected' || globalStatus === 'daemon-running') {
     return themeType === 'light'
       ? '0px 0px 25px rgba(0, 0, 0, 0.55)'
       : `0px 0px 15px rgba(255, 255, 255, 0.48)`;
@@ -88,10 +87,6 @@ export const PowerButton = (): JSX.Element => {
   const [isHovered, setIsHovered] = useState(false);
 
   const connectingStatus = useGlobalConnectingStatus();
-  const dispatch = useDispatch();
-
-  const authCodeFromUser = useSelector(selectAuthCodeFromUser);
-  const exitNodeFromUser = useSelector(selectExitNodeFromUser);
 
   const { shadow, buttonContainerBackground } = getPowerButtonStyles(
     connectingStatus,
@@ -109,16 +104,23 @@ export const PowerButton = (): JSX.Element => {
         setIsHovered(false);
       }}
       onClick={() => {
-        if (
-          connectingStatus === 'connecting' ||
-          connectingStatus === 'error-start-stop'
-        ) {
-          return;
-        }
-        if (connectingStatus === 'connected') {
-          turnExitOff(dispatch);
-        } else {
-          turnExitOn(dispatch, exitNodeFromUser, authCodeFromUser);
+        switch (connectingStatus) {
+          // we are waiting for a refresh from lokinet, drop the click event
+          case 'daemon-loading':
+          case 'exit-connecting':
+            return;
+          // if the daemon is running, the exit is connected, or the exit is in error allow to stop the daemon
+          case 'daemon-running':
+          case 'exit-connected':
+          case 'error-add-exit':
+            doStopLokinetProcess();
+            return;
+          // if we are in an error state with the start/stop, try to start the daemon again on click
+          case 'error-start-stop':
+          case 'daemon-not-running':
+            markRendererReady();
+          default:
+            break;
         }
       }}
     >

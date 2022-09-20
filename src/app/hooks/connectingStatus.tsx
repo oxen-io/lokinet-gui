@@ -1,40 +1,53 @@
 import { useSelector } from 'react-redux';
-import { StatusErrorTypeSet } from '../../../sharedIpc';
 import {
   selectHasExitNodeEnabled,
-  selectHasExitNodeChangeLoading
+  selectHasExitNodeChangeLoading,
+  selectHasDoneInitialLoading
 } from '../../features/exitStatusSlice';
-import { selectGlobalError } from '../../features/statusSlice';
+import {
+  selectGlobalError,
+  selectDaemonRunning
+} from '../../features/statusSlice';
 
-export type ConnectingStatus =
-  | 'default'
-  | 'exit-connected'
-  | 'exit-connecting'
-  | 'daemon-connected'
-  | 'daemon-connecting'
-  | StatusErrorTypeSet;
+// export type ConnectingStatus =
+//   | 'exit-connected'
+//   | 'exit-connecting'
+//   | 'daemon-running'
+//   | 'daemon-not-running'
+//   | 'daemon-loading'
+//   | 'error-start-stop'
+//   | 'error-add-exit';
 
-export const useGlobalConnectingStatus = (): ConnectingStatus => {
-  const exitIsSet = useSelector(selectHasExitNodeEnabled);
-  const exitIsLoading = useSelector(selectHasExitNodeChangeLoading);
-  const globalError = useSelector(selectGlobalError);
+// export const useGlobalConnectingStatus = (): ConnectingStatus => {
+//   const exitIsSet = useSelector(selectHasExitNodeEnabled);
+//   const exitIsLoading = useSelector(selectHasExitNodeChangeLoading);
+//   const daemonIsRunning = useSelector(selectDaemonRunning);
+//   const globalError = useSelector(selectGlobalError);
+//   const initialLoadingFinished = useSelector(selectHasDoneInitialLoading);
 
-  if (globalError) {
-    return globalError;
-  }
+//   if (globalError) {
+//     return globalError;
+//   }
 
-  if (exitIsLoading) {
-    return 'exit-connecting';
-  }
+//   if (!initialLoadingFinished) {
+//     return 'daemon-loading';
+//   }
+//   if (!daemonIsRunning) {
+//     return 'daemon-not-running';
+//   }
 
-  if (exitIsSet) {
-    return 'exit-connected';
-  }
-  return 'default';
-};
+//   if (exitIsLoading) {
+//     return 'exit-connecting';
+//   }
 
-export const isGlobalStatusError = (
-  globalStatus: ConnectingStatus
-): boolean => {
-  return globalStatus.startsWith('error-');
-};
+//   if (exitIsSet) {
+//     return 'exit-connected';
+//   }
+//   return 'daemon-running';
+// };
+
+// export const isGlobalStatusError = (
+//   globalStatus: ConnectingStatus
+// ): boolean => {
+//   return Boolean(globalStatus?.startsWith('error-'));
+// };

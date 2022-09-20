@@ -55,7 +55,8 @@ export const statusSlice = createSlice({
       }>
     ) => {
       state.isRunning = action.payload.daemonStatus?.isRunning || false;
-      if (!state.isRunning) {
+      if (!state.isRunning || !action.payload.daemonStatus?.lokiAddress) {
+        state.isRunning = false;
         state.downloadUsage = 0;
         state.uploadUsage = 0;
         state.numPathsBuilt = 0;
@@ -80,6 +81,7 @@ export const statusSlice = createSlice({
       state.numRoutersKnown = action.payload.daemonStatus?.numRoutersKnown || 0;
       state.numPeersConnected =
         action.payload.daemonStatus?.numPeersConnected || 0;
+
       state.lokiAddress = action.payload.daemonStatus?.lokiAddress || '';
       state.ratio = action.payload.daemonStatus?.ratio || '';
       state.version = action.payload.daemonStatus?.version;
@@ -113,6 +115,7 @@ export const statusSlice = createSlice({
       return state;
     },
     markAsStopped: (state) => {
+      console.info('marking as daemon stopped');
       return { ...initialSummaryStatusState, globalError: state.globalError };
     },
     setGlobalError: (state, action: PayloadAction<StatusErrorType>) => {
@@ -127,7 +130,8 @@ export const { updateFromDaemonStatus, markAsStopped, setGlobalError } =
   statusSlice.actions;
 export const selectStatus = (state: RootState): SummaryStatusState =>
   state.status;
-export const selectLokinetRunning = createSelector(
+
+export const selectDaemonRunning = createSelector(
   selectStatus,
   (status) => status.isRunning
 );

@@ -1,17 +1,23 @@
 import { Flex, Stack, Input } from '@chakra-ui/react';
-import { noop } from 'lodash';
 import React from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 import {
   onUserAuthCodeSet,
   onUserExitNodeSet,
+  selectAuthCodeFromUser,
+  selectExitNodeFromUser,
   selectExitStatus
 } from '../../features/exitStatusSlice';
 import { useAppDispatch } from '../hooks';
 import { paddingDividers } from './Utils/Dividers';
 import { TextButton } from './TextButton';
 import { VSpacer } from './Utils/Spacer';
+import {
+  isGlobalStatusError,
+  useGlobalConnectingStatus
+} from '../hooks/connectingStatus';
+import { turnExitOff, turnExitOn } from './PowerButton/PowerButtonActions';
 
 const ExitInput = styled(Input)`
   background-color: ${(props) => props.theme.inputBackground};
@@ -39,21 +45,44 @@ const InputLabel = styled.div`
 const ConnectDisconnectButton = () => {
   const { exitLoading, exitNodeFromDaemon } = useSelector(selectExitStatus);
   const theme = useTheme();
+
   const isConnected = Boolean(exitNodeFromDaemon);
+  const connectingStatus = useGlobalConnectingStatus();
+  const isGlobalError = isGlobalStatusError(connectingStatus);
 
   const buttonText = isConnected
     ? 'DISCONNECT'
-    : exitLoading
+    : exitLoading && !isGlobalError
     ? 'CONNECTING'
     : 'CONNECT';
 
   const buttonColor = isConnected ? theme.dangerColor : theme.textColor;
+  const dispatch = useDispatch();
+
+  const authCodeFromUser = useSelector(selectAuthCodeFromUser);
+  const exitNodeFromUser = useSelector(selectExitNodeFromUser);
+
+  const buttonDisabled =
+    connectingStatus === 'daemon-loading' ||
+    connectingStatus === 'exit-connecting' ||
+    connectingStatus === 'error-start-stop';
+
+  function onClick() {
+    if (buttonDisabled) {
+      return;
+    }
+    if (connectingStatus === 'exit-connected') {
+      turnExitOff(dispatch);
+    } else if (connectingStatus === 'daemon-running') {
+      turnExitOn(dispatch, exitNodeFromUser, authCodeFromUser);
+    }
+  }
   return (
     <TextButton
       buttonColor={buttonColor}
-      onClick={noop}
+      onClick={onClick}
       text={buttonText}
-      title={buttonText}
+      disabled={buttonDisabled}
     />
   );
 };

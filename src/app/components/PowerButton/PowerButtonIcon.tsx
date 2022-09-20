@@ -1,36 +1,43 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import styled, { useTheme } from 'styled-components';
-import { selectedTheme } from '../../../features/uiStatusSlice';
-import { useGlobalConnectingStatus } from '../../hooks/connectingStatus';
+import styled, { DefaultTheme, useTheme } from 'styled-components';
+import {
+  ConnectingStatus,
+  useGlobalConnectingStatus
+} from '../../hooks/connectingStatus';
 
-export const PowerButtonIcon = (props: { isHovered: boolean }): JSX.Element => {
-  const isHovered = props.isHovered;
+export function getPowerButtonColorBasedOnStatus(
+  globalStatus: ConnectingStatus,
+  theme: DefaultTheme,
+  isHovered: boolean
+) {
+  let buttonColor = isHovered ? theme.textColor : theme.textColorSubtle;
+
+  if (globalStatus === 'daemon-running' || globalStatus === 'exit-connected') {
+    buttonColor = isHovered ? theme.textColorSubtle : theme.textColor;
+  }
+  return buttonColor;
+}
+
+export const PowerButtonIcon = ({
+  isHovered
+}: {
+  isHovered: boolean;
+}): JSX.Element => {
   const globalStatus = useGlobalConnectingStatus();
   const theme = useTheme();
-  const themeType = useSelector(selectedTheme);
 
-  let buttonColor = isHovered ? theme.textColor : theme.textColorSubtle;
-  let dropShadow = '';
-
-  if (globalStatus === 'connecting' || globalStatus === 'connected') {
-    buttonColor = isHovered ? theme.textColorSubtle : theme.textColor;
-    if (globalStatus === 'connected' && !isHovered) {
-      dropShadow =
-        themeType === 'light'
-          ? 'drop-shadow(rgba(0, 0, 0, 0.16) 0px 0px 1px)'
-          : 'drop-shadow(0px 0px 6px #FFFFFF)';
-    }
-  }
+  const buttonColor = getPowerButtonColorBasedOnStatus(
+    globalStatus,
+    theme,
+    isHovered
+  );
 
   return (
-    <StyledPowerIcon buttonColor={buttonColor} dropShadow={dropShadow}>
-      {svgPower}
-    </StyledPowerIcon>
+    <StyledPowerIcon buttonColor={buttonColor}>{svgPower}</StyledPowerIcon>
   );
 };
 
-const StyledPowerIcon = styled.div<{ buttonColor: string; dropShadow: string }>`
+const StyledPowerIcon = styled.div<{ buttonColor: string }>`
   width: 50%;
   height: 50%;
   position: relative;
@@ -40,12 +47,11 @@ const StyledPowerIcon = styled.div<{ buttonColor: string; dropShadow: string }>`
   transform: translate(-50%, -50%);
   text-align: center;
   transition: inherit;
+  box-shadow: none;
 
   svg {
     height: 100%;
     width: 100%;
-
-    filter: ${(props) => props.dropShadow};
   }
 `;
 

@@ -78,11 +78,13 @@ export class LokinetSystemDProcessManager implements ILokinetProcessManager {
     return result;
   }
 
-  async doStopLokinetProcess(): Promise<string | null> {
-    const isRunning = await this.checkForActiveLokinetService();
+  async doStopLokinetProcess(duringAppExit = false): Promise<string | null> {
+    if (!duringAppExit) {
+      const isRunning = await this.checkForActiveLokinetService();
 
-    if (!isRunning) {
-      return null;
+      if (!isRunning) {
+        return null;
+      }
     }
     return invoke('systemctl', ['--no-block', 'stop', lokinetService]);
   }

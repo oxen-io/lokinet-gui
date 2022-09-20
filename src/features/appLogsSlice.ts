@@ -24,6 +24,14 @@ export const appLogsSlice = createSlice({
   initialState: initialStatusState,
   reducers: {
     appendToApplogs: (state, action: PayloadAction<string>) => {
+      const lastLine = state.appLogs[state.appLogs.length - 1];
+      const summaryStatusTimedOut = 'getSummaryStatus timed out at';
+      if (
+        lastLine?.includes(summaryStatusTimedOut) &&
+        action.payload?.includes(summaryStatusTimedOut)
+      ) {
+        return state;
+      }
       state.appLogs.push(`${Date.now()}: ${action.payload}`);
 
       // Remove the first item is the size is too big

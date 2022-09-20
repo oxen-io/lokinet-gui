@@ -1,7 +1,7 @@
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
 
-const StyledButton = styled.button`
+const StyledButton = styled.button<{ disabled?: boolean }>`
   border: 1px solid ${(props) => props.theme.textColor};
   color: ${(props) => props.theme.textColor};
   background-color: ${(props) => props.theme.backgroundColor};
@@ -19,25 +19,27 @@ const StyledButton = styled.button`
   transition: 0.25s;
   border-radius: 7px;
   align-self: center;
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'default')};
 
   :hover {
-    color: ${(props) => props.theme.textColorSubtle};
-    border: 1px solid ${(props) => props.theme.textColorSubtle};
+    color: ${(props) => !props.disabled && props.theme.textColorSubtle};
+    border: 1px solid
+      ${(props) => !props.disabled && props.theme.textColorSubtle};
   }
 `;
 
 export const TextButton = (props: {
   text: string;
-  title: string;
   onClick: () => void;
   buttonColor?: string;
+  disabled?: boolean;
 }): JSX.Element => {
   const theme = useTheme();
   return (
     <StyledButton
       onClick={props.onClick}
-      title={props.title}
       theme={{ ...theme, textColor: props.buttonColor || theme.textColor }}
+      disabled={props.disabled}
     >
       {props.text}
     </StyledButton>

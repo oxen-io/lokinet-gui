@@ -1,5 +1,6 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../app/store';
+import { selectDaemonRunning } from './statusSlice';
 
 export interface ExitStatusState {
   // set to true when the user clicked. We must block other call while this is true
@@ -16,7 +17,6 @@ export interface ExitStatusState {
   // those 2 fields will be set once exitLoading is done loading with what the daemon gave us back.
   exitNodeFromDaemon?: string;
   exitAuthCodeFromDaemon?: string;
-  vpnModeSelected: boolean;
 }
 
 const initialStatusState: ExitStatusState = {
@@ -26,8 +26,7 @@ const initialStatusState: ExitStatusState = {
   exitNodeFromUser: 'exit.loki',
   exitAuthCodeFromUser: undefined,
   exitNodeFromDaemon: undefined,
-  exitAuthCodeFromDaemon: undefined,
-  vpnModeSelected: false
+  exitAuthCodeFromDaemon: undefined
 };
 
 export const exitStatusSlice = createSlice({
@@ -51,10 +50,7 @@ export const exitStatusSlice = createSlice({
       state.exitAuthCodeFromDaemon = undefined;
       return state;
     },
-    setVpnMode: (state, action: PayloadAction<boolean>) => {
-      state.vpnModeSelected = action.payload;
-      return state;
-    },
+
     markInitialLoadingFinished(state) {
       if (!state.initialLoadingFinished) {
         state.exitLoading = false;
@@ -93,8 +89,7 @@ export const {
   markExitNodesFromDaemon,
   onUserExitNodeSet,
   onUserAuthCodeSet,
-  markInitialLoadingFinished,
-  setVpnMode
+  markInitialLoadingFinished
 } = exitStatusSlice.actions;
 
 export const selectExitStatus = (state: RootState): ExitStatusState =>
@@ -102,12 +97,15 @@ export const selectExitStatus = (state: RootState): ExitStatusState =>
 
 export const selectHasExitNodeEnabled = createSelector(
   selectExitStatus,
-  (status) => Boolean(status.exitNodeFromDaemon)
+  selectDaemonRunning,
+  (status, daemonRunning: boolean) =>
+    daemonRunning && Boolean(status.exitNodeFromDaemon)
 );
 
 export const selectHasExitNodeChangeLoading = createSelector(
   selectExitStatus,
-  (status) => status.exitLoading
+  selectDaemonRunning,
+  (status, daemonRunning: boolean) => daemonRunning && status.exitLoading
 );
 
 export const selectExitNodeFromUser = createSelector(
@@ -120,7 +118,7 @@ export const selectAuthCodeFromUser = createSelector(
   (status) => status.exitAuthCodeFromUser
 );
 
-export const selectVpnMode = createSelector(
+export const selectHasDoneInitialLoading = createSelector(
   selectExitStatus,
-  (status) => status.vpnModeSelected
+  (status) => status.initialLoadingFinished
 );

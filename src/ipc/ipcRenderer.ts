@@ -11,9 +11,13 @@ import {
   IPC_LOG_LINE,
   StatusErrorType
 } from '../../sharedIpc';
-import { appendToAppLogsOutsideRedux, setErrorOutsideRedux } from '../app/app';
+import {
+  appendToAppLogsOutsideRedux,
+  markAsStoppedOutsideRedux,
+  setErrorOutsideRedux
+} from '../app/app';
 
-const IPC_UPDATE_TIMEOUT = 10000; // 5 secs
+const IPC_UPDATE_TIMEOUT = 10000; // 10 secs
 
 const channelsFromRendererToMainToMake = {
   // rpc calls (zeromq calls)
@@ -54,8 +58,10 @@ export async function deleteExit(): Promise<string> {
   return channels.deleteExit();
 }
 
-export async function doStopLokinetProcess(): Promise<string | null> {
-  return channels.doStopLokinetProcess();
+export async function doStopLokinetProcess(
+  duringAppExit?: boolean
+): Promise<string | null> {
+  return channels.doStopLokinetProcess(duringAppExit);
 }
 
 export async function markRendererReady(): Promise<void> {
@@ -118,7 +124,8 @@ export async function initializeIpcRendererSide(): Promise<void> {
     }
   );
 
-  channels.markRendererReady();
+  const jobId = `markRendererReady-${Date.now()}`;
+  channels.markRendererReady(jobId);
 }
 
 async function _shutdown() {
@@ -223,7 +230,12 @@ function makeChannel(fnName: string) {
       _jobs[jobId].timer = setTimeout(() => {
         const logline = `IPC channel job ${jobId}: ${fnName} timed out at ${Date.now()}`;
         appendToAppLogsOutsideRedux(logline);
-        reject(new Error(logline));
+        // except if that was our stop call, consider that this means the lokinet daemon is not running
+        if (fnName !== 'doStopLokinetProcess') {
+          markAsStoppedOutsideRedux();
+        }
+
+        // reject(new Error(logline));
       }, IPC_UPDATE_TIMEOUT);
     });
   };
