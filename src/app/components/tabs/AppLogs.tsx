@@ -19,10 +19,12 @@ const ButtonRow = styled.div`
 const Timestamp = styled.span`
   font-size: 10px;
   color: ${(props) => props.theme.textColorSubtle};
+  user-select: text;
 `;
 
 const Content = styled(Timestamp)`
   color: ${(props) => props.theme.textColor};
+  user-select: text;
 `;
 
 export const AppLogs = (): JSX.Element => {
@@ -69,11 +71,7 @@ export const AppLogs = (): JSX.Element => {
         )}
       </Code>
       <ButtonRow>
-        <TextButton
-          onClick={() => dispatch(clearLogs())}
-          text="Clear"
-          title="Clear logs"
-        />
+        <TextButton onClick={() => dispatch(clearLogs())} text="Clear" />
         <LokinetIconButton
           onClick={() => copyToClipboard(appLogs.join('\r\n'))}
           size="30px"

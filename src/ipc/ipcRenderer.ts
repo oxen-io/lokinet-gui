@@ -2,7 +2,7 @@
 
 import Electron from 'electron';
 const { ipcRenderer } = Electron;
-import _ from 'lodash';
+import _, { clone } from 'lodash';
 import crypto from 'crypto';
 import {
   DEBUG_IPC_CALLS,
@@ -26,6 +26,7 @@ const channelsFromRendererToMainToMake = {
   deleteExit,
   setConfig,
   // lokinet process manager calls
+  doStartLokinetProcess,
   doStopLokinetProcess,
   // utility calls
   markRendererReady,
@@ -51,7 +52,7 @@ export async function addExit(
   console.info(
     `Triggering exit node set with node ${exitAddress}, authCode:${exitToken}`
   );
-  return channels.addExit(exitAddress, exitToken);
+  return channels.addExit(clone(exitAddress), clone(exitToken));
 }
 
 export async function deleteExit(): Promise<string> {
@@ -62,6 +63,10 @@ export async function doStopLokinetProcess(
   duringAppExit?: boolean
 ): Promise<string | null> {
   return channels.doStopLokinetProcess(duringAppExit);
+}
+
+export async function doStartLokinetProcess(): Promise<string | null> {
+  return channels.doStartLokinetProcess();
 }
 
 export async function markRendererReady(): Promise<void> {
@@ -102,7 +107,7 @@ export async function initializeIpcRendererSide(): Promise<void> {
 
   ipcRenderer.on(
     `${IPC_CHANNEL_KEY}-done`,
-    (event, jobId, errorForDisplay, result: string | null) => {
+    (_event, jobId, errorForDisplay, result: string | null) => {
       const job = _getJob(jobId);
       if (!job) {
         console.info(
@@ -124,8 +129,10 @@ export async function initializeIpcRendererSide(): Promise<void> {
     }
   );
 
-  const jobId = `markRendererReady-${Date.now()}`;
-  channels.markRendererReady(jobId);
+  channels.markRendererReady();
+  const jobId = `doStartLokinetProcess-${Date.now()}`;
+
+  channels.doStartLokinetProcess(jobId);
 }
 
 async function _shutdown() {
@@ -231,7 +238,11 @@ function makeChannel(fnName: string) {
         const logline = `IPC channel job ${jobId}: ${fnName} timed out at ${Date.now()}`;
         appendToAppLogsOutsideRedux(logline);
         // except if that was our stop call, consider that this means the lokinet daemon is not running
-        if (fnName !== 'doStopLokinetProcess') {
+        if (
+          fnName !== 'doStopLokinetProcess' &&
+          fnName !== 'markRendererReady' &&
+          fnName !== 'doStartLokinetProcess'
+        ) {
           markAsStoppedOutsideRedux();
         }
 
@@ -290,7 +301,6 @@ export const parseSummaryStatus = (
   let stats = null;
 
   if (!payload || _.isEmpty(payload)) {
-    console.info('Empty payload for summary status');
     return defaultDaemonSummaryStatus;
   }
 

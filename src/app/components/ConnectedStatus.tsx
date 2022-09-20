@@ -1,9 +1,15 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 import {
-  isGlobalStatusError,
-  useGlobalConnectingStatus
-} from '../hooks/connectingStatus';
+  selectHasExitNodeEnabled,
+  selectHasExitNodeChangeLoading,
+  selectDaemonIsLoading
+} from '../../features/exitStatusSlice';
+import {
+  selectDaemonRunning,
+  selectGlobalError
+} from '../../features/statusSlice';
 
 const ConnectedStatusContainer = styled.div`
   height: 40px;
@@ -21,13 +27,12 @@ const ConnectedStatusContainerWithLogo = styled(ConnectedStatusContainer)`
   height: 40px;
 `;
 
-const ConnectedStatusTitle = styled.span<{ textShadow: string }>`
+const ConnectedStatusTitle = styled.span`
   font-family: Archivo;
   font-style: normal;
   font-weight: bold;
   font-size: 1.4rem;
   text-align: center;
-  text-shadow: ${(props) => props.textShadow};
 `;
 
 const ConnectedStatusLED = styled.span<{ ledColor: string }>`
@@ -36,6 +41,7 @@ const ConnectedStatusLED = styled.span<{ ledColor: string }>`
   border-radius: 50%;
   margin-left: 1rem;
   background-color: ${(props) => props.ledColor};
+  flex-shrink: 0;
 `;
 
 const StyledLogoAndTitle = styled.svg`
@@ -58,57 +64,41 @@ const LokinetTitleSvg = () => {
 };
 
 export const ConnectedStatus = (): JSX.Element => {
-  const globalStatus = useGlobalConnectingStatus();
+  const daemonRunning = useSelector(selectDaemonRunning);
+  const daemonLoading = useSelector(selectDaemonIsLoading);
+  const hasExitEnabled = useSelector(selectHasExitNodeEnabled);
+  const hasExitLoading = useSelector(selectHasExitNodeChangeLoading);
+  const globalError = useSelector(selectGlobalError);
 
   const theme = useTheme();
 
-  if (
-    globalStatus === 'daemon-loading' ||
-    globalStatus === 'daemon-not-running'
-  ) {
+  if (daemonLoading || !daemonRunning) {
     return <LokinetTitleSvg />;
   }
 
   let ledColor = '';
-  let textShadow = '';
   let statusText = '';
 
-  if (isGlobalStatusError(globalStatus)) {
+  if (globalError) {
     statusText =
-      globalStatus === 'error-start-stop'
+      globalError === 'error-start-stop'
         ? 'FAILED TO START LOKINET'
         : 'UNABLE TO CONNECT';
     ledColor = theme.dangerColor;
-  }
-
-  switch (globalStatus) {
-    case 'exit-connecting':
-      textShadow = '';
-      statusText = 'CONNECTING';
-      ledColor = theme.connectingColor;
-      break;
-    case 'daemon-running':
-      textShadow = '';
-      statusText = 'CONNECTED TO LOKINET';
-      ledColor = theme.textColor;
-      break;
-    case 'exit-connected':
-      textShadow = '';
-      statusText = 'CONNECTED IN VPN MODE';
-      ledColor = theme.connectedColor;
-      break;
-    default: {
-      if (!globalStatus.startsWith('error')) {
-        throw new Error(`Missing case error ${globalStatus}`);
-      }
-    }
+  } else if (hasExitLoading) {
+    statusText = 'CONNECTING';
+    ledColor = theme.connectingColor;
+  } else if (hasExitEnabled) {
+    statusText = 'CONNECTED IN VPN MODE';
+    ledColor = theme.connectedColor;
+  } else if (daemonRunning) {
+    statusText = 'CONNECTED TO LOKINET';
+    ledColor = theme.textColor;
   }
 
   return (
     <ConnectedStatusContainer>
-      <ConnectedStatusTitle textShadow={textShadow}>
-        {statusText}
-      </ConnectedStatusTitle>
+      <ConnectedStatusTitle>{statusText}</ConnectedStatusTitle>
       <ConnectedStatusLED ledColor={ledColor} />
     </ConnectedStatusContainer>
   );

@@ -9,17 +9,12 @@ const options: Array<{ id: OnExitStopSetting; title: string; label: string }> =
   [
     {
       id: 'stop_everything',
-      label: 'Stop Lokinet completely',
-      title: 'Stop the exit mode set and the Lokinet daemon.'
-    },
-    {
-      id: 'keep_daemon_only',
-      label: 'Stop exit mode only',
-      title: 'Keep the Lokinet daemon running but stop exit mode'
+      label: 'Stop the Lokinet daemon',
+      title: 'Stop the exit mode set and the Lokinet daemon. '
     },
     {
       id: 'keep_everything',
-      label: 'Keep Lokinet & exit mode',
+      label: 'Keep the Lokinet daemon running',
       title:
         'Keep Lokinet and the current exit status running even when the app is fully stopped.'
     }
@@ -72,7 +67,7 @@ export const SettingsTab = (): JSX.Element => {
     <SettingsTabContainer>
       <PlusDivider />
 
-      <SettingsText>When the app is completely exited, do:</SettingsText>
+      <SettingsText>When the app is completely closed, do:</SettingsText>
       <RadioGroupContainer>
         {options.map((m) => {
           const selected = m.id === selectedOnStopSetting;

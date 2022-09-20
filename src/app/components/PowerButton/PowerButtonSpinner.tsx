@@ -1,7 +1,8 @@
 import React from 'react';
-import styled, { useTheme } from 'styled-components';
-import { useGlobalConnectingStatus } from '../../hooks/connectingStatus';
-import { getPowerButtonColorBasedOnStatus } from './PowerButtonIcon';
+import { useSelector } from 'react-redux';
+import styled from 'styled-components';
+import { selectDaemonOrExitIsLoading } from '../../../features/statusSlice';
+import { usePowerButtonColor } from './PowerButtonIcon';
 
 export const PowerButtonContainerBorder = ({
   isHovered,
@@ -10,21 +11,15 @@ export const PowerButtonContainerBorder = ({
   children: React.ReactNode;
   isHovered: boolean;
 }): JSX.Element => {
-  const globalStatus = useGlobalConnectingStatus();
-  const theme = useTheme();
+  const borderColor = usePowerButtonColor(isHovered);
+  const loading = useSelector(selectDaemonOrExitIsLoading);
 
-  const borderColor = getPowerButtonColorBasedOnStatus(
-    globalStatus,
-    theme,
-    isHovered
-  );
-
-  if (globalStatus === 'daemon-loading' || globalStatus === 'exit-connecting') {
+  if (loading) {
     // display the spinner only when starting lokinet daemon or connecting to an exit
     return (
       <>
         {children}
-        <PowerButtonSpinner></PowerButtonSpinner>
+        <PowerButtonSpinner />
       </>
     );
   }

@@ -1,18 +1,21 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 import styled, { DefaultTheme, useTheme } from 'styled-components';
 import {
-  ConnectingStatus,
-  useGlobalConnectingStatus
-} from '../../hooks/connectingStatus';
+  selectHasExitNodeEnabled,
+  selectHasExitNodeChangeLoading
+} from '../../../features/exitStatusSlice';
+import { selectDaemonRunning } from '../../../features/statusSlice';
 
-export function getPowerButtonColorBasedOnStatus(
-  globalStatus: ConnectingStatus,
-  theme: DefaultTheme,
-  isHovered: boolean
-) {
+export function usePowerButtonColor(isHovered: boolean) {
+  const theme = useTheme();
+  const daemonRunning = useSelector(selectDaemonRunning);
+  const hasExitEnabled = useSelector(selectHasExitNodeEnabled);
+  const hasExitLoading = useSelector(selectHasExitNodeChangeLoading);
+
   let buttonColor = isHovered ? theme.textColor : theme.textColorSubtle;
 
-  if (globalStatus === 'daemon-running' || globalStatus === 'exit-connected') {
+  if (daemonRunning || (hasExitEnabled && !hasExitLoading)) {
     buttonColor = isHovered ? theme.textColorSubtle : theme.textColor;
   }
   return buttonColor;
@@ -23,14 +26,7 @@ export const PowerButtonIcon = ({
 }: {
   isHovered: boolean;
 }): JSX.Element => {
-  const globalStatus = useGlobalConnectingStatus();
-  const theme = useTheme();
-
-  const buttonColor = getPowerButtonColorBasedOnStatus(
-    globalStatus,
-    theme,
-    isHovered
-  );
+  const buttonColor = usePowerButtonColor(isHovered);
 
   return (
     <StyledPowerIcon buttonColor={buttonColor}>{svgPower}</StyledPowerIcon>

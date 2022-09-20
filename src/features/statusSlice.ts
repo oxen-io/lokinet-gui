@@ -6,6 +6,10 @@ import {
 } from '../app/components/tabs/SpeedChart';
 import { RootState } from '../app/store';
 import { defaultDaemonSummaryStatus } from '../ipc/ipcRenderer';
+import {
+  selectDaemonIsLoading,
+  selectHasExitNodeChangeLoading
+} from './exitStatusSlice';
 
 export interface SummaryStatusState {
   isRunning: boolean;
@@ -115,7 +119,6 @@ export const statusSlice = createSlice({
       return state;
     },
     markAsStopped: (state) => {
-      console.info('marking as daemon stopped');
       return { ...initialSummaryStatusState, globalError: state.globalError };
     },
     setGlobalError: (state, action: PayloadAction<StatusErrorType>) => {
@@ -128,12 +131,28 @@ export const statusSlice = createSlice({
 // Action creators are generated for each case reducer function
 export const { updateFromDaemonStatus, markAsStopped, setGlobalError } =
   statusSlice.actions;
-export const selectStatus = (state: RootState): SummaryStatusState =>
-  state.status;
+
+export function selectStatus(state: RootState): SummaryStatusState {
+  return state.status;
+}
 
 export const selectDaemonRunning = createSelector(
   selectStatus,
   (status) => status.isRunning
+);
+
+export const selectGlobalError = createSelector(
+  selectStatus,
+  (status): StatusErrorType => status.globalError || undefined
+);
+
+export const selectDaemonOrExitIsLoading = createSelector(
+  selectDaemonIsLoading,
+  selectHasExitNodeChangeLoading,
+  selectGlobalError,
+  (daemonIsLoading, exitLoading, globalError) => {
+    return !globalError && (daemonIsLoading || exitLoading);
+  }
 );
 
 export const selectVersion = createSelector(
@@ -149,11 +168,6 @@ export const selectUptime = createSelector(
 export const selectLokinetAddress = createSelector(
   selectStatus,
   (status) => status.lokiAddress || ''
-);
-
-export const selectGlobalError = createSelector(
-  selectStatus,
-  (status): StatusErrorType => status.globalError || undefined
 );
 
 export const selectUploadRate = createSelector(selectStatus, (status) =>

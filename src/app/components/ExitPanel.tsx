@@ -7,17 +7,20 @@ import {
   onUserExitNodeSet,
   selectAuthCodeFromUser,
   selectExitNodeFromUser,
-  selectExitStatus
+  selectExitStatus,
+  selectHasExitNodeChangeLoading,
+  selectHasExitNodeEnabled
 } from '../../features/exitStatusSlice';
 import { useAppDispatch } from '../hooks';
 import { paddingDividers } from './Utils/Dividers';
 import { TextButton } from './TextButton';
 import { VSpacer } from './Utils/Spacer';
-import {
-  isGlobalStatusError,
-  useGlobalConnectingStatus
-} from '../hooks/connectingStatus';
+
 import { turnExitOff, turnExitOn } from './PowerButton/PowerButtonActions';
+import {
+  selectDaemonOrExitIsLoading,
+  selectDaemonRunning
+} from '../../features/statusSlice';
 
 const ExitInput = styled(Input)`
   background-color: ${(props) => props.theme.inputBackground};
@@ -43,37 +46,37 @@ const InputLabel = styled.div`
 `;
 
 const ConnectDisconnectButton = () => {
-  const { exitLoading, exitNodeFromDaemon } = useSelector(selectExitStatus);
   const theme = useTheme();
 
-  const isConnected = Boolean(exitNodeFromDaemon);
-  const connectingStatus = useGlobalConnectingStatus();
-  const isGlobalError = isGlobalStatusError(connectingStatus);
+  const daemonOrExitIsLoading = useSelector(selectDaemonOrExitIsLoading);
+  const daemonIsRunning = useSelector(selectDaemonRunning);
+  const exitLoading = useSelector(selectHasExitNodeChangeLoading);
+  const exitIsOn = useSelector(selectHasExitNodeEnabled);
 
-  const buttonText = isConnected
+  const buttonText = exitIsOn
     ? 'DISCONNECT'
-    : exitLoading && !isGlobalError
+    : exitLoading
     ? 'CONNECTING'
     : 'CONNECT';
 
-  const buttonColor = isConnected ? theme.dangerColor : theme.textColor;
+  const buttonColor = exitIsOn ? theme.dangerColor : theme.textColor;
   const dispatch = useDispatch();
 
   const authCodeFromUser = useSelector(selectAuthCodeFromUser);
   const exitNodeFromUser = useSelector(selectExitNodeFromUser);
 
-  const buttonDisabled =
-    connectingStatus === 'daemon-loading' ||
-    connectingStatus === 'exit-connecting' ||
-    connectingStatus === 'error-start-stop';
+  const buttonDisabled = daemonOrExitIsLoading; // || globalError === 'error-start-stop';
 
   function onClick() {
     if (buttonDisabled) {
       return;
     }
-    if (connectingStatus === 'exit-connected') {
+    if (exitIsOn) {
       turnExitOff(dispatch);
-    } else if (connectingStatus === 'daemon-running') {
+      return;
+    }
+    if (daemonIsRunning) {
+      // no need to try to stop the exit if the daemon is not running
       turnExitOn(dispatch, exitNodeFromUser, authCodeFromUser);
     }
   }

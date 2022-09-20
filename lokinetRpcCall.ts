@@ -2,7 +2,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ipcMain } from 'electron';
 import * as _zmq from 'zeromq/';
-import * as zmq from 'zeromq/v5-compat';
 
 _zmq.context.blocky = false;
 

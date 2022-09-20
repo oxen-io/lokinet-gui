@@ -97,26 +97,21 @@ const getLokinetProcessManager = async () => {
 export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
   let result: string | undefined;
 
-  if (!process.env.DISABLE_AUTO_START_STOP) {
-    try {
-      logLineToAppSide('About to start Lokinet process');
+  try {
+    logLineToAppSide('About to start Lokinet process');
 
-      const manager = await getLokinetProcessManager();
-      const startStopResult = await manager.doStartLokinetProcess();
+    const manager = await getLokinetProcessManager();
+    const startStopResult = await manager.doStartLokinetProcess();
 
-      if (startStopResult) {
-        sendGlobalErrorToAppSide('error-start-stop');
-      }
-    } catch (e: any) {
-      logLineToAppSide(`Lokinet process start failed with ${e.message}`);
-      console.info('doStartLokinetProcess failed with', e);
+    if (startStopResult) {
       sendGlobalErrorToAppSide('error-start-stop');
     }
-  } else {
-    logLineToAppSide(
-      'ENV "DISABLE_AUTO_START_STOP" is set, not auto starting lokinet daemon'
-    );
+  } catch (e: any) {
+    logLineToAppSide(`Lokinet process start failed with ${e.message}`);
+    console.info('doStartLokinetProcess failed with', e);
+    sendGlobalErrorToAppSide('error-start-stop');
   }
+
   const event = getEventByJobId(jobId);
   event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
