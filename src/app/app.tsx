@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDom from 'react-dom';
 import 'focus-visible/dist/focus-visible';
 
@@ -17,7 +17,7 @@ import {
   setGlobalError,
   updateFromDaemonStatus
 } from '../features/statusSlice';
-import { Provider, useSelector } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch } from './hooks';
 import {
@@ -29,8 +29,9 @@ import { appendToApplogs } from '../features/appLogsSlice';
 import { GlobalStyle } from './globalStyles';
 import { ThemeProvider } from 'styled-components';
 import { darkTheme, lightTheme } from './theme';
-import { selectedTheme } from '../features/uiStatusSlice';
+import { selectedTheme, setTheme } from '../features/uiStatusSlice';
 import { StatusErrorType } from '../../sharedIpc';
+import { getThemeFromSettings } from './config';
 
 void initializeIpcRendererSide();
 
@@ -127,6 +128,18 @@ ReactDom.render(<div id="root" />, document.body);
 
 const LokinetThemeProvider = (props: { children: React.ReactNode }) => {
   const currentTheme = useSelector(selectedTheme);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fromSettings = getThemeFromSettings();
+    if (
+      (currentTheme !== fromSettings && fromSettings === 'light') ||
+      fromSettings === 'dark'
+    ) {
+      dispatch(setTheme(fromSettings));
+    }
+  }, [currentTheme, dispatch]);
+
   return (
     <ThemeProvider theme={currentTheme === 'light' ? lightTheme : darkTheme}>
       {props.children}

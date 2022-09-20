@@ -10,8 +10,10 @@ import ElectronStore from 'electron-store';
 import {
   getDefaultOnExitDo,
   OnExitStopSetting,
+  SETTINGS_ID_SELECTED_THEME,
   SETTINGS_ID_STOP_ON_EXIT
 } from './types';
+import { darkTheme, lightTheme } from './src/app/theme';
 
 let store: ElectronStore | undefined;
 const configScreenIndex = 'screen_index';
@@ -66,6 +68,8 @@ async function createWindow() {
   const width = defaultWidth * scaleFactorDiy;
   const height = defaultHeight * scaleFactorDiy;
 
+  const selectedTheme = store.get(SETTINGS_ID_SELECTED_THEME, 'light');
+
   mainWindow = new BrowserWindow({
     width,
     height,
@@ -80,7 +84,10 @@ async function createWindow() {
       webSecurity: true,
       zoomFactor: scaleFactorDiy
     },
-    backgroundColor: '#fff',
+    backgroundColor:
+      selectedTheme === 'light'
+        ? lightTheme.backgroundColor
+        : darkTheme.backgroundColor,
     autoHideMenuBar: true,
     frame: false,
     x: Math.floor(bounds.x + bounds.width / 2 - width / 2),
@@ -141,7 +148,6 @@ app.on('before-quit', () => {
   if (todoOnExit === 'stop_everything') {
     void doStopLokinetProcess(true);
   }
-
 
   if (tray) {
     tray.destroy();
