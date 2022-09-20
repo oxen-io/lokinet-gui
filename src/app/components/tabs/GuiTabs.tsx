@@ -5,10 +5,12 @@ import { useTheme } from 'styled-components';
 import {
   selectSelectedTab,
   setTabSelected,
-  TabIndex
-} from '../../features/uiStatusSlice';
+  TabIndex,
+  toTabName
+} from '../../../features/uiStatusSlice';
 import { AppLogs } from './AppLogs';
 import { MainTab } from './MainTab';
+import { SettingsTab } from './SettingsTab';
 import { SpeedChart } from './SpeedChart';
 
 export const GuiTabs = (): JSX.Element => {
@@ -34,9 +36,7 @@ export const GuiTabs = (): JSX.Element => {
       flexGrow={1}
       index={selectedTab}
       onChange={(index: number) => {
-        dispatch(
-          setTabSelected(index === 0 ? 'main' : index === 1 ? 'chart' : 'logs')
-        );
+        dispatch(setTabSelected(toTabName(index as TabIndex)));
       }}
       isLazy={false}
       variant="unstyled"
@@ -45,6 +45,7 @@ export const GuiTabs = (): JSX.Element => {
         <Tab _selected={selectedStyle}>MAIN</Tab>
         <Tab _selected={selectedStyle}>CHART</Tab>
         <Tab _selected={selectedStyle}>LOGS</Tab>
+        <Tab _selected={selectedStyle}>OPTS</Tab>
       </TabList>
       <TabPanels flexGrow={1} padding={1} height="0px">
         <TabPanel flexGrow={1} padding={2}>
@@ -55,6 +56,9 @@ export const GuiTabs = (): JSX.Element => {
         </TabPanel>
         <TabPanel flexGrow={1} padding={2} height="100%">
           <AppLogs />
+        </TabPanel>
+        <TabPanel flexGrow={1} padding={2} >
+          <SettingsTab />
         </TabPanel>
       </TabPanels>
     </Tabs>

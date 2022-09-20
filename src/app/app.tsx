@@ -136,7 +136,6 @@ ReactDom.render(
   <Provider store={store}>
     <LokinetThemeProvider>
       <GlobalStyle />
-
       <App />
     </LokinetThemeProvider>
   </Provider>,

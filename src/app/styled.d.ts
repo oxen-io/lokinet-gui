@@ -7,5 +7,8 @@ declare module 'styled-components' {
     textColorSubtle: string;
     inputBackground: string;
     inputTextColor: string;
+    dangerColor: string;
+    connectingColor: string;
+    connectedColor: string;
   }
 }

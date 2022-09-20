@@ -3,7 +3,7 @@ import { StatusErrorType } from '../../sharedIpc';
 import {
   MAX_NUMBER_POINT_HISTORY,
   SpeedHistoryDataType
-} from '../app/components/SpeedChart';
+} from '../app/components/tabs/SpeedChart';
 import { RootState } from '../app/store';
 import { defaultDaemonSummaryStatus } from '../ipc/ipcRenderer';
 

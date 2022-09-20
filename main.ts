@@ -1,15 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { app, BrowserWindow, screen, Tray } from 'electron';
-import { initializeIpcNodeSide, logLineToAppSide } from './ipcNode';
+import { initializeIpcNodeSide } from './ipcNode';
 import { doStopLokinetProcess } from './lokinetProcessManager';
 import { closeRpcConnection } from './lokinetRpcCall';
 import { createTrayIcon } from './trayIcon';
 import { markShouldQuit, shouldQuit } from './windowState';
 
 import ElectronStore from 'electron-store';
+import {
+  getDefaultOnExitDo,
+  OnExitStopSetting,
+  SETTINGS_ID_STOP_ON_EXIT
+} from './types';
 
 let store: ElectronStore | undefined;
-const configScreenIndex = 'SCREEN_INDEX';
+const configScreenIndex = 'screen_index';
 
 let mainWindow: BrowserWindow | null;
 let tray: Tray | null = null;
@@ -43,9 +48,9 @@ async function createWindow() {
       validScreenIndexToUse = screenIndexFromStore;
     }
   }
-  const openDevTools = false;
+  const openDevTools = process.env.OPEN_DEV_TOOLS || false;
   const defaultHeight = 850; // 850
-  const defaultWidth = openDevTools ? 1000 : 450; // 450
+  const defaultWidth = openDevTools ? 1250 : 450; // 450
 
   const isDev = process.env.NODE_ENV === 'development';
   const indexToUse = validScreenIndexToUse || 0;
@@ -123,16 +128,25 @@ async function createWindow() {
   });
 }
 
-app.on('before-quit', () => {
+app.on('before-quit', async () => {
   console.log('before-quit event');
-  void closeRpcConnection();
-  if (!process.env.DISABLE_AUTO_START_STOP) {
+  await closeRpcConnection();
+
+  const todoOnExit: OnExitStopSetting =
+    (store?.get(
+      SETTINGS_ID_STOP_ON_EXIT,
+      getDefaultOnExitDo()
+    ) as OnExitStopSetting) || getDefaultOnExitDo();
+  console.warn('todoOnExit', todoOnExit);
+  // if (!process.env.DISABLE_AUTO_START_STOP) {
+  if (todoOnExit === 'stop_everything') {
     void doStopLokinetProcess();
-  } else {
-    logLineToAppSide(
-      'ENV "DISABLE_AUTO_START_STOP" is set, not auto starting lokinet daemon'
-    );
   }
+  // } else {
+  //   logLineToAppSide(
+  //     'ENV "DISABLE_AUTO_START_STOP" is set, not auto stopping lokinet daemon'
+  //   );
+  // }
 
   if (tray) {
     tray.destroy();

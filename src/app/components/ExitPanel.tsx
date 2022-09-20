@@ -1,14 +1,17 @@
 import { Flex, Stack, Input } from '@chakra-ui/react';
+import { noop } from 'lodash';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import {
   onUserAuthCodeSet,
   onUserExitNodeSet,
   selectExitStatus
 } from '../../features/exitStatusSlice';
 import { useAppDispatch } from '../hooks';
-import { paddingDividers } from './Dividers';
+import { paddingDividers } from './Utils/Dividers';
+import { TextButton } from './TextButton';
+import { VSpacer } from './Utils/Spacer';
 
 const ExitInput = styled(Input)`
   background-color: ${(props) => props.theme.inputBackground};
@@ -21,7 +24,7 @@ const ExitInput = styled(Input)`
   font-size: 1.1rem;
   padding: 5px;
   outline: none;
-  transition: 0.5s;
+  transition: 0.25s;
   cursor: ${(props) => (props.disabled ? 'not-allowed' : 'auto')};
 `;
 
@@ -31,8 +34,29 @@ const InputLabel = styled.div`
   font-weight: 500;
   font-size: 1.1rem;
   text-align: start;
-  user-select: none;
 `;
+
+const ConnectDisconnectButton = () => {
+  const { exitLoading, exitNodeFromDaemon } = useSelector(selectExitStatus);
+  const theme = useTheme();
+  const isConnected = Boolean(exitNodeFromDaemon);
+
+  const buttonText = isConnected
+    ? 'DISCONNECT'
+    : exitLoading
+    ? 'CONNECTING'
+    : 'CONNECT';
+
+  const buttonColor = isConnected ? theme.dangerColor : theme.textColor;
+  return (
+    <TextButton
+      buttonColor={buttonColor}
+      onClick={noop}
+      text={buttonText}
+      title={buttonText}
+    />
+  );
+};
 
 export const ExitPanel = (): JSX.Element => {
   const exitStatus = useSelector(selectExitStatus);
@@ -60,10 +84,10 @@ export const ExitPanel = (): JSX.Element => {
           <InputLabel>EXIT NODE</InputLabel>
           <ExitInput
             disabled={disableInputEdits}
-            onChange={(e) =>
+            onChange={(e: any) =>
               dispatch(onUserExitNodeSet(e?.currentTarget?.value))
             }
-            onPaste={(e) =>
+            onPaste={(e: any) =>
               dispatch(onUserExitNodeSet(e?.currentTarget?.value))
             }
             size="sm"
@@ -78,10 +102,10 @@ export const ExitPanel = (): JSX.Element => {
           <ExitInput
             disabled={disableInputEdits}
             spellCheck={false}
-            onChange={(e) =>
+            onChange={(e: any) =>
               dispatch(onUserAuthCodeSet(e?.currentTarget?.value))
             }
-            onPaste={(e) =>
+            onPaste={(e: any) =>
               dispatch(onUserAuthCodeSet(e?.currentTarget?.value))
             }
             size="sm"
@@ -90,6 +114,8 @@ export const ExitPanel = (): JSX.Element => {
             marginBottom={2}
             noOfLines={1}
           />
+          <VSpacer height="20px" />
+          <ConnectDisconnectButton />
         </Flex>
       </Stack>
     </Flex>

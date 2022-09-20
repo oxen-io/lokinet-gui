@@ -8,7 +8,6 @@ const StyledHeading = styled.h3`
 
   align-self: start;
   padding-bottom: 5px;
-  user-select: none;
 `;
 
 export const StatsSection = styled.div`

@@ -49,7 +49,7 @@ export const turnExitOff = async (dispatch: AppDispatch): Promise<void> => {
       } else {
         // Do nothing. At this point we are waiting for the next getSummaryStatus call
         // to send us the exit node set from the daemon.
-        dispatch(appendToApplogs(`TurnExitOFF OK? <= ${parsed.result}`));
+        dispatch(appendToApplogs(`TurnExitOFF OK result <= ${parsed.result}`));
       }
     } catch (e) {
       dispatchExitFailedToTurnOff(dispatch);

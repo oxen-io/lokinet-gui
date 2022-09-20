@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { selectedTheme } from '../../features/uiStatusSlice';
 import {
   isGlobalStatusError,
@@ -29,7 +29,6 @@ const ConnectedStatusTitle = styled.span<{ textShadow: string }>`
   font-weight: bold;
   font-size: 1.4rem;
   text-align: center;
-  user-select: none;
   text-shadow: ${(props) => props.textShadow};
 `;
 
@@ -51,36 +50,56 @@ export const ConnectedStatus = (): JSX.Element => {
   const globalStatus = useGlobalConnectingStatus();
   const themeType = useSelector(selectedTheme);
 
+  const theme = useTheme();
+
+  let ledColor = '';
+  let textShadow = '';
+  let statusText = '';
+
   if (isGlobalStatusError(globalStatus)) {
-    const errorText =
-      status === 'error-start-stop'
+    statusText =
+      globalStatus === 'error-start-stop'
         ? 'FAILED TO START LOKINET'
         : 'UNABLE TO CONNECT';
-    return (
-      <ConnectedStatusContainer>
-        <ConnectedStatusTitle textShadow="">{errorText}</ConnectedStatusTitle>
-        <ConnectedStatusLED ledColor="#F33232" />
-      </ConnectedStatusContainer>
-    );
+    ledColor = theme.dangerColor;
   }
 
-  if (globalStatus === 'connecting') {
-    return (
-      <ConnectedStatusContainer>
-        <ConnectedStatusTitle textShadow="">CONNECTING</ConnectedStatusTitle>
-        <ConnectedStatusLED ledColor="#EBD619" />
-      </ConnectedStatusContainer>
-    );
+  switch (globalStatus) {
+    case 'daemon-connecting':
+      textShadow = '';
+      statusText = 'DAEMON CONNECTING';
+      ledColor = theme.connectedColor;
+      break;
+    case 'daemon-connected':
+      textShadow = '';
+      statusText = 'DAEMON CONNECTED';
+      ledColor = theme.connectedColor;
+      break;
+    case 'exit-connecting':
+      textShadow = '';
+      statusText = 'EXIT CONNECTING';
+      ledColor = theme.connectedColor;
+      break;
+    case 'exit-connected':
+      textShadow = themeType == 'light' ? '' : '0px 0px 3px #FFFFFF';
+      statusText = 'EXITG CONNECTED';
+      ledColor = theme.connectedColor;
+      break;
+
+    default: {
+      if (!globalStatus.startsWith('error')) {
+        throw new Error('Missing case error');
+      }
+    }
   }
-  if (globalStatus === 'connected') {
+
+  if (globalStatus !== 'default') {
     return (
       <ConnectedStatusContainer>
-        <ConnectedStatusTitle
-          textShadow={themeType == 'light' ? '' : '0px 0px 3px #FFFFFF'}
-        >
-          CONNECTED
+        <ConnectedStatusTitle textShadow={textShadow}>
+          \ {statusText}
         </ConnectedStatusTitle>
-        <ConnectedStatusLED ledColor="#37EB19" />
+        <ConnectedStatusLED ledColor={ledColor} />
       </ConnectedStatusContainer>
     );
   }

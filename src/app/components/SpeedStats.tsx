@@ -1,9 +1,5 @@
 import React from 'react';
-import { useSelector } from 'react-redux';
-import {
-  selectUploadRate,
-  selectDownloadRate
-} from '../../features/statusSlice';
+
 import { StatsHeading, StatsSection } from './CommonStats';
 import { DownSpeedWithIcon, UpSpeedWithIcon } from './LabelSubtleWithValue';
 

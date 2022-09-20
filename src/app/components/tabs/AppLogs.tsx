@@ -4,11 +4,11 @@ import { MdOutlineContentCopy } from 'react-icons/md';
 import { useDispatch } from 'react-redux';
 import { useCopyToClipboard } from 'react-use';
 import styled, { useTheme } from 'styled-components';
-import { clearLogs, selectAppLogs } from '../../features/appLogsSlice';
-import { useAppSelector } from '../hooks';
-import { MinusDivider, PlusDivider } from './Dividers';
-import { LokinetIconButton } from './LokinetIconButton';
-import { TextButton } from './TextButton';
+import { selectAppLogs, clearLogs } from '../../../features/appLogsSlice';
+import { useAppSelector } from '../../hooks';
+import { PlusDivider, MinusDivider } from '../Utils/Dividers';
+import { LokinetIconButton } from '../LokinetIconButton';
+import { TextButton } from '../TextButton';
 
 const ButtonRow = styled.div`
   display: flex;

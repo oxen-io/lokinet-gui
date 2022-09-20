@@ -1,6 +1,5 @@
-import React, { useRef, useState } from 'react';
+import React, {  useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useHover } from 'react-use';
 import styled from 'styled-components';
 import {
   selectAuthCodeFromUser,

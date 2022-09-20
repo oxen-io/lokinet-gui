@@ -56,6 +56,7 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    user-select: none;
   }
 
   :focus {
@@ -73,7 +74,6 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     font-size: 1.4rem;
     border-bottom: 3px solid transparent;
     padding: 0 5px 5px 5px;
-    user-select: none;
     transition: 0.25s linear;
   }
 

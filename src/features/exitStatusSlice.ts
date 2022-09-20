@@ -16,6 +16,7 @@ export interface ExitStatusState {
   // those 2 fields will be set once exitLoading is done loading with what the daemon gave us back.
   exitNodeFromDaemon?: string;
   exitAuthCodeFromDaemon?: string;
+  vpnModeSelected: boolean;
 }
 
 const initialStatusState: ExitStatusState = {
@@ -25,7 +26,8 @@ const initialStatusState: ExitStatusState = {
   exitNodeFromUser: 'exit.loki',
   exitAuthCodeFromUser: undefined,
   exitNodeFromDaemon: undefined,
-  exitAuthCodeFromDaemon: undefined
+  exitAuthCodeFromDaemon: undefined,
+  vpnModeSelected: false
 };
 
 export const exitStatusSlice = createSlice({
@@ -47,6 +49,10 @@ export const exitStatusSlice = createSlice({
       state.exitLoading = false;
       state.exitNodeFromDaemon = undefined;
       state.exitAuthCodeFromDaemon = undefined;
+      return state;
+    },
+    setVpnMode: (state, action: PayloadAction<boolean>) => {
+      state.vpnModeSelected = action.payload;
       return state;
     },
     markInitialLoadingFinished(state) {
@@ -87,8 +93,10 @@ export const {
   markExitNodesFromDaemon,
   onUserExitNodeSet,
   onUserAuthCodeSet,
-  markInitialLoadingFinished
+  markInitialLoadingFinished,
+  setVpnMode
 } = exitStatusSlice.actions;
+
 export const selectExitStatus = (state: RootState): ExitStatusState =>
   state.exitStatus;
 
@@ -110,4 +118,9 @@ export const selectExitNodeFromUser = createSelector(
 export const selectAuthCodeFromUser = createSelector(
   selectExitStatus,
   (status) => status.exitAuthCodeFromUser
+);
+
+export const selectVpnMode = createSelector(
+  selectExitStatus,
+  (status) => status.vpnModeSelected
 );

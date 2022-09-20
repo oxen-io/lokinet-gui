@@ -8,8 +8,10 @@ import { selectGlobalError } from '../../features/statusSlice';
 
 export type ConnectingStatus =
   | 'default'
-  | 'connected'
-  | 'connecting'
+  | 'exit-connected'
+  | 'exit-connecting'
+  | 'daemon-connected'
+  | 'daemon-connecting'
   | StatusErrorTypeSet;
 
 export const useGlobalConnectingStatus = (): ConnectingStatus => {
@@ -22,11 +24,11 @@ export const useGlobalConnectingStatus = (): ConnectingStatus => {
   }
 
   if (exitIsLoading) {
-    return 'connecting';
+    return 'exit-connecting';
   }
 
   if (exitIsSet) {
-    return 'connected';
+    return 'exit-connected';
   }
   return 'default';
 };

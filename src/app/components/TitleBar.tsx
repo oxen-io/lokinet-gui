@@ -17,7 +17,6 @@ const Container = styled.div`
   display: flex;
   font-size: 2rem;
   -webkit-app-region: drag;
-  -webkit-user-select: none;
   flex-shrink: 0;
   padding: 0.5rem 1rem;
 `;
