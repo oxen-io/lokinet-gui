@@ -51,10 +51,9 @@ async function createWindow() {
     }
   }
   const openDevTools = process.env.OPEN_DEV_TOOLS || false;
-  const defaultHeight = 850; // 850
-  const defaultWidth = openDevTools ? 1250 : 450; // 450
+  const defaultHeight = 850;
+  const defaultWidth = openDevTools ? 1250 : 450;
 
-  const isDev = process.env.NODE_ENV === 'development';
   const indexToUse = validScreenIndexToUse || 0;
   const sz = allDisplays[indexToUse].size;
   const bounds = allDisplays[indexToUse].bounds;
@@ -97,17 +96,11 @@ async function createWindow() {
 
   tray = createTrayIcon(getMainWindow);
 
-  if (isDev) {
-    mainWindow.loadURL(`http://localhost:4000`);
-    if (openDevTools) {
-      mainWindow.webContents.openDevTools({ mode: 'right' });
-    }
-  } else {
-    mainWindow.loadFile('./dist/index.html');
-    if (openDevTools) {
-      mainWindow.webContents.openDevTools({ mode: 'right' });
-    }
+  mainWindow.loadFile('./dist/index.html');
+  if (openDevTools) {
+    mainWindow.webContents.openDevTools({ mode: 'right' });
   }
+
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();
   await initializeIpcNodeSide(getMainWindow);

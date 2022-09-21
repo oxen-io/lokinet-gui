@@ -1,12 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ipcMain } from 'electron';
 import * as _zmq from 'zeromq/';
 
 _zmq.context.blocky = false;
 
-import { eventsByJobId } from './ipcNode';
-import { IPC_CHANNEL_KEY } from './sharedIpc';
+import { sendIpcReplyAndDeleteJob } from './ipcNode';
 
 const RPC_BOUND_PORT = 1190;
 const RPC_BOUND_IP = '127.0.0.1';
@@ -99,34 +97,14 @@ const loopDealerReceiving = async (): Promise<void> => {
       const reply = await dealer.receive();
       const replyLength = reply.length;
 
+      // we only care if we get a REPLY event with 3 arguments total for nowq.
       if (replyLength === 3) {
         const replyType = reply[0].toString('utf8');
         if (replyType === 'REPLY') {
           const jobId = reply[1].toString('utf8');
           const content = reply[2].toString('utf8');
-          const event = eventsByJobId[jobId];
 
-          if (!event) {
-            throw new Error(`Could not find the event for jobId ${jobId}`);
-          }
-          event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, content);
-          delete eventsByJobId[jobId];
-        } else {
-          // delete eventsByJobId[jobId];
-          //FIXME TODO
-          throw new Error('To handle');
-        }
-      } else {
-        throw new Error('To handle');
-
-        console.warn('Got an invalid reply of length', replyLength);
-        if (replyLength === 2) {
-          const jobId = reply[1].toString('utf8');
-          ipcMain.emit(
-            `${IPC_CHANNEL_KEY}-done`,
-            jobId,
-            'Got an invalid reply of length'
-          );
+          sendIpcReplyAndDeleteJob(jobId, null, content);
         }
       }
     }
@@ -145,7 +123,7 @@ export const initialLokinetRpcDealer = async (): Promise<void> => {
     throw new Error('RPC Channel is already init.');
   }
 
-  dealer = new _zmq.Dealer({ sendTimeout: 10000 });
+  dealer = new _zmq.Dealer({ sendTimeout: 1000 }); // 1sec
   // just trigger the loop, non blocking
   void loopDealerReceiving();
 };

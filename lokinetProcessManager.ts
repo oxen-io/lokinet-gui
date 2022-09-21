@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import util from 'util';
 import {
-  getEventByJobId,
   logLineToAppSide,
-  sendGlobalErrorToAppSide
+  sendGlobalErrorToAppSide,
+  sendIpcReplyAndDeleteJob
 } from './ipcNode';
 import { LokinetLinuxProcessManager } from './lokinetProcessManagerLinux';
 import {
@@ -13,7 +13,6 @@ import {
 
 import { LokinetWindowsProcessManager } from './lokinetProcessManagerWindows';
 
-import { IPC_CHANNEL_KEY } from './sharedIpc';
 import { exec } from 'child_process';
 import { LokinetMacOSProcessManager } from './lokinetProcessManagerMacOS';
 
@@ -101,6 +100,10 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
     logLineToAppSide('About to start Lokinet process');
 
     const manager = await getLokinetProcessManager();
+    // we send the ipc reply first because the call below might hand until the user typed his password etc.
+    // we then trigger an update if an error happened with `sendGlobalErrorToAppSide`
+    sendIpcReplyAndDeleteJob(jobId, null, '');
+
     const startStopResult = await manager.doStartLokinetProcess();
 
     if (startStopResult) {
@@ -110,10 +113,8 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
     logLineToAppSide(`Lokinet process start failed with ${e.message}`);
     console.info('doStartLokinetProcess failed with', e);
     sendGlobalErrorToAppSide('error-start-stop');
+    sendIpcReplyAndDeleteJob(jobId, null, result);
   }
-
-  const event = getEventByJobId(jobId);
-  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
 /**
@@ -121,20 +122,19 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
  * for the event return and so no jobId argument required
  */
 export const doStopLokinetProcess = async (
+  jobId: string,
   duringAppExit = false
 ): Promise<void> => {
   try {
     logLineToAppSide('About to stop Lokinet process');
 
     const manager = await getLokinetProcessManager();
+    sendIpcReplyAndDeleteJob(jobId, null, '');
     await manager.doStopLokinetProcess(duringAppExit);
   } catch (e: any) {
     logLineToAppSide(`Lokinet process stop failed with ${e.message}`);
+    sendIpcReplyAndDeleteJob(jobId, e.message, '');
 
     console.info('doStopLokinetProcess failed with', e);
   }
-};
-
-export const doGetProcessPid = (): number => {
-  return 0;
 };

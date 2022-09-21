@@ -21,6 +21,7 @@ import {
   selectDaemonOrExitIsLoading,
   selectDaemonRunning
 } from '../../features/statusSlice';
+import { VpnMode } from './VpnInfos';
 
 const ExitInput = styled(Input)`
   background-color: ${(props) => props.theme.inputBackground};
@@ -65,7 +66,7 @@ const ConnectDisconnectButton = () => {
   const authCodeFromUser = useSelector(selectAuthCodeFromUser);
   const exitNodeFromUser = useSelector(selectExitNodeFromUser);
 
-  const buttonDisabled = daemonOrExitIsLoading; // || globalError === 'error-start-stop';
+  const buttonDisabled = daemonOrExitIsLoading || !daemonIsRunning; // || globalError === 'error-start-stop';
 
   function onClick() {
     if (buttonDisabled) {
@@ -113,6 +114,7 @@ export const ExitPanel = (): JSX.Element => {
     >
       <Stack direction="row" alignSelf="center" width="100%" height="100%">
         <Flex flexDirection="column" flexGrow={1}>
+          <VpnMode />
           <InputLabel>EXIT NODE</InputLabel>
           <ExitInput
             disabled={disableInputEdits}

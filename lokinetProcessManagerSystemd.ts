@@ -36,12 +36,12 @@ export class LokinetSystemDProcessManager implements ILokinetProcessManager {
   async checkForActiveLokinetService(): Promise<boolean> {
     let result;
     try {
-      logLineToAppSide('SystemD: checking if lokinet is already running');
+      logLineToAppSide('SystemD: checking if lokinet is running');
       const cmdWithArgs = `systemctl is-active ${lokinetService}`;
 
       result = await execPromisified(cmdWithArgs);
       if (result?.stdout?.trim() === 'active') {
-        logLineToAppSide('SystemD: lokinet is already running');
+        logLineToAppSide('SystemD: lokinet is running');
         return true;
       }
     } catch (e: any) {

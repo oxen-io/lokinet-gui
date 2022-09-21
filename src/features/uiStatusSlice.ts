@@ -11,7 +11,7 @@ export type GeneralInfosState = {
 };
 
 const initialGeneralInfosState: GeneralInfosState = {
-  tabSelected: toTabIndex('settings'),
+  tabSelected: toTabIndex('main'),
   theme: 'light'
 };
 

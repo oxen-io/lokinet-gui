@@ -17,7 +17,7 @@ import {
   setErrorOutsideRedux
 } from '../app/app';
 
-const IPC_UPDATE_TIMEOUT = 10000; // 10 secs
+const IPC_UPDATE_TIMEOUT = 1000;
 
 const channelsFromRendererToMainToMake = {
   // rpc calls (zeromq calls)
@@ -62,19 +62,19 @@ export async function deleteExit(): Promise<string> {
 export async function doStopLokinetProcess(
   duringAppExit?: boolean
 ): Promise<string | null> {
-  return channels.doStopLokinetProcess(duringAppExit);
+  return channels.doStopLokinetProcess('doStopLokinetProcess', duringAppExit);
 }
 
 export async function doStartLokinetProcess(): Promise<string | null> {
-  return channels.doStartLokinetProcess();
+  return channels.doStartLokinetProcess('doStartLokinetProcess');
 }
 
 export async function markRendererReady(): Promise<void> {
-  channels.markRendererReady();
+  channels.markRendererReady('markRendererReady');
 }
 
 export async function minimizeToTray(): Promise<void> {
-  channels.minimizeToTray();
+  channels.minimizeToTray('minimizeToTray');
 }
 export async function setConfig(
   section: string,
@@ -129,10 +129,8 @@ export async function initializeIpcRendererSide(): Promise<void> {
     }
   );
 
-  channels.markRendererReady();
-  const jobId = `doStartLokinetProcess-${Date.now()}`;
-
-  channels.doStartLokinetProcess(jobId);
+  channels.markRendererReady('markRendererReady');
+  channels.doStartLokinetProcess('doStartLokinetProcess');
 }
 
 async function _shutdown() {
@@ -235,18 +233,13 @@ function makeChannel(fnName: string) {
       });
 
       _jobs[jobId].timer = setTimeout(() => {
-        const logline = `IPC channel job ${jobId}: ${fnName} timed out at ${Date.now()}`;
+        const logline = `IPC channel job ${jobId}: ${fnName} timed out after ${IPC_UPDATE_TIMEOUT}ms`;
         appendToAppLogsOutsideRedux(logline);
-        // except if that was our stop call, consider that this means the lokinet daemon is not running
-        if (
-          fnName !== 'doStopLokinetProcess' &&
-          fnName !== 'markRendererReady' &&
-          fnName !== 'doStartLokinetProcess'
-        ) {
+
+        // if you ever find that this is run because one of your called timedout, it's because you need to send the ipc reply (look at `sendIpcReplyAndDeleteJob`)
+        if (fnName !== 'addExit') {
           markAsStoppedOutsideRedux();
         }
-
-        // reject(new Error(logline));
       }, IPC_UPDATE_TIMEOUT);
     });
   };
