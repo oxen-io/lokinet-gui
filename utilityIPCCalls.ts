@@ -17,9 +17,9 @@ export function minimizeToTray(jobId: string): void {
   }
 
   const tray = getTrayIcon();
-  if (tray) {
-    (tray as any).updateContextMenu();
-  }
+
+  (tray as any)?.updateContextMenu();
+
   sendIpcReplyAndDeleteJob(jobId, null, '');
 }
 

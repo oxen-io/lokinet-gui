@@ -22,6 +22,10 @@ let mainWindow: BrowserWindow | null;
 let tray: Tray | null = null;
 let ready = false;
 
+function isMacOS() {
+  return process.platform === 'darwin';
+}
+
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
 }
@@ -93,8 +97,9 @@ async function createWindow() {
     y: Math.floor(bounds.y + bounds.height / 2 - height / 2)
   });
   ready = true;
-
-  tray = createTrayIcon(getMainWindow);
+  if (!isMacOS()) {
+    tray = createTrayIcon(getMainWindow);
+  }
 
   mainWindow.loadFile('./dist/index.html');
   if (openDevTools) {
@@ -117,8 +122,9 @@ async function createWindow() {
     mainWindow.hide();
 
     // toggle the visibility of the show/hide tray icon menu entries
-
-    (tray as any)?.updateContextMenu();
+    if (!isMacOS()) {
+      (tray as any)?.updateContextMenu();
+    }
 
     return;
   });
@@ -139,12 +145,11 @@ app.on('before-quit', () => {
     ) as OnExitStopSetting) || getDefaultOnExitDo();
   console.info('todoOnExit', todoOnExit);
   if (todoOnExit === 'stop_everything') {
-    void doStopLokinetProcess(true);
+    void doStopLokinetProcess('stop_everything', true);
   }
 
-  if (tray) {
-    tray.destroy();
-  }
+  tray?.destroy();
+
   markShouldQuit();
 });
 

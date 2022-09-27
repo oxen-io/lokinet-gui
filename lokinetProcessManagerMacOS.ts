@@ -16,7 +16,7 @@ export class LokinetMacOSProcessManager implements ILokinetProcessManager {
     return invoke(getLokinetControlLocation(), ['--start']);
   }
 
-  doStopLokinetProcess(_duringAppExit = false): Promise<string | null> {
+  doStopLokinetProcess(): Promise<string | null> {
     return invoke(getLokinetControlLocation(), ['--stop']);
   }
 }

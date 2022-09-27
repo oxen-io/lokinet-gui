@@ -5,7 +5,7 @@ export class LokinetWindowsProcessManager implements ILokinetProcessManager {
     return invoke('net', ['start', 'lokinet']);
   }
 
-  doStopLokinetProcess(duringAppExit = false): Promise<string | null> {
+  doStopLokinetProcess(): Promise<string | null> {
     return invoke('net', ['stop', 'lokinet']);
   }
 }
