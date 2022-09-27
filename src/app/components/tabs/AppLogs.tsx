@@ -49,7 +49,7 @@ export const AppLogs = (): JSX.Element => {
         wordBreak="break-all"
         padding="10px"
         borderRadius="8px"
-        flexDirection="column-reverse"
+        flexDirection="column"
         flexGrow={1}
         flexShrink={300}
         backgroundColor={theme.inputBackground}
