@@ -31,11 +31,14 @@ export const setThemeToSettings = (selectedTheme: ThemeType) => {
 };
 
 export const getSavedExitNodesFromSettings = (): Array<string> => {
-  return store.get(SETTINGS_ID_EXIT_NODES, [
-    DEFAULT_EXIT_NODE
-  ]) as Array<string>;
+  return (
+    store.get(SETTINGS_ID_EXIT_NODES, [DEFAULT_EXIT_NODE]) as Array<string>
+  ).map((m) => m.trim());
 };
 
 export const setSavedExitNodesToSettings = (exitNodes: Array<string>) => {
-  store.set(SETTINGS_ID_EXIT_NODES, exitNodes);
+  store.set(
+    SETTINGS_ID_EXIT_NODES,
+    exitNodes.map((e) => e.trim())
+  );
 };
