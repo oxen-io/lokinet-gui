@@ -19,7 +19,7 @@ const BookMarkSVGSelected = ({ onClick }: { onClick: () => void }) => {
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       onClick={onClick}
-      cursor="pointer"
+      cursor="inherit"
     >
       <path
         d="M21.8737 0.998718H0V22.8959H21.8737V0.998718Z"
@@ -48,7 +48,7 @@ const BookMarkSVGNotSelected = ({ onClick }: { onClick: () => void }) => {
       viewBox="0 0 23 23"
       fill="none"
       onClick={onClick}
-      cursor="pointer"
+      cursor="inherit"
     >
       <path
         d="M4.47067 22.4356H18.656C21.195 22.4356 22.5002 21.1303 22.5002 18.6298V4.3676C22.5002 1.86495 21.195 0.561829 18.656 0.561829H4.47067C1.9413 0.561829 0.626465 1.85534 0.626465 4.3676V18.6298C0.626465 21.1399 1.9413 22.4356 4.47067 22.4356ZM4.60379 20.1396C3.51418 20.1396 2.92238 19.5755 2.92238 18.4369V4.55838C2.92238 3.41978 3.51418 2.85775 4.60379 2.85775H18.5229C19.6029 2.85775 20.2043 3.41978 20.2043 4.55838V18.4369C20.2043 19.5755 19.6029 20.1396 18.5229 20.1396H4.60379Z"
@@ -64,8 +64,7 @@ const BookMarkSVGNotSelected = ({ onClick }: { onClick: () => void }) => {
 
 const SvgContainer = styled.div<{ disableClicks: boolean }>`
   margin-left: 10px;
-  cursor: ${(props) => (props.disableClicks ? 'not-allowed' : 'inherit')};
-  pointer-events: ${(props) => (props.disableClicks ? 'none' : 'inherit')};
+  cursor: ${(props) => (props.disableClicks ? 'not-allowed' : 'pointer')};
 `;
 
 const BookmarkSvg = ({
@@ -78,7 +77,9 @@ const BookmarkSvg = ({
   disableClicks: boolean;
 }) => {
   const toggleSelected = () => {
-    setIsSelected(!isSelected);
+    if (!disableClicks) {
+      setIsSelected(!isSelected);
+    }
   };
   return (
     <SvgContainer disableClicks={disableClicks}>
@@ -121,7 +122,7 @@ export const ExitSelector = ({
 
   return (
     <Flex flexDirection={'row'} alignItems="center" marginBottom={2}>
-      {bookmarkIsOpened ? (
+      {bookmarkIsOpened && !disableInputEdits ? (
         <ExitSelect {...sharedOptions} width="100%">
           {exitsNodesFromSettings.map((exitNode) => {
             return (
@@ -140,7 +141,7 @@ export const ExitSelector = ({
           {...sharedOptions}
           width="100%"
           height="30px"
-            style={{ textIndent: "4px"}}
+          style={{ textIndent: '4px' }}
           onPaste={(e: any) =>
             dispatch(onUserExitNodeSet(e?.currentTarget?.value))
           }

@@ -2,7 +2,7 @@
 
 import Electron from 'electron';
 const { ipcRenderer } = Electron;
-import _, { clone } from 'lodash';
+import { clone, forEach, isEmpty, isFunction, isString } from 'lodash';
 import crypto from 'crypto';
 import {
   DEBUG_IPC_CALLS,
@@ -16,8 +16,6 @@ import {
   markAsStoppedOutsideRedux,
   setErrorOutsideRedux
 } from '../app/app';
-
-const IPC_UPDATE_TIMEOUT = 1000;
 
 const channelsFromRendererToMainToMake = {
   // rpc calls (zeromq calls)
@@ -89,14 +87,14 @@ export async function initializeIpcRendererSide(): Promise<void> {
   //   any warnings that might be sent to the console in that case.
   ipcRenderer.setMaxListeners(0);
 
-  _.forEach(channelsFromRendererToMainToMake, (fn) => {
-    if (_.isFunction(fn)) {
+  forEach(channelsFromRendererToMainToMake, (fn) => {
+    if (isFunction(fn)) {
       makeChannel(fn.name);
     }
   });
 
   ipcRenderer.on(IPC_LOG_LINE, (_event, logLine: string) => {
-    if (_.isString(logLine) && !_.isEmpty(logLine)) {
+    if (isString(logLine) && !isEmpty(logLine)) {
       appendToAppLogsOutsideRedux(logLine);
     }
   });
@@ -232,15 +230,17 @@ function makeChannel(fnName: string) {
         args: DEBUG_IPC_CALLS ? args : null
       });
 
+      const timerForThisCall = fnName === 'getSummaryStatus' ? 1000 : 6000;
+
       _jobs[jobId].timer = setTimeout(() => {
-        const logline = `IPC channel job ${jobId}: ${fnName} timed out after ${IPC_UPDATE_TIMEOUT}ms`;
+        const logline = `IPC channel job ${jobId}: ${fnName} timed out after ${timerForThisCall}ms`;
         appendToAppLogsOutsideRedux(logline);
 
         // if you ever find that this is run because one of your called timedout, it's because you need to send the ipc reply (look at `sendIpcReplyAndDeleteJob`)
         if (fnName !== 'addExit') {
           markAsStoppedOutsideRedux();
         }
-      }, IPC_UPDATE_TIMEOUT);
+      }, timerForThisCall);
     });
   };
 }
@@ -293,7 +293,7 @@ export const parseSummaryStatus = (
 ): DaemonSummaryStatus => {
   let stats = null;
 
-  if (!payload || _.isEmpty(payload)) {
+  if (!payload || isEmpty(payload)) {
     return defaultDaemonSummaryStatus;
   }
 
@@ -314,7 +314,7 @@ export const parseSummaryStatus = (
   const statsResult = stats.result;
   const parsedSummaryStatus: DaemonSummaryStatus = defaultDaemonSummaryStatus;
 
-  if (!statsResult || _.isEmpty(statsResult)) {
+  if (!statsResult || isEmpty(statsResult)) {
     console.info('We got an empty statsResult');
     return parsedSummaryStatus;
   }
