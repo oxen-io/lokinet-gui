@@ -1,10 +1,41 @@
 import React from 'react';
 import styled, { useTheme } from 'styled-components';
 
+const TooltipContent = styled.div`
+  visibility: hidden;
+  opacity: 0;
+
+  position: absolute;
+  background: ${(props) => props.theme.inputBackground};
+  color: ${(props) => props.theme.textColor};
+
+  padding: 2px 5px;
+  font-size: 13px;
+  transition: 0.25s all ease;
+  transition-delay: 0.15s;
+  z-index: 2;
+  top: -35px;
+  overflow: hidden;
+  font-family: 'Archivo';
+  font-weight: 400;
+  letter-spacing: 0.03em;
+`;
+
 const VpnModeContainer = styled.div`
   display: flex;
   align-items: center;
   margin-bottom: 20px;
+  position: relative;
+
+  :hover {
+    ${TooltipContent} {
+      visibility: visible;
+      opacity: 1;
+      transition: 0.25s all ease;
+      transition-delay: 0.2s;
+      top: -35px;
+    }
+  }
 `;
 
 const VpnModeLabel = styled.div`
@@ -14,7 +45,7 @@ const VpnModeLabel = styled.div`
   font-size: 16px;
 `;
 
-const VpnModeToolTip = styled.span`
+const QuestionMarkContainer = styled.span`
   width: 18px;
   height: 15px;
   margin-left: 10px;
@@ -44,11 +75,12 @@ const vpnTooltip =
 
 export const VpnMode = () => {
   return (
-    <VpnModeContainer title={vpnTooltip}>
+    <VpnModeContainer>
       <VpnModeLabel>VPN Mode</VpnModeLabel>
-      <VpnModeToolTip>
+      <QuestionMarkContainer>
         <SvgQuestionMark />
-      </VpnModeToolTip>
+      </QuestionMarkContainer>
+      <TooltipContent>{vpnTooltip}</TooltipContent>
     </VpnModeContainer>
   );
 };
