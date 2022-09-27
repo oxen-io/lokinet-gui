@@ -67,7 +67,7 @@ export const SettingsTab = (): JSX.Element => {
     <SettingsTabContainer>
       <PlusDivider />
 
-      <SettingsText>When the app is completely closed, do:</SettingsText>
+      <SettingsText>When exiting the app:</SettingsText>
       <RadioGroupContainer>
         {options.map((m) => {
           const selected = m.id === selectedOnStopSetting;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import styled, { DefaultTheme, useTheme } from 'styled-components';
+import styled, {  useTheme } from 'styled-components';
 import {
   selectHasExitNodeEnabled,
   selectHasExitNodeChangeLoading

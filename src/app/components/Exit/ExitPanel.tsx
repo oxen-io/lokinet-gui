@@ -1,42 +1,27 @@
-import { Flex, Stack, Input } from '@chakra-ui/react';
+import { Flex, Stack } from '@chakra-ui/react';
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
 import {
   onUserAuthCodeSet,
-  onUserExitNodeSet,
   selectAuthCodeFromUser,
   selectExitNodeFromUser,
   selectExitStatus,
   selectHasExitNodeChangeLoading,
   selectHasExitNodeEnabled
-} from '../../features/exitStatusSlice';
-import { useAppDispatch } from '../hooks';
-import { paddingDividers } from './Utils/Dividers';
-import { TextButton } from './TextButton';
-import { VSpacer } from './Utils/Spacer';
+} from '../../../features/exitStatusSlice';
+import { useAppDispatch } from '../../hooks';
+import { paddingDividers } from '../Utils/Dividers';
+import { TextButton } from '../TextButton';
+import { VSpacer } from '../Utils/Spacer';
 
-import { turnExitOff, turnExitOn } from './PowerButton/PowerButtonActions';
+import { turnExitOff, turnExitOn } from '../PowerButton/PowerButtonActions';
 import {
   selectDaemonOrExitIsLoading,
   selectDaemonRunning
-} from '../../features/statusSlice';
-import { VpnMode } from './VpnInfos';
-
-const ExitInput = styled(Input)`
-  background-color: ${(props) => props.theme.inputBackground};
-  color: ${(props) => props.theme.textColor};
-  outline-color: transparent;
-  font-family: 'IBM Plex Mono';
-  font-weight: 400;
-  border-radius: 3px;
-  border: none;
-  font-size: 1.1rem;
-  padding: 5px;
-  outline: none;
-  transition: 0.25s;
-  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'auto')};
-`;
+} from '../../../features/statusSlice';
+import { VpnMode } from '../VpnInfos';
+import { ExitInput, ExitSelector } from './ExitSelect';
 
 const InputLabel = styled.div`
   font-family: Archivo;
@@ -54,13 +39,23 @@ const ConnectDisconnectButton = () => {
   const exitLoading = useSelector(selectHasExitNodeChangeLoading);
   const exitIsOn = useSelector(selectHasExitNodeEnabled);
 
+  const isConnecting = !exitIsOn && exitLoading;
+
   const buttonText = exitIsOn
     ? 'DISCONNECT'
-    : exitLoading
+    : isConnecting
     ? 'CONNECTING'
     : 'CONNECT';
 
-  const buttonColor = exitIsOn ? theme.dangerColor : theme.textColor;
+  const textAndBorderColor = exitIsOn
+    ? theme.dangerColor
+    : isConnecting
+    ? theme.backgroundColor
+    : theme.textColor;
+  const buttonBackgroundColor = isConnecting
+    ? theme.textColor
+    : theme.backgroundColor;
+
   const dispatch = useDispatch();
 
   const authCodeFromUser = useSelector(selectAuthCodeFromUser);
@@ -83,7 +78,8 @@ const ConnectDisconnectButton = () => {
   }
   return (
     <TextButton
-      buttonColor={buttonColor}
+      textAndBorderColor={textAndBorderColor}
+      backgroundColor={buttonBackgroundColor}
       onClick={onClick}
       text={buttonText}
       disabled={buttonDisabled}
@@ -101,10 +97,6 @@ export const ExitPanel = (): JSX.Element => {
   const disableInputEdits =
     exitStatus.exitLoading || Boolean(exitStatus.exitNodeFromDaemon);
 
-  const exitToUse = disableInputEdits
-    ? exitStatus.exitNodeFromDaemon
-    : exitStatus.exitNodeFromUser;
-
   return (
     <Flex
       flexDirection="column"
@@ -116,21 +108,8 @@ export const ExitPanel = (): JSX.Element => {
         <Flex flexDirection="column" flexGrow={1}>
           <VpnMode />
           <InputLabel>EXIT NODE</InputLabel>
-          <ExitInput
-            disabled={disableInputEdits}
-            onChange={(e: any) =>
-              dispatch(onUserExitNodeSet(e?.currentTarget?.value))
-            }
-            onPaste={(e: any) =>
-              dispatch(onUserExitNodeSet(e?.currentTarget?.value))
-            }
-            size="sm"
-            variant="flushed"
-            marginBottom={2}
-            spellCheck={false}
-            noOfLines={1}
-            value={exitToUse || ''}
-          />
+          <ExitSelector disableInputEdits={disableInputEdits} />
+
           <InputLabel>AUTH CODE</InputLabel>
 
           <ExitInput
@@ -147,6 +126,7 @@ export const ExitPanel = (): JSX.Element => {
             value={exitStatus.exitAuthCodeFromUser || ''}
             marginBottom={2}
             noOfLines={1}
+            style={{ textIndent: '4px' }}
           />
           <VSpacer height="20px" />
           <ConnectDisconnectButton />

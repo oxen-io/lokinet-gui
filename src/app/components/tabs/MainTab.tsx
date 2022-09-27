@@ -3,7 +3,7 @@ import React from 'react';
 import { useSelector } from 'react-redux';
 import { selectStatus } from '../../../features/statusSlice';
 import { PlusDivider, MinusDivider, paddingDividers } from '../Utils/Dividers';
-import { ExitPanel } from '../ExitPanel';
+import { ExitPanel } from '../Exit/ExitPanel';
 import { RoutersStats } from '../RouterStats';
 import { SpeedStats } from '../SpeedStats';
 

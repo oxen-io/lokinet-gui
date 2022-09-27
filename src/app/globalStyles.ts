@@ -77,6 +77,9 @@ export const GlobalStyle = createGlobalStyle<{ theme: DefaultTheme }>`
     transition: 0.25s linear;
   }
 
+  .chakra-select__icon-wrapper {
+    display: none !important; // remove the second (?) arrow down from the exit input in multiple option mode
+  }
 
 
   @font-face {

@@ -1,13 +1,19 @@
 import { Dispatch } from 'react';
+import { DEFAULT_EXIT_NODE } from '../../../../types';
 import { appendToApplogs } from '../../../features/appLogsSlice';
 import {
   markExitIsTurningOff,
   markExitFailedToLoad,
-  markExitIsTurningOn
+  markExitIsTurningOn,
+  updateExitsFromSettings
 } from '../../../features/exitStatusSlice';
 import { setGlobalError } from '../../../features/statusSlice';
 import { setTabSelected } from '../../../features/uiStatusSlice';
 import { addExit, deleteExit } from '../../../ipc/ipcRenderer';
+import {
+  getSavedExitNodesFromSettings,
+  setSavedExitNodesToSettings
+} from '../../config';
 import { AppDispatch, store } from '../../store';
 
 const dispatchExitFailedToTurnOn = (dispatch: Dispatch<any>) => {
@@ -77,6 +83,28 @@ export const turnExitOn = async (
   dispatch(appendToApplogs(toAppendToLogs));
 
   dispatch(markExitIsTurningOn());
+  let existingFromSettings = getSavedExitNodesFromSettings();
+
+  // remove any occurence of the exit node from the list.
+  // as we just requested it, we want to pop it to the front
+  existingFromSettings = existingFromSettings.filter((m) => m !== exitNode);
+
+  // add exitNode to the front
+  existingFromSettings.unshift(exitNode);
+
+  // remove any exit mode if we have too many saved already
+  if (existingFromSettings.length > 5) {
+    existingFromSettings.pop();
+  }
+  // we always wait exit.loki to be one of the option saved
+  if (!existingFromSettings.includes(DEFAULT_EXIT_NODE)) {
+    // remove the last element and add default exit node as last item
+    existingFromSettings.pop();
+    existingFromSettings.push(DEFAULT_EXIT_NODE);
+  }
+  setSavedExitNodesToSettings(existingFromSettings);
+  dispatch(updateExitsFromSettings(existingFromSettings));
+
   // trigger the IPC+RPC call
   const addExitResult = await addExit(exitNode, authCode);
 

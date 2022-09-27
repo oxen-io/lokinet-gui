@@ -31,14 +31,19 @@ const StyledButton = styled.button<{ disabled?: boolean }>`
 export const TextButton = (props: {
   text: string;
   onClick: () => void;
-  buttonColor?: string;
+  textAndBorderColor?: string;
+  backgroundColor?: string;
   disabled?: boolean;
 }): JSX.Element => {
   const theme = useTheme();
   return (
     <StyledButton
       onClick={props.onClick}
-      theme={{ ...theme, textColor: props.buttonColor || theme.textColor }}
+      theme={{
+        ...theme,
+        textColor: props.textAndBorderColor || theme.textColor,
+        backgroundColor: props.backgroundColor || theme.backgroundColor
+      }}
       disabled={props.disabled}
     >
       {props.text}

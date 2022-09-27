@@ -1,4 +1,4 @@
-import { configureStore, getDefaultMiddleware } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import { appLogsSlice } from '../features/appLogsSlice';
 import { exitStatusSlice } from '../features/exitStatusSlice';
 import { statusSlice } from '../features/statusSlice';
