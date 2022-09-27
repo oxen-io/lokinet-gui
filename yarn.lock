@@ -1907,10 +1907,10 @@
   resolved "https://registry.npmjs.org/@discoveryjs/json-ext/-/json-ext-0.5.3.tgz"
   integrity sha512-Fxt+AfXgjMoin2maPIYzFZnQjAXjAL0PHscM5pRTtatFqB+vZxAM9tLp2Optnuw3QOQC40jTNeGYFOMvyf7v9g==
 
-"@electron/get@^1.0.1":
-  version "1.13.0"
-  resolved "https://registry.npmjs.org/@electron/get/-/get-1.13.0.tgz"
-  integrity sha512-+SjZhRuRo+STTO1Fdhzqnv9D2ZhjxXP6egsJ9kiO8dtP68cDx7dFCwWi64dlMQV7sWcfW1OYCW4wviEBzmRsfQ==
+"@electron/get@^1.13.0":
+  version "1.14.1"
+  resolved "https://registry.yarnpkg.com/@electron/get/-/get-1.14.1.tgz#16ba75f02dffb74c23965e72d617adc721d27f40"
+  integrity sha512-BrZYyL/6m0ZXz/lDxy/nlVhQz+WF+iPS6qXolEU8atw7h6v1aYkjwJZ63m+bJMBTxDE66X+r2tPS4a/8C82sZw==
   dependencies:
     debug "^4.1.1"
     env-paths "^2.2.0"
@@ -1920,7 +1920,7 @@
     semver "^6.2.0"
     sumchecker "^3.0.1"
   optionalDependencies:
-    global-agent "^2.0.2"
+    global-agent "^3.0.0"
     global-tunnel-ng "^2.7.1"
 
 "@electron/universal@1.2.1":
@@ -1972,7 +1972,7 @@
 
 "@emotion/is-prop-valid@^0.8.2", "@emotion/is-prop-valid@^0.8.8":
   version "0.8.8"
-  resolved "https://registry.npmjs.org/@emotion/is-prop-valid/-/is-prop-valid-0.8.8.tgz"
+  resolved "https://registry.yarnpkg.com/@emotion/is-prop-valid/-/is-prop-valid-0.8.8.tgz#db28b1c4368a259b60a97311d6a952d4fd01ac1a"
   integrity sha512-u5WtneEAr5IDG2Wv65yhunPSMLIpuKsbuOktRojfrEiEvRyC85LgPMZI63cr7NUqT8ZIGdSVg8ZKGxIug4lXcA==
   dependencies:
     "@emotion/memoize" "0.7.4"
@@ -2434,10 +2434,10 @@
   resolved "https://registry.npmjs.org/@types/node/-/node-16.7.11.tgz"
   integrity sha512-OtOGO+DYmNNqJQG9HG4e5a6iqoRcNfdCf4ha3div7XF5w/uOa3YVpb5aRGClwSDKLmfOysv2hFIvoklffnQi4w==
 
-"@types/node@^12.0.12":
-  version "12.20.23"
-  resolved "https://registry.npmjs.org/@types/node/-/node-12.20.23.tgz"
-  integrity sha512-FW0q7NI8UnjbKrJK8NGr6QXY69ATw9IFe6ItIo5yozPwA9DU/xkhiPddctUVyrmFXvyFYerYgQak/qu200UBDw==
+"@types/node@^16.11.26":
+  version "16.11.62"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-16.11.62.tgz#bab2e6208531321d147eda20c38e389548cd5ffc"
+  integrity sha512-K/ggecSdwAAy2NUW4WKmF4Rc03GKbsfP+k326UWgckoS+Rzd2PaWbjk76dSmqdLQvLTJAO9axiTUJ6488mFsYQ==
 
 "@types/parse-json@^4.0.0":
   version "4.0.0"
@@ -3656,7 +3656,7 @@ concat-map@0.0.1:
 
 concat-stream@^1.6.2:
   version "1.6.2"
-  resolved "https://registry.npmjs.org/concat-stream/-/concat-stream-1.6.2.tgz"
+  resolved "https://registry.yarnpkg.com/concat-stream/-/concat-stream-1.6.2.tgz#904bdf194cd3122fc675c77fc4ac3d4ff0fd1a34"
   integrity sha512-27HBghJxjiZtIk3Ycvn/4kbJk/1uZuJFfuPEns6LaEvpvG1f0hTea8lilrouyo9mVc2GWdcEZ8OLoGmSADlrCw==
   dependencies:
     buffer-from "^1.0.0"
@@ -3762,11 +3762,6 @@ core-js-compat@^3.20.2, core-js-compat@^3.21.0:
   dependencies:
     browserslist "^4.19.1"
     semver "7.0.0"
-
-core-js@^3.6.5:
-  version "3.17.2"
-  resolved "https://registry.npmjs.org/core-js/-/core-js-3.17.2.tgz"
-  integrity sha512-XkbXqhcXeMHPRk2ItS+zQYliAMilea2euoMsnpRRdDad6b2VY6CQQcwz1K8AnWesfw4p165RzY0bTnr3UrbYiA==
 
 core-util-is@1.0.2:
   version "1.0.2"
@@ -4002,7 +3997,7 @@ debounce-fn@^4.0.0:
 
 debug@2.6.9, debug@^2.6.8, debug@^2.6.9:
   version "2.6.9"
-  resolved "https://registry.npmjs.org/debug/-/debug-2.6.9.tgz"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.9.tgz#5d128515df134ff327e90a4c93f4e077a536341f"
   integrity sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==
   dependencies:
     ms "2.0.0"
@@ -4358,13 +4353,13 @@ electron-to-chromium@^1.4.17:
   resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.68.tgz"
   integrity sha512-cId+QwWrV8R1UawO6b9BR1hnkJ4EJPCPAr4h315vliHUtVUJDk39Sg1PMNnaWKfj5x+93ssjeJ9LKL6r8LaMiA==
 
-electron@^11.2.3:
-  version "11.5.0"
-  resolved "https://registry.npmjs.org/electron/-/electron-11.5.0.tgz"
-  integrity sha512-WjNDd6lGpxyiNjE3LhnFCAk/D9GIj1rU3GSDealVShhkkkPR3Vh4q8ErXGDl1OAO/faomVa10KoFPUN/pLbNxg==
+electron@18.3.6:
+  version "18.3.6"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-18.3.6.tgz#33739f44cb0a74e45c3efd879485af53c7c531c5"
+  integrity sha512-o1cArbCDkRKOJRKk+UXiBv7/wVa0jA0k0U3LGfMcYaq+M3m20EQ5hUxC5xCHxyLYSdkriAjEp3VDaGP9EwjBsQ==
   dependencies:
-    "@electron/get" "^1.0.1"
-    "@types/node" "^12.0.12"
+    "@electron/get" "^1.13.0"
+    "@types/node" "^16.11.26"
     extract-zip "^1.0.3"
 
 emoji-regex@^7.0.1:
@@ -4684,7 +4679,7 @@ express@^4.17.1:
 
 extract-zip@^1.0.3:
   version "1.7.0"
-  resolved "https://registry.npmjs.org/extract-zip/-/extract-zip-1.7.0.tgz"
+  resolved "https://registry.yarnpkg.com/extract-zip/-/extract-zip-1.7.0.tgz#556cc3ae9df7f452c493a0cfb51cc30277940927"
   integrity sha512-xoh5G1W/PB0/27lXgMQyIhP5DSY/LhoCsOyZgb+6iMmRtCwVBo55uKaMoEYrDCKQhWvqEip5ZPKAc6eFNyf/MA==
   dependencies:
     concat-stream "^1.6.2"
@@ -4887,9 +4882,9 @@ forwarded@0.2.0:
   integrity sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow==
 
 framer-motion@^7.3.6:
-  version "7.3.6"
-  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-7.3.6.tgz#aff993b9b7064c8d13cf0afa118d24e07713570a"
-  integrity sha512-en8mLpDv6IcieZo54acHg56HSLpOSryRLZtMOd1Sj1s7hBbUTWnJsv68CWaHI2ysPKcbH/olGfAhRh4yrJn5tw==
+  version "7.4.0"
+  resolved "https://registry.yarnpkg.com/framer-motion/-/framer-motion-7.4.0.tgz#318c52a76517f9f854aa4a298c292be04941521b"
+  integrity sha512-tcvL5L1cASYjIeBG6mQHhzfndm7MdyHjOwqIdOzOetIVa1yUqeYMufAoljgqg69XFgsgZet+c4iuSuFF+Vgbjg==
   dependencies:
     "@motionone/dom" "10.13.1"
     framesync "6.1.2"
@@ -5064,13 +5059,12 @@ glob@^7.1.3, glob@^7.1.6:
     once "^1.3.0"
     path-is-absolute "^1.0.0"
 
-global-agent@^2.0.2:
-  version "2.2.0"
-  resolved "https://registry.npmjs.org/global-agent/-/global-agent-2.2.0.tgz"
-  integrity sha512-+20KpaW6DDLqhG7JDiJpD1JvNvb8ts+TNl7BPOYcURqCrXqnN1Vf+XVOrkKJAFPqfX+oEhsdzOj1hLWkBTdNJg==
+global-agent@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/global-agent/-/global-agent-3.0.0.tgz#ae7cd31bd3583b93c5a16437a1afe27cc33a1ab6"
+  integrity sha512-PT6XReJ+D07JvGoxQMkT6qji/jVNfX/h364XHZOWeRzy64sSFr+xJ5OX7LI3b4MPQzdL4H8Y8M0xzPpsVMwA8Q==
   dependencies:
     boolean "^3.0.1"
-    core-js "^3.6.5"
     es6-error "^4.1.1"
     matcher "^3.0.0"
     roarr "^2.15.3"
@@ -6091,6 +6085,11 @@ minimist@^1.2.0, minimist@^1.2.5:
   resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.5.tgz"
   integrity sha512-FM9nNUYrRBAELZQT3xeZQ7fmMOBg6nWNmJKTcgsJeaLstP/UODVpGsr5OhXhhXg6f+qtJ8uiZ+PUxkDWcgIXLw==
 
+minimist@^1.2.6:
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.2.6.tgz#8637a5b759ea0d6e98702cfb3a9283323c93af44"
+  integrity sha512-Jsjnk4bw3YJqYzbdyBiNsPWHPfO++UGG749Cxs6peCu5Xg4nrena6OVxOYxrQTqww0Jmwt+Ref8rggumkTLz9Q==
+
 minipass@^3.0.0:
   version "3.3.4"
   resolved "https://registry.yarnpkg.com/minipass/-/minipass-3.3.4.tgz#ca99f95dd77c43c7a76bf51e6d200025eee0ffae"
@@ -6106,7 +6105,14 @@ minizlib@^2.1.1:
     minipass "^3.0.0"
     yallist "^4.0.0"
 
-mkdirp@^0.5.4, mkdirp@^0.5.5:
+mkdirp@^0.5.4:
+  version "0.5.6"
+  resolved "https://registry.yarnpkg.com/mkdirp/-/mkdirp-0.5.6.tgz#7def03d2432dcae4ba1d611445c48396062255f6"
+  integrity sha512-FP+p8RB8OWpF3YZBCrP5gtADmtXApB5AMLn+vdyA+PyxCjrCs00mjyUozssO33cwDeT3wNGdLxJ5M//YqtHAJw==
+  dependencies:
+    minimist "^1.2.6"
+
+mkdirp@^0.5.5:
   version "0.5.5"
   resolved "https://registry.npmjs.org/mkdirp/-/mkdirp-0.5.5.tgz"
   integrity sha512-NKmAlESf6jMGym1++R0Ra7wvhV+wFW63FaSOFPwRahvea0gMUcGUhVeAg/0BC0wiv9ih5NYPB1Wn1UEI1/L+xQ==
@@ -6890,7 +6896,7 @@ read-config-file@6.2.0:
 
 readable-stream@^2.0.1, readable-stream@^2.2.2:
   version "2.3.7"
-  resolved "https://registry.npmjs.org/readable-stream/-/readable-stream-2.3.7.tgz"
+  resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-2.3.7.tgz#1eca1cf711aef814c04f62252a36a62f6cb23b57"
   integrity sha512-Ebho8K4jIbHAxnuxi7o42OrZgF/ZTNcsZj6nRKyUmkhLFq8CHItp/fy6hQZuZmP/n3yZ9VBUbp4zz/mX8hmYPw==
   dependencies:
     core-util-is "~1.0.0"
@@ -7934,8 +7940,8 @@ typedarray-to-buffer@^3.1.5:
 
 typedarray@^0.0.6:
   version "0.0.6"
-  resolved "https://registry.npmjs.org/typedarray/-/typedarray-0.0.6.tgz"
-  integrity sha1-hnrHTjhkGHsdPUfZlqeOxciDB3c=
+  resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
+  integrity sha512-/aCDEGatGvZ2BIk+HmLf4ifCJFwvKFNb9/JeZPMulfgFracn9QFcAf5GO8B/mweUjSoblS5In0cWhqpfs/5PQA==
 
 typescript@^4.1.5:
   version "4.5.5"
