@@ -38,11 +38,9 @@ const StyledPowerButtonContainer = styled.div<{ shadow: string; bg: string }>`
 `;
 
 const StyledPowerButton = styled.div`
-  height: 50%;
-  width: 50%;
+  height: 80%;
+  width: 80%;
 
-  max-height: 100px;
-  max-width: 100px;
   margin: auto;
   border: 2px solid ${(props) => props.theme.textColor}
   position: absolute;
