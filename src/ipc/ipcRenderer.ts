@@ -2,7 +2,7 @@
 
 import Electron from 'electron';
 const { ipcRenderer } = Electron;
-import _ from 'lodash';
+import { clone, forEach, isEmpty, isFunction, isString } from 'lodash';
 import crypto from 'crypto';
 import {
   DEBUG_IPC_CALLS,
@@ -11,9 +11,11 @@ import {
   IPC_LOG_LINE,
   StatusErrorType
 } from '../../sharedIpc';
-import { appendToAppLogsOutsideRedux, setErrorOutsideRedux } from '../app/app';
-
-const IPC_UPDATE_TIMEOUT = 10000; // 5 secs
+import {
+  appendToAppLogsOutsideRedux,
+  markAsStoppedOutsideRedux,
+  setErrorOutsideRedux
+} from '../app/app';
 
 const channelsFromRendererToMainToMake = {
   // rpc calls (zeromq calls)
@@ -22,6 +24,7 @@ const channelsFromRendererToMainToMake = {
   deleteExit,
   setConfig,
   // lokinet process manager calls
+  doStartLokinetProcess,
   doStopLokinetProcess,
   // utility calls
   markRendererReady,
@@ -47,23 +50,29 @@ export async function addExit(
   console.info(
     `Triggering exit node set with node ${exitAddress}, authCode:${exitToken}`
   );
-  return channels.addExit(exitAddress, exitToken);
+  return channels.addExit(clone(exitAddress), clone(exitToken));
 }
 
 export async function deleteExit(): Promise<string> {
   return channels.deleteExit();
 }
 
-export async function doStopLokinetProcess(): Promise<string | null> {
-  return channels.doStopLokinetProcess();
+export async function doStopLokinetProcess(
+  duringAppExit?: boolean
+): Promise<string | null> {
+  return channels.doStopLokinetProcess('doStopLokinetProcess', duringAppExit);
+}
+
+export async function doStartLokinetProcess(): Promise<string | null> {
+  return channels.doStartLokinetProcess('doStartLokinetProcess');
 }
 
 export async function markRendererReady(): Promise<void> {
-  channels.markRendererReady();
+  channels.markRendererReady('markRendererReady');
 }
 
 export async function minimizeToTray(): Promise<void> {
-  channels.minimizeToTray();
+  channels.minimizeToTray('minimizeToTray');
 }
 export async function setConfig(
   section: string,
@@ -78,14 +87,14 @@ export async function initializeIpcRendererSide(): Promise<void> {
   //   any warnings that might be sent to the console in that case.
   ipcRenderer.setMaxListeners(0);
 
-  _.forEach(channelsFromRendererToMainToMake, (fn) => {
-    if (_.isFunction(fn)) {
+  forEach(channelsFromRendererToMainToMake, (fn) => {
+    if (isFunction(fn)) {
       makeChannel(fn.name);
     }
   });
 
   ipcRenderer.on(IPC_LOG_LINE, (_event, logLine: string) => {
-    if (_.isString(logLine) && !_.isEmpty(logLine)) {
+    if (isString(logLine) && !isEmpty(logLine)) {
       appendToAppLogsOutsideRedux(logLine);
     }
   });
@@ -96,7 +105,7 @@ export async function initializeIpcRendererSide(): Promise<void> {
 
   ipcRenderer.on(
     `${IPC_CHANNEL_KEY}-done`,
-    (event, jobId, errorForDisplay, result: string | null) => {
+    (_event, jobId, errorForDisplay, result: string | null) => {
       const job = _getJob(jobId);
       if (!job) {
         console.info(
@@ -118,7 +127,8 @@ export async function initializeIpcRendererSide(): Promise<void> {
     }
   );
 
-  channels.markRendererReady();
+  channels.markRendererReady('markRendererReady');
+  channels.doStartLokinetProcess('doStartLokinetProcess');
 }
 
 async function _shutdown() {
@@ -220,11 +230,17 @@ function makeChannel(fnName: string) {
         args: DEBUG_IPC_CALLS ? args : null
       });
 
+      const timerForThisCall = fnName === 'getSummaryStatus' ? 1000 : 6000;
+
       _jobs[jobId].timer = setTimeout(() => {
-        const logline = `IPC channel job ${jobId}: ${fnName} timed out at ${Date.now()}`;
+        const logline = `IPC channel job ${jobId}: ${fnName} timed out after ${timerForThisCall}ms`;
         appendToAppLogsOutsideRedux(logline);
-        reject(new Error(logline));
-      }, IPC_UPDATE_TIMEOUT);
+
+        // if you ever find that this is run because one of your called timedout, it's because you need to send the ipc reply (look at `sendIpcReplyAndDeleteJob`)
+        if (fnName !== 'addExit') {
+          markAsStoppedOutsideRedux();
+        }
+      }, timerForThisCall);
     });
   };
 }
@@ -277,8 +293,7 @@ export const parseSummaryStatus = (
 ): DaemonSummaryStatus => {
   let stats = null;
 
-  if (!payload || _.isEmpty(payload)) {
-    console.info('Empty payload for summary status');
+  if (!payload || isEmpty(payload)) {
     return defaultDaemonSummaryStatus;
   }
 
@@ -299,7 +314,7 @@ export const parseSummaryStatus = (
   const statsResult = stats.result;
   const parsedSummaryStatus: DaemonSummaryStatus = defaultDaemonSummaryStatus;
 
-  if (!statsResult || _.isEmpty(statsResult)) {
+  if (!statsResult || isEmpty(statsResult)) {
     console.info('We got an empty statsResult');
     return parsedSummaryStatus;
   }

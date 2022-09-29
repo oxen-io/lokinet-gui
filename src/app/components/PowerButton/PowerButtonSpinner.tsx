@@ -1,63 +1,44 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import styled, { useTheme } from 'styled-components';
-import { selectedTheme } from '../../../features/uiStatusSlice';
-import {
-  isGlobalStatusError,
-  useGlobalConnectingStatus
-} from '../../hooks/connectingStatus';
+import styled from 'styled-components';
+import { selectDaemonOrExitIsLoading } from '../../../features/statusSlice';
+import { usePowerButtonColor } from './PowerButtonIcon';
 
-export const PowerButtonContainerBorder = (props: {
+export const PowerButtonContainerBorder = ({
+  isHovered,
+  children
+}: {
   children: React.ReactNode;
   isHovered: boolean;
 }): JSX.Element => {
-  const isHovered = props.isHovered;
-  const globalStatus = useGlobalConnectingStatus();
-  const globalStatusIsError = isGlobalStatusError(globalStatus);
-  const theme = useTheme();
-  const themeType = useSelector(selectedTheme);
+  const borderColor = usePowerButtonColor(isHovered);
+  const loading = useSelector(selectDaemonOrExitIsLoading);
 
-  if (globalStatus === 'connecting') {
-    // display the spinner only when connecting
+  if (loading) {
+    // display the spinner only when starting lokinet daemon or connecting to an exit
     return (
       <>
-        {props.children}
-        <PowerButtonSpinner></PowerButtonSpinner>
+        {children}
+        <PowerButtonSpinner />
       </>
     );
   }
 
-  const borderColor =
-    globalStatus === 'default' || globalStatusIsError
-      ? isHovered
-        ? theme.textColor
-        : theme.textColorSubtle
-      : isHovered
-      ? theme.textColorSubtle
-      : theme.textColor;
-
-  const filterShadow =
-    !isHovered && globalStatus === 'connected' && themeType === 'light'
-      ? 'drop-shadow(0px 0px 1px rgba(0, 0, 0, 0.74));'
-      : '';
-
   return (
-    <StyledBorderContainer borderColor={borderColor} filter={filterShadow}>
-      {props.children}
+    <StyledBorderContainer borderColor={borderColor}>
+      {children}
     </StyledBorderContainer>
   );
 };
 
 const StyledBorderContainer = styled.div<{
   borderColor: string;
-  filter: string;
 }>`
   width: 100%;
   height: 100%;
   transition: 0.25s;
 
   border: 2px solid ${(props) => props.borderColor};
-  filter: ${(props) => props.filter};
   border-radius: 50%;
 `;
 

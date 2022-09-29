@@ -9,12 +9,12 @@ import {
   VictoryAxis,
   VictoryLabel
 } from 'victory';
-import { makeRate, selectStatus } from '../../features/statusSlice';
-import { PlusDivider } from './Dividers';
+import { makeRate, selectStatus } from '../../../features/statusSlice';
+import { PlusDivider } from '../Utils/Dividers';
 import {
   DownSpeedWithPillAndIcon,
   UpSpeedWithPillAndIcon
-} from './LabelSubtleWithValue';
+} from '../LabelSubtleWithValue';
 
 export type NumberQueue = Array<number>;
 export type SpeedHistoryDataType = {
@@ -25,9 +25,6 @@ export type SpeedHistoryDataType = {
 };
 
 export const MAX_NUMBER_POINT_HISTORY = 60; // 1 minute as there is 2 points per sec currently
-
-export const uploadColorChart = '#37EB19';
-export const downloadColorChart = '#F33232';
 
 export const SpeedChart = (): JSX.Element => {
   const daemonStatus = useSelector(selectStatus);
@@ -101,13 +98,13 @@ export const SpeedChart = (): JSX.Element => {
           >
             <VictoryArea
               style={{
-                data: { stroke: downloadColorChart, fill: downloadColorChart }
+                data: { stroke: theme.dangerColor, fill: theme.dangerColor }
               }}
               data={downloadCoordinates}
             />
             <VictoryArea
               style={{
-                data: { stroke: uploadColorChart, fill: uploadColorChart }
+                data: { stroke: theme.connectedColor, fill: theme.connectedColor }
               }}
               data={uploadCoordinates}
             />

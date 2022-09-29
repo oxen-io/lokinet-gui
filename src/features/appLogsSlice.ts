@@ -24,6 +24,15 @@ export const appLogsSlice = createSlice({
   initialState: initialStatusState,
   reducers: {
     appendToApplogs: (state, action: PayloadAction<string>) => {
+      // do not duplicate the getSummaryStatus timed out if the last one was the same
+      const lastLine = state.appLogs[state.appLogs.length - 1];
+      const summaryStatusTimedOut = 'getSummaryStatus timed out after';
+      if (
+        lastLine?.includes(summaryStatusTimedOut) &&
+        action.payload?.includes(summaryStatusTimedOut)
+      ) {
+        return state;
+      }
       state.appLogs.push(`${Date.now()}: ${action.payload}`);
 
       // Remove the first item is the size is too big

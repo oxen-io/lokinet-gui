@@ -4,11 +4,11 @@ import { MdOutlineContentCopy } from 'react-icons/md';
 import { useDispatch } from 'react-redux';
 import { useCopyToClipboard } from 'react-use';
 import styled, { useTheme } from 'styled-components';
-import { clearLogs, selectAppLogs } from '../../features/appLogsSlice';
-import { useAppSelector } from '../hooks';
-import { MinusDivider, PlusDivider } from './Dividers';
-import { LokinetIconButton } from './LokinetIconButton';
-import { TextButton } from './TextButton';
+import { selectAppLogs, clearLogs } from '../../../features/appLogsSlice';
+import { useAppSelector } from '../../hooks';
+import { PlusDivider, MinusDivider } from '../Utils/Dividers';
+import { LokinetIconButton } from '../LokinetIconButton';
+import { TextButton } from '../TextButton';
 
 const ButtonRow = styled.div`
   display: flex;
@@ -19,10 +19,12 @@ const ButtonRow = styled.div`
 const Timestamp = styled.span`
   font-size: 10px;
   color: ${(props) => props.theme.textColorSubtle};
+  user-select: text;
 `;
 
 const Content = styled(Timestamp)`
   color: ${(props) => props.theme.textColor};
+  user-select: text;
 `;
 
 export const AppLogs = (): JSX.Element => {
@@ -47,7 +49,7 @@ export const AppLogs = (): JSX.Element => {
         wordBreak="break-all"
         padding="10px"
         borderRadius="8px"
-        flexDirection="column-reverse"
+        flexDirection="column"
         flexGrow={1}
         flexShrink={300}
         backgroundColor={theme.inputBackground}
@@ -69,11 +71,7 @@ export const AppLogs = (): JSX.Element => {
         )}
       </Code>
       <ButtonRow>
-        <TextButton
-          onClick={() => dispatch(clearLogs())}
-          text="Clear"
-          title="Clear logs"
-        />
+        <TextButton onClick={() => dispatch(clearLogs())} text="Clear" />
         <LokinetIconButton
           onClick={() => copyToClipboard(appLogs.join('\r\n'))}
           size="30px"

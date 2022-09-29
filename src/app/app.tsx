@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
+import React, { useEffect } from 'react';
 import ReactDom from 'react-dom';
 import 'focus-visible/dist/focus-visible';
 
@@ -13,24 +13,25 @@ import {
 } from '../ipc/ipcRenderer';
 import {
   markAsStopped,
+  selectGlobalError,
   setGlobalError,
   updateFromDaemonStatus
 } from '../features/statusSlice';
-import { Provider, useSelector } from 'react-redux';
+import { Provider, useDispatch, useSelector } from 'react-redux';
 import { store } from './store';
 import { useAppDispatch } from './hooks';
 import {
   markExitNodesFromDaemon,
-  markInitialLoadingFinished
+  markDaemonIsLoading
 } from '../features/exitStatusSlice';
 import { AppLayout } from './components/AppLayout';
 import { appendToApplogs } from '../features/appLogsSlice';
 import { GlobalStyle } from './globalStyles';
 import { ThemeProvider } from 'styled-components';
 import { darkTheme, lightTheme } from './theme';
-import { selectedTheme } from '../features/uiStatusSlice';
+import { selectedTheme, setTheme } from '../features/uiStatusSlice';
 import { StatusErrorType } from '../../sharedIpc';
-import { useGlobalConnectingStatus } from './hooks/connectingStatus';
+import { getThemeFromSettings } from './config';
 
 void initializeIpcRendererSide();
 
@@ -42,11 +43,14 @@ export function setErrorOutsideRedux(errorStatus: StatusErrorType): void {
   store.dispatch(setGlobalError(errorStatus));
 }
 
+export function markAsStoppedOutsideRedux(): void {
+  store.dispatch(markAsStopped());
+}
+
 const useSummaryStatusPolling = () => {
-  // dispatch is used to make updates to the redux store
   const dispatch = useAppDispatch();
 
-  const globalStatus = useGlobalConnectingStatus();
+  const globalError = useSelector(selectGlobalError);
 
   // register an interval for fetching the status of the daemon
   useInterval(async () => {
@@ -89,21 +93,21 @@ const useSummaryStatusPolling = () => {
             exitAuthCodeFromDaemon: parsedStatus.exitAuthCode
           })
         );
-        // the daermon told us we have an exit set but our current state says we have an error on the status.
+        // the daemon told us we have an exit set but our current state says we have an error on the status.
         // make sure to remove that error from the UI
         if (
           hasExitNodeChange &&
           parsedStatus.exitNode &&
-          globalStatus === 'error-add-exit'
+          globalError === 'error-add-exit'
         ) {
           dispatch(setGlobalError(undefined));
         }
       }
-      dispatch(markInitialLoadingFinished());
+      dispatch(markDaemonIsLoading(false));
     } catch (e) {
       console.log('getSummaryStatus() failed');
       dispatch(markAsStopped());
-      dispatch(markInitialLoadingFinished());
+      dispatch(markDaemonIsLoading(false));
 
       dispatch(
         markExitNodesFromDaemon({
@@ -124,6 +128,18 @@ ReactDom.render(<div id="root" />, document.body);
 
 const LokinetThemeProvider = (props: { children: React.ReactNode }) => {
   const currentTheme = useSelector(selectedTheme);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const fromSettings = getThemeFromSettings();
+    if (
+      (currentTheme !== fromSettings && fromSettings === 'light') ||
+      fromSettings === 'dark'
+    ) {
+      dispatch(setTheme(fromSettings));
+    }
+  }, [currentTheme, dispatch]);
+
   return (
     <ThemeProvider theme={currentTheme === 'light' ? lightTheme : darkTheme}>
       {props.children}
@@ -136,7 +152,6 @@ ReactDom.render(
   <Provider store={store}>
     <LokinetThemeProvider>
       <GlobalStyle />
-
       <App />
     </LokinetThemeProvider>
   </Provider>,

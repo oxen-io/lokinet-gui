@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import util from 'util';
 import {
-  getEventByJobId,
   logLineToAppSide,
-  sendGlobalErrorToAppSide
+  sendGlobalErrorToAppSide,
+  sendIpcReplyAndDeleteJob
 } from './ipcNode';
 import { LokinetLinuxProcessManager } from './lokinetProcessManagerLinux';
 import {
@@ -13,7 +13,6 @@ import {
 
 import { LokinetWindowsProcessManager } from './lokinetProcessManagerWindows';
 
-import { IPC_CHANNEL_KEY } from './sharedIpc';
 import { exec } from 'child_process';
 import { LokinetMacOSProcessManager } from './lokinetProcessManagerMacOS';
 
@@ -53,7 +52,7 @@ export const invoke = async (
 
 export interface ILokinetProcessManager {
   doStartLokinetProcess: () => Promise<string | null>;
-  doStopLokinetProcess: () => Promise<string | null>;
+  doStopLokinetProcess: (duringAppExit: boolean) => Promise<string | null>;
 }
 
 let lokinetProcessManager: ILokinetProcessManager;
@@ -97,47 +96,45 @@ const getLokinetProcessManager = async () => {
 export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
   let result: string | undefined;
 
-  if (!process.env.DISABLE_AUTO_START_STOP) {
-    try {
-      logLineToAppSide('About to start Lokinet process');
+  try {
+    logLineToAppSide('About to start Lokinet process');
 
-      const manager = await getLokinetProcessManager();
-      const startStopResult = await manager.doStartLokinetProcess();
+    const manager = await getLokinetProcessManager();
+    // we send the ipc reply first because the call below might hand until the user typed his password etc.
+    // we then trigger an update if an error happened with `sendGlobalErrorToAppSide`
+    sendIpcReplyAndDeleteJob(jobId, null, '');
 
-      if (startStopResult) {
-        sendGlobalErrorToAppSide('error-start-stop');
-      }
-    } catch (e: any) {
-      logLineToAppSide(`Lokinet process start failed with ${e.message}`);
-      console.info('doStartLokinetProcess failed with', e);
+    const startStopResult = await manager.doStartLokinetProcess();
+
+    if (startStopResult) {
       sendGlobalErrorToAppSide('error-start-stop');
     }
-  } else {
-    logLineToAppSide(
-      'ENV "DISABLE_AUTO_START_STOP" is set, not auto starting lokinet daemon'
-    );
+  } catch (e: any) {
+    logLineToAppSide(`Lokinet process start failed with ${e.message}`);
+    console.info('doStartLokinetProcess failed with', e);
+    sendGlobalErrorToAppSide('error-start-stop');
+    sendIpcReplyAndDeleteJob(jobId, null, result);
   }
-  const event = getEventByJobId(jobId);
-  event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null, result);
 };
 
 /**
  * doStopLokinetProcess is only called when exiting the app so there is no point to wait
  * for the event return and so no jobId argument required
  */
-export const doStopLokinetProcess = async (): Promise<void> => {
+export const doStopLokinetProcess = async (
+  jobId: string,
+  duringAppExit = false
+): Promise<void> => {
   try {
     logLineToAppSide('About to stop Lokinet process');
 
     const manager = await getLokinetProcessManager();
-    await manager.doStopLokinetProcess();
+    sendIpcReplyAndDeleteJob(jobId, null, '');
+    await manager.doStopLokinetProcess(duringAppExit);
   } catch (e: any) {
     logLineToAppSide(`Lokinet process stop failed with ${e.message}`);
+    sendIpcReplyAndDeleteJob(jobId, e.message, '');
 
     console.info('doStopLokinetProcess failed with', e);
   }
-};
-
-export const doGetProcessPid = (): number => {
-  return 0;
 };

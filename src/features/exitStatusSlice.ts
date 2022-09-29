@@ -1,16 +1,19 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { getSavedExitNodesFromSettings } from '../app/config';
 import { RootState } from '../app/store';
+import { selectStatus } from './statusSlice';
 
 export interface ExitStatusState {
   // set to true when the user clicked. We must block other call while this is true
   exitLoading: boolean;
   // false until the first get_status gets resolved/fails
-  initialLoadingFinished: boolean;
+  daemonIsLoading: boolean;
 
   // Those are user entered values
   // When clicking on enable exit, those are the values used to setup the daemon
   // exitNodeFromUser is required, but not exitAuthCodeFromUser
   exitNodeFromUser?: string;
+  exitsFromSettings: Array<string>;
   exitAuthCodeFromUser?: string;
 
   // those 2 fields will be set once exitLoading is done loading with what the daemon gave us back.
@@ -21,8 +24,9 @@ export interface ExitStatusState {
 const initialStatusState: ExitStatusState = {
   // default to true to let the user know we are fetching data on app load
   exitLoading: true,
-  initialLoadingFinished: false,
-  exitNodeFromUser: 'exit.loki',
+  daemonIsLoading: true,
+  exitNodeFromUser: getSavedExitNodesFromSettings()[0],
+  exitsFromSettings: getSavedExitNodesFromSettings(),
   exitAuthCodeFromUser: undefined,
   exitNodeFromDaemon: undefined,
   exitAuthCodeFromDaemon: undefined
@@ -49,10 +53,11 @@ export const exitStatusSlice = createSlice({
       state.exitAuthCodeFromDaemon = undefined;
       return state;
     },
-    markInitialLoadingFinished(state) {
-      if (!state.initialLoadingFinished) {
+
+    markDaemonIsLoading(state, action: PayloadAction<boolean>) {
+      if (state.daemonIsLoading) {
         state.exitLoading = false;
-        state.initialLoadingFinished = true;
+        state.daemonIsLoading = action.payload;
       }
       return state;
     },
@@ -75,6 +80,10 @@ export const exitStatusSlice = createSlice({
       state.exitNodeFromDaemon = action.payload.exitNodeFromDaemon;
       state.exitAuthCodeFromDaemon = action.payload.exitAuthCodeFromDaemon;
       return state;
+    },
+    updateExitsFromSettings: (state, action: PayloadAction<Array<string>>) => {
+      state.exitsFromSettings = action.payload;
+      return state;
     }
   }
 });
@@ -87,19 +96,26 @@ export const {
   markExitNodesFromDaemon,
   onUserExitNodeSet,
   onUserAuthCodeSet,
-  markInitialLoadingFinished
+  markDaemonIsLoading,
+  updateExitsFromSettings
 } = exitStatusSlice.actions;
+
 export const selectExitStatus = (state: RootState): ExitStatusState =>
   state.exitStatus;
 
 export const selectHasExitNodeEnabled = createSelector(
   selectExitStatus,
-  (status) => Boolean(status.exitNodeFromDaemon)
+  selectStatus,
+  (status, daemonStatus) =>
+    daemonStatus.isRunning &&
+    Boolean(status.exitNodeFromDaemon) &&
+    !status.exitLoading
 );
 
 export const selectHasExitNodeChangeLoading = createSelector(
   selectExitStatus,
-  (status) => status.exitLoading
+  selectStatus,
+  (status, daemonStatus) => daemonStatus.isRunning && status.exitLoading
 );
 
 export const selectExitNodeFromUser = createSelector(
@@ -110,4 +126,13 @@ export const selectExitNodeFromUser = createSelector(
 export const selectAuthCodeFromUser = createSelector(
   selectExitStatus,
   (status) => status.exitAuthCodeFromUser
+);
+
+export const selectDaemonIsLoading = createSelector(
+  selectExitStatus,
+  (status) => status.daemonIsLoading
+);
+export const selectExitsFromSettings = createSelector(
+  selectExitStatus,
+  (status) => status.exitsFromSettings
 );

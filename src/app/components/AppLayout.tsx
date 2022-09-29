@@ -3,7 +3,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { ConnectedStatus } from './ConnectedStatus';
 import { GeneralInfos } from './GeneralInfos';
-import { GuiTabs } from './GuiTabs';
+import { GuiTabs } from './tabs/GuiTabs';
 import { PowerButton } from './PowerButton/PowerButton';
 import { TitleBar } from './TitleBar';
 

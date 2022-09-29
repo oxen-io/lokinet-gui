@@ -6,6 +6,7 @@ import styled from 'styled-components';
 import { selectedTheme, setTheme } from '../../features/uiStatusSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { minimizeToTray } from '../../ipc/ipcRenderer';
+import { setThemeToSettings } from '../config';
 
 const Container = styled.div`
   background: ${(props) => props.theme.backgroundColor};
@@ -17,7 +18,6 @@ const Container = styled.div`
   display: flex;
   font-size: 2rem;
   -webkit-app-region: drag;
-  -webkit-user-select: none;
   flex-shrink: 0;
   padding: 0.5rem 1rem;
 `;
@@ -45,7 +45,10 @@ export const TitleBar = (): JSX.Element => {
       <StyledIconButton
         title="Switch theme dark/white"
         onClick={() => {
-          dispatch(setTheme(themeSelected === 'light' ? 'dark' : 'light'));
+          const newTheme = themeSelected === 'light' ? 'dark' : 'light';
+          setThemeToSettings(newTheme);
+
+          dispatch(setTheme(newTheme));
         }}
         style={{ marginRight: 'auto' }}
       >

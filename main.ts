@@ -1,19 +1,30 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { app, BrowserWindow, screen, Tray } from 'electron';
-import { initializeIpcNodeSide, logLineToAppSide } from './ipcNode';
+import { initializeIpcNodeSide } from './ipcNode';
 import { doStopLokinetProcess } from './lokinetProcessManager';
 import { closeRpcConnection } from './lokinetRpcCall';
 import { createTrayIcon } from './trayIcon';
 import { markShouldQuit, shouldQuit } from './windowState';
 
 import ElectronStore from 'electron-store';
+import {
+  getDefaultOnExitDo,
+  OnExitStopSetting,
+  SETTINGS_ID_SELECTED_THEME,
+  SETTINGS_ID_STOP_ON_EXIT
+} from './types';
+import { darkTheme, lightTheme } from './src/app/theme';
 
 let store: ElectronStore | undefined;
-const configScreenIndex = 'SCREEN_INDEX';
+const configScreenIndex = 'screen_index';
 
 let mainWindow: BrowserWindow | null;
 let tray: Tray | null = null;
 let ready = false;
+
+function isMacOS() {
+  return process.platform === 'darwin';
+}
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
@@ -43,11 +54,10 @@ async function createWindow() {
       validScreenIndexToUse = screenIndexFromStore;
     }
   }
-  const openDevTools = false;
-  const defaultHeight = 850; // 850
-  const defaultWidth = openDevTools ? 1000 : 450; // 450
+  const openDevTools = process.env.OPEN_DEV_TOOLS || false;
+  const defaultHeight = 850;
+  const defaultWidth = openDevTools ? 1250 : 450;
 
-  const isDev = process.env.NODE_ENV === 'development';
   const indexToUse = validScreenIndexToUse || 0;
   const sz = allDisplays[indexToUse].size;
   const bounds = allDisplays[indexToUse].bounds;
@@ -60,6 +70,8 @@ async function createWindow() {
 
   const width = defaultWidth * scaleFactorDiy;
   const height = defaultHeight * scaleFactorDiy;
+
+  const selectedTheme = store.get(SETTINGS_ID_SELECTED_THEME, 'light');
 
   mainWindow = new BrowserWindow({
     width,
@@ -75,27 +87,25 @@ async function createWindow() {
       webSecurity: true,
       zoomFactor: scaleFactorDiy
     },
-    backgroundColor: '#fff',
+    backgroundColor:
+      selectedTheme === 'light'
+        ? lightTheme.backgroundColor
+        : darkTheme.backgroundColor,
     autoHideMenuBar: true,
     frame: false,
     x: Math.floor(bounds.x + bounds.width / 2 - width / 2),
     y: Math.floor(bounds.y + bounds.height / 2 - height / 2)
   });
   ready = true;
-
-  tray = createTrayIcon(getMainWindow);
-
-  if (isDev) {
-    mainWindow.loadURL(`http://localhost:4000`);
-    if (openDevTools) {
-      mainWindow.webContents.openDevTools({ mode: 'right' });
-    }
-  } else {
-    mainWindow.loadFile('./dist/index.html');
-    if (openDevTools) {
-      mainWindow.webContents.openDevTools({ mode: 'right' });
-    }
+  if (!isMacOS()) {
+    tray = createTrayIcon(getMainWindow);
   }
+
+  mainWindow.loadFile('./dist/index.html');
+  if (openDevTools) {
+    mainWindow.webContents.openDevTools({ mode: 'right' });
+  }
+
   // if you hide the menu the shortcut CTLR-Q won't work
   // mainWindow.removeMenu();
   await initializeIpcNodeSide(getMainWindow);
@@ -112,8 +122,9 @@ async function createWindow() {
     mainWindow.hide();
 
     // toggle the visibility of the show/hide tray icon menu entries
-
-    (tray as any)?.updateContextMenu();
+    if (!isMacOS()) {
+      (tray as any)?.updateContextMenu();
+    }
 
     return;
   });
@@ -125,18 +136,20 @@ async function createWindow() {
 
 app.on('before-quit', () => {
   console.log('before-quit event');
-  void closeRpcConnection();
-  if (!process.env.DISABLE_AUTO_START_STOP) {
-    void doStopLokinetProcess();
-  } else {
-    logLineToAppSide(
-      'ENV "DISABLE_AUTO_START_STOP" is set, not auto starting lokinet daemon'
-    );
+  closeRpcConnection();
+
+  const todoOnExit: OnExitStopSetting =
+    (store?.get(
+      SETTINGS_ID_STOP_ON_EXIT,
+      getDefaultOnExitDo()
+    ) as OnExitStopSetting) || getDefaultOnExitDo();
+  console.info('todoOnExit', todoOnExit);
+  if (todoOnExit === 'stop_everything') {
+    void doStopLokinetProcess('stop_everything', true);
   }
 
-  if (tray) {
-    tray.destroy();
-  }
+  tray?.destroy();
+
   markShouldQuit();
 });
 

@@ -13,15 +13,39 @@ import * as rpcCalls from './lokinetRpcCall';
 import * as lokinetProcessManager from './lokinetProcessManager';
 import * as utilityIPCCalls from './utilityIPCCalls';
 
-export const eventsByJobId = Object.create(null);
+const eventsByJobId: Record<string, Electron.IpcMainEvent> =
+  Object.create(null);
 
-export const getEventByJobId = (jobId: string): any => {
+const getEventByJobId = (jobId: string): Electron.IpcMainEvent => {
   const event = eventsByJobId[jobId];
 
   if (!event) {
     throw new Error(`Could not find the event for jobId ${jobId}`);
   }
   return event;
+};
+
+const deleteJobId = (jobId: string) => {
+  if (eventsByJobId[jobId]) {
+    delete eventsByJobId[jobId];
+  }
+};
+
+export const sendIpcReplyAndDeleteJob = (
+  jobId: string,
+  error: any,
+  result: string | undefined
+) => {
+  try {
+    const event = getEventByJobId(jobId);
+    event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, error, result);
+    deleteJobId(jobId);
+  } catch (e: any) {
+    console.warn(
+      `sendIpcReplyAndDeleteJob for ${jobId} failed with `,
+      e.message
+    );
+  }
 };
 
 let getMainWindowLocal: () => BrowserWindow | null;
@@ -73,13 +97,14 @@ export async function initializeIpcNodeSide(
       eventsByJobId[jobId] = event;
       // this call just trigger the RPC call. The reply will come from somewhere else
       await fnToCall(jobId, ...args);
+      // event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null);
     } catch (error: any) {
       const errorForDisplay = error && error.msg ? error.msg : error;
       console.log(
         `ipc channel error with call ${callName}: ${errorForDisplay}`
       );
-      delete eventsByJobId[jobId];
-      event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, error?.msg || null);
+
+      sendIpcReplyAndDeleteJob(jobId, errorForDisplay || null, '');
     }
   });
 }
@@ -96,7 +121,7 @@ export function logLineToAppSide(logLine: string): void {
 
 export function sendGlobalErrorToAppSide(globalError: StatusErrorType): void {
   if (utilityIPCCalls.getRendererReady()) {
-    console.info(`global error "${globalError}`);
+    console.info(`sendGlobalErrorToAppSide: global error "${globalError}`);
     getMainWindowLocal()?.webContents.send(IPC_GLOBAL_ERROR, globalError);
   } else {
     console.info('sendGlobalErrorToAppSide : renderer is not ready');

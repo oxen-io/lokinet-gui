@@ -1,7 +1,7 @@
 import { Flex } from '@chakra-ui/react';
 import React from 'react';
 import useCopyToClipboard from 'react-use/lib/useCopyToClipboard';
-import styled, { DefaultTheme } from 'styled-components';
+import styled, { DefaultTheme, useTheme } from 'styled-components';
 import { MdOutlineContentCopy } from 'react-icons/md';
 import { FiDownloadCloud, FiUploadCloud } from 'react-icons/fi';
 import { useSelector } from 'react-redux';
@@ -9,12 +9,11 @@ import {
   selectDownloadRate,
   selectUploadRate
 } from '../../features/statusSlice';
-import { downloadColorChart, uploadColorChart } from './SpeedChart';
+import { HSpacer } from './Utils/Spacer';
 
 const StyledLabelSubtle = styled.div`
   color: ${(props) => props.theme.textColorSubtle};
   padding-inline-end: 5px;
-  user-select: none;
   white-space: nowrap;
 `;
 
@@ -25,7 +24,6 @@ const StyledValue = styled(StyledLabelSubtle)<{
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  user-select: none;
 `;
 
 const InlineIconButton = styled.button<{ size: string; theme: DefaultTheme }>`
@@ -75,6 +73,7 @@ const CopyToClipboardIcon = (props: { valueToCopy: string }) => {
         copyToClipboard(props.valueToCopy);
       }}
       title="Copy to clipboard"
+      aria-label="Copy to clipboard"
     >
       <MdOutlineContentCopy />
     </InlineIconButton>
@@ -168,9 +167,10 @@ const SpeedWithPillAndIcon = (props: {
 
 export const UpSpeedWithPillAndIcon = (): JSX.Element => {
   const upSpeed = useSelector(selectUploadRate);
+  const theme = useTheme();
   return (
     <SpeedWithPillAndIcon
-      pillColor={uploadColorChart}
+      pillColor={theme.connectedColor}
       icon={<UploadInlineIcon size="15px" />}
       label="Upload"
       value={upSpeed}
@@ -180,9 +180,11 @@ export const UpSpeedWithPillAndIcon = (): JSX.Element => {
 
 export const DownSpeedWithPillAndIcon = (): JSX.Element => {
   const downSpeed = useSelector(selectDownloadRate);
+  const theme = useTheme();
+
   return (
     <SpeedWithPillAndIcon
-      pillColor={downloadColorChart}
+      pillColor={theme.dangerColor}
       icon={<DownloadInlineIcon size="15px" />}
       label="Download"
       value={downSpeed}
@@ -239,9 +241,3 @@ export const DownSpeedWithIcon = (): JSX.Element => {
     />
   );
 };
-
-export const HSpacer = styled.span<{ width: string }>`
-  width: ${(props) => props.width};
-  height: 1px;
-  background: none;
-`;

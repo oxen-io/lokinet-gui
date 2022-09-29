@@ -1,11 +1,10 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
-const StyledButton = styled.button`
+const StyledButton = styled.button<{ disabled?: boolean }>`
   border: 1px solid ${(props) => props.theme.textColor};
   color: ${(props) => props.theme.textColor};
   background-color: ${(props) => props.theme.backgroundColor};
-
   border-radius: 7px;
   outline: none;
   font-family: Archivo;
@@ -17,23 +16,36 @@ const StyledButton = styled.button`
   padding: 4px 27px;
   margin-inline-start: 10px;
   margin-inline-end: 10px;
-  user-select: none;
-
   transition: 0.25s;
   border-radius: 7px;
+  align-self: center;
+  cursor: ${(props) => (props.disabled ? 'not-allowed' : 'default')};
+
   :hover {
-    color: ${(props) => props.theme.textColorSubtle};
-    border: 1px solid ${(props) => props.theme.textColorSubtle};
+    color: ${(props) => !props.disabled && props.theme.textColorSubtle};
+    border: 1px solid
+      ${(props) => !props.disabled && props.theme.textColorSubtle};
   }
 `;
 
 export const TextButton = (props: {
   text: string;
-  title: string;
   onClick: () => void;
+  textAndBorderColor?: string;
+  backgroundColor?: string;
+  disabled?: boolean;
 }): JSX.Element => {
+  const theme = useTheme();
   return (
-    <StyledButton onClick={props.onClick} title={props.title}>
+    <StyledButton
+      onClick={props.onClick}
+      theme={{
+        ...theme,
+        textColor: props.textAndBorderColor || theme.textColor,
+        backgroundColor: props.backgroundColor || theme.backgroundColor
+      }}
+      disabled={props.disabled}
+    >
       {props.text}
     </StyledButton>
   );

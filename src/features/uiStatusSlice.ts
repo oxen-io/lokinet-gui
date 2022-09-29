@@ -1,25 +1,45 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { RootState } from '../app/store';
 
-export type TabIndex = 0 | 1 | 2;
+export type TabIndex = 0 | 1 | 2 | 3;
 
 export type ThemeType = 'light' | 'dark';
 
 export type GeneralInfosState = {
-  tabSelected: 0 | 1 | 2;
+  tabSelected: TabIndex;
   theme: ThemeType;
 };
+
 const initialGeneralInfosState: GeneralInfosState = {
-  tabSelected: 2,
+  tabSelected: toTabIndex('main'),
   theme: 'light'
 };
+
+export type TabName = 'main' | 'chart' | 'logs' | 'settings';
+
+export function toTabIndex(name: TabName): TabIndex {
+  return name === 'main' ? 0 : name === 'chart' ? 1 : name === 'logs' ? 2 : 3;
+}
+
+export function toTabName(index: TabIndex): TabName {
+  switch (index) {
+    case 0:
+      return 'main';
+    case 1:
+      return 'chart';
+    case 2:
+      return 'logs';
+    case 3:
+      return 'settings';
+  }
+}
+
 export const uiSlice = createSlice({
   name: 'ui',
   initialState: initialGeneralInfosState,
   reducers: {
-    setTabSelected(state, action: PayloadAction<'main' | 'chart' | 'logs'>) {
-      const tabSelected =
-        action.payload === 'main' ? 0 : action.payload === 'chart' ? 1 : 2;
+    setTabSelected(state, action: PayloadAction<TabName>) {
+      const tabSelected = toTabIndex(action.payload);
       return {
         ...state,
         tabSelected
