@@ -60,7 +60,7 @@ export const AppLogs = (): JSX.Element => {
             const timestamp = logLine.substring(0, separator);
             const content = logLine.substring(separator);
             return (
-              <span>
+              <span key={timestamp}>
                 <Timestamp>{timestamp}</Timestamp>
                 <Content>{content}</Content>
               </span>

@@ -1,4 +1,5 @@
 import { sendIpcReplyAndDeleteJob } from './ipcNode';
+import { subscribeLokinetLogs } from './lokinetRpcCall';
 
 import { getMainWindow, getTrayIcon } from './main';
 
@@ -8,6 +9,7 @@ export function markRendererReady(jobId: string): void {
   isRendererReady = true;
 
   sendIpcReplyAndDeleteJob(jobId, null, '');
+  subscribeLokinetLogs();
 }
 
 export function minimizeToTray(jobId: string): void {
