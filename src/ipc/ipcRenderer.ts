@@ -222,7 +222,7 @@ function makeChannel(fnName: string) {
     const jobId = _makeJob(fnName);
 
     return new Promise((resolve, reject) => {
-      ipcRenderer.send(IPC_CHANNEL_KEY, jobId, fnName, ...args);
+      ipcRenderer?.send(IPC_CHANNEL_KEY, jobId, fnName, ...args);
 
       _updateJob(jobId, {
         resolve,

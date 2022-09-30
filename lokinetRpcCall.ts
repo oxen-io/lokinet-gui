@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+import { isString } from 'lodash';
 import * as _zmq from 'zeromq/';
 
 _zmq.context.blocky = false;
 
-import { sendIpcReplyAndDeleteJob } from './ipcNode';
+import { logLineToAppSide, sendIpcReplyAndDeleteJob } from './ipcNode';
 
 const RPC_BOUND_PORT = 1190;
 const RPC_BOUND_IP = '127.0.0.1';
@@ -25,16 +26,16 @@ const request = async (
   if (!reply_tag) {
     throw new Error(`You must use a reply tag for cmd ${cmd}`);
   }
-  await dealer.send([cmd, reply_tag, args]);
+  await dealer?.send([cmd, reply_tag, args]);
 };
 
 // LokinetApiClient::invoke
 const invoke = async (
   endpoint: string,
   reply_tag: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown> | string
 ) => {
-  const argsStringified = JSON.stringify(args);
+  const argsStringified = isString(args) ? args : JSON.stringify(args);
   await request(endpoint, reply_tag, argsStringified);
 };
 
@@ -59,6 +60,19 @@ export const addExit = async (
 
 export const deleteExit = async (reply_tag: string): Promise<void> => {
   await invoke('llarp.exit', reply_tag, { unmap: true });
+};
+
+const LOG_MESSAGE_PUSH = 'log.message';
+const LOG_SUBSCRIBE_TAG_PREFIX = 'enableLogs';
+let lastEnableLogsRequestTimestamp: number | undefined;
+
+export const subscribeLokinetLogs = async (): Promise<void> => {
+  await invoke(
+    'llarp.logs',
+    `${LOG_SUBSCRIBE_TAG_PREFIX}-${Date.now()}`,
+    LOG_MESSAGE_PUSH
+  );
+  lastEnableLogsRequestTimestamp = Date.now();
 };
 
 export const setConfig = async (
@@ -87,26 +101,53 @@ export const closeRpcConnection = (): void => {
   }
 };
 
+function sendEnableLogsAgainIfNeeded() {
+  if (
+    lastEnableLogsRequestTimestamp &&
+    Date.now() - lastEnableLogsRequestTimestamp > 30 * 1000
+  ) {
+    subscribeLokinetLogs();
+  }
+}
+
 const loopDealerReceiving = async (): Promise<void> => {
-  // TODO handle exception in the loop so the loop is not exited if the error is not that bad
   try {
     dealer.connect(RPC_ZMQ_ADDRESS);
     console.log(`Connected to port ${RPC_BOUND_PORT}`);
     isRunning = true;
     while (isRunning) {
-      const reply = await dealer.receive();
+      const reply = (await dealer.receive()) as Array<Buffer>;
       const replyLength = reply.length;
 
-      // we only care if we get a REPLY event with 3 arguments total for nowq.
-      if (replyLength === 3) {
+      if (replyLength > 1) {
         const replyType = reply[0].toString('utf8');
-        if (replyType === 'REPLY') {
-          const jobId = reply[1].toString('utf8');
-          const content = reply[2].toString('utf8');
+        switch (replyType) {
+          case 'REPLY':
+            if (replyLength === 3) {
+              const jobId = reply[1].toString('utf8');
+              const content = reply[2].toString('utf8');
 
-          sendIpcReplyAndDeleteJob(jobId, null, content);
+              if (jobId.startsWith(LOG_SUBSCRIBE_TAG_PREFIX)) {
+                // we do not have an ipc call to forward that specific call
+                break;
+              }
+              sendIpcReplyAndDeleteJob(jobId, null, content);
+            }
+            break;
+          case LOG_MESSAGE_PUSH:
+            if (reply.length > 1) {
+              const logMessages = reply.slice(1).map((m) => m.toString('utf8'));
+              if (logMessages) {
+                logMessages.forEach(logLineToAppSide);
+              }
+            }
+            break;
+          default:
+            break;
         }
       }
+
+      sendEnableLogsAgainIfNeeded();
     }
   } catch (e) {
     if (isRunning) {

@@ -38,7 +38,7 @@ export const sendIpcReplyAndDeleteJob = (
 ) => {
   try {
     const event = getEventByJobId(jobId);
-    event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, error, result);
+    event.sender?.send(`${IPC_CHANNEL_KEY}-done`, jobId, error, result);
     deleteJobId(jobId);
   } catch (e: any) {
     console.warn(
@@ -112,17 +112,14 @@ export async function initializeIpcNodeSide(
 export function logLineToAppSide(logLine: string): void {
   const withTimestamp = `${logLine}`;
   if (utilityIPCCalls.getRendererReady()) {
-    console.info(`logLine ready "${logLine}`);
-    getMainWindowLocal()?.webContents.send(IPC_LOG_LINE, withTimestamp);
-  } else {
-    console.info('logLineToAppSide : renderer is not ready');
+    getMainWindowLocal()?.webContents?.send(IPC_LOG_LINE, withTimestamp);
   }
 }
 
 export function sendGlobalErrorToAppSide(globalError: StatusErrorType): void {
   if (utilityIPCCalls.getRendererReady()) {
-    console.info(`sendGlobalErrorToAppSide: global error "${globalError}`);
-    getMainWindowLocal()?.webContents.send(IPC_GLOBAL_ERROR, globalError);
+    console.info(`sendGlobalErrorToAppSide: global error "${globalError}"`);
+    getMainWindowLocal()?.webContents?.send(IPC_GLOBAL_ERROR, globalError);
   } else {
     console.info('sendGlobalErrorToAppSide : renderer is not ready');
   }
