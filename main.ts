@@ -26,6 +26,10 @@ function isMacOS() {
   return process.platform === 'darwin';
 }
 
+function isLinux() {
+  return process.platform !== 'win32' && !isMacOS();
+}
+
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
 }
@@ -134,7 +138,8 @@ async function createWindow() {
   });
 }
 
-app.on('before-quit', () => {
+let stopEverythingDone = false;
+app.on('before-quit', async (event) => {
   console.log('before-quit event');
   closeRpcConnection();
 
@@ -144,12 +149,29 @@ app.on('before-quit', () => {
       getDefaultOnExitDo()
     ) as OnExitStopSetting) || getDefaultOnExitDo();
   console.info('todoOnExit', todoOnExit);
+
   if (todoOnExit === 'stop_everything') {
-    void doStopLokinetProcess('stop_everything', true);
+    if (isLinux()) {
+      console.info('just triggering lokinet daemon stop');
+      void doStopLokinetProcess('stop_everything', true);
+    } else {
+      if (stopEverythingDone) {
+        return;
+      }
+      event.preventDefault();
+      console.info('waiting for lokinet daemon to stop');
+      await doStopLokinetProcess('stop_everything', true);
+      console.info('lokinet daemon stopped');
+      tray?.destroy();
+      markShouldQuit();
+      stopEverythingDone = true;
+      // we have to call quite ourself as we prevented the event default
+      app.quit();
+      return;
+    }
   }
 
   tray?.destroy();
-
   markShouldQuit();
 });
 
