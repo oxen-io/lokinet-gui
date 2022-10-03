@@ -45,6 +45,7 @@ export function setErrorOutsideRedux(errorStatus: StatusErrorType): void {
 
 export function markAsStoppedOutsideRedux(): void {
   store.dispatch(markAsStopped());
+  store.dispatch(markDaemonIsLoading(false));
 }
 
 const useSummaryStatusPolling = () => {
@@ -103,6 +104,7 @@ const useSummaryStatusPolling = () => {
           dispatch(setGlobalError(undefined));
         }
       }
+
       dispatch(markDaemonIsLoading(false));
     } catch (e) {
       console.log('getSummaryStatus() failed');
