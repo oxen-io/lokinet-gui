@@ -162,9 +162,10 @@ app.on('before-quit', async (event) => {
       console.info('waiting for lokinet daemon to stop');
       await doStopLokinetProcess('stop_everything', true);
       console.info('lokinet daemon stopped');
+      stopEverythingDone = true;
+
       tray?.destroy();
       markShouldQuit();
-      stopEverythingDone = true;
       // we have to call quite ourself as we prevented the event default
       app.quit();
       return;

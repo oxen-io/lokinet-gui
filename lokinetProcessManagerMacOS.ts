@@ -1,14 +1,12 @@
 import { ILokinetProcessManager, invoke } from './lokinetProcessManager';
-import { app } from 'electron';
-import { dirname } from 'path';
+import { logLineToAppSide } from './ipcNode';
 
 function getLokinetControlLocation() {
-  // We will be at: Lokinet.app/Contents/Helpers/Lokinet-GUI.app/Contents/MacOS/Lokinet-GUI, we want to back to
-  // Lokinet.app/Contents/MacOS/Lokinet:
-  return (
-    dirname(dirname(dirname(dirname(dirname(app.getPath('exe')))))) +
-    '/MacOS/Lokinet'
-  );
+  const lokinetControlLocation =
+    '/Applications/Lokinet.app/Contents/MacOS/Lokinet';
+
+  logLineToAppSide(`lokinet path: "${lokinetControlLocation}"`);
+  return lokinetControlLocation;
 }
 
 export class LokinetMacOSProcessManager implements ILokinetProcessManager {
