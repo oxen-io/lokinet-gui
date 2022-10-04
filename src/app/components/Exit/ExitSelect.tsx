@@ -82,7 +82,10 @@ const BookmarkSvg = ({
     }
   };
   return (
-    <SvgContainer disableClicks={disableClicks}>
+    <SvgContainer
+      disableClicks={disableClicks}
+      title="Toggle connection history"
+    >
       {isSelected ? (
         <BookMarkSVGSelected onClick={toggleSelected} />
       ) : (

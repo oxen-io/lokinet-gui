@@ -23,3 +23,11 @@ export type StatusErrorType = StatusErrorTypeSet | undefined;
 
 export const DEBUG_IPC_CALLS = true;
 export const DEBUG_IPC_CALLS_GET_STATUS = false;
+
+export function isMacOS() {
+  return process.platform === 'darwin';
+}
+
+export function isLinux() {
+  return process.platform !== 'win32' && !isMacOS();
+}

@@ -7,8 +7,12 @@ import { selectedTheme, setTheme } from '../../features/uiStatusSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { minimizeToTray } from '../../ipc/ipcRenderer';
 import { setThemeToSettings } from '../config';
+import { isMacOS } from '../../../sharedIpc';
 
-const Container = styled.div`
+const Container = styled.div<{ reverse: boolean }>`
+  flex-direction: ${(props) => (props.reverse ? 'row-reverse' : 'row')};
+  place-content: space-between;
+
   background: ${(props) => props.theme.backgroundColor};
   z-index: 99;
 
@@ -40,17 +44,17 @@ const StyledIconButton = styled.button`
 export const TitleBar = (): JSX.Element => {
   const themeSelected = useSelector(selectedTheme);
   const dispatch = useDispatch();
+
+  const macOs = isMacOS();
   return (
-    <Container>
+    <Container reverse={macOs}>
       <StyledIconButton
         title="Switch theme dark/white"
         onClick={() => {
           const newTheme = themeSelected === 'light' ? 'dark' : 'light';
           setThemeToSettings(newTheme);
-
           dispatch(setTheme(newTheme));
         }}
-        style={{ marginRight: 'auto' }}
       >
         <HiMoon />
       </StyledIconButton>

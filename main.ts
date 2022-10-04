@@ -14,6 +14,7 @@ import {
   SETTINGS_ID_STOP_ON_EXIT
 } from './types';
 import { darkTheme, lightTheme } from './src/app/theme';
+import { isMacOS, isLinux } from './sharedIpc';
 
 let store: ElectronStore | undefined;
 const configScreenIndex = 'screen_index';
@@ -21,14 +22,6 @@ const configScreenIndex = 'screen_index';
 let mainWindow: BrowserWindow | null;
 let tray: Tray | null = null;
 let ready = false;
-
-function isMacOS() {
-  return process.platform === 'darwin';
-}
-
-function isLinux() {
-  return process.platform !== 'win32' && !isMacOS();
-}
 
 export function getMainWindow(): BrowserWindow | null {
   return mainWindow;
