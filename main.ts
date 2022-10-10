@@ -82,6 +82,7 @@ async function createWindow() {
       nodeIntegration: true,
       devTools: true,
       webSecurity: true,
+      contextIsolation: false,
       zoomFactor: scaleFactorDiy
     },
     backgroundColor:
