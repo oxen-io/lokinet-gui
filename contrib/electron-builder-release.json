@@ -22,7 +22,8 @@
     "target": ["deb"]
   },
   "deb": {
-    "afterInstall": "build-scripts/deb-postinstall.sh"
+    "packageCategory": "net",
+    "depends": ["lokinet>=0.9.10~", "gconf2", "gconf-service", "libnotify4", "libxtst6", "libnss3"]
   },
   "files": [
     "dist/**/*",

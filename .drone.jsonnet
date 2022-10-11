@@ -2,12 +2,6 @@ local default_deps = 'npm yarn';
 local default_windows_deps = 'zip nsis npm yarn';
 local docker_image = 'registry.oxen.rocks/lokinet-ci-nodejs-lts';
 
-local submodules = {
-  name: 'submodules',
-  image: 'drone/git',
-  commands: ['git fetch --tags', 'git submodule update --init --recursive --depth=1'],
-};
-
 local apt_get_quiet = 'apt-get -o=Dpkg::Use-Pty=0 -q';
 
 // Regular build on a debian-like system:
@@ -26,7 +20,6 @@ local debian_pipeline(name,
   platform: { arch: arch },
   trigger: { branch: { exclude: ['debian/*', 'ubuntu/*'] } },
   steps: [
-    submodules,
     {
       name: 'build',
       image: image,
@@ -61,7 +54,6 @@ local windows_cross_pipeline(name,
   platform: { arch: arch },
   trigger: { branch: { exclude: ['debian/*', 'ubuntu/*'] } },
   steps: [
-    submodules,
     {
       name: 'build',
       image: image,
@@ -92,7 +84,6 @@ local mac_builder(name, build_type='Release', werror=true, cmake_extra='', extra
   name: name,
   platform: { os: 'darwin', arch: 'amd64' },
   steps: [
-    { name: 'submodules', commands: ['git fetch --tags', 'git submodule update --init --recursive'] },
     {
       name: 'build',
       environment: { SSH_KEY: { from_secret: 'SSH_KEY' } },

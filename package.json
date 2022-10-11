@@ -2,8 +2,9 @@
   "name": "lokinet-gui",
   "productName": "Lokinet-GUI",
   "description": "A Control panel for Lokinet",
-  "version": "0.9.9",
+  "version": "1.0.0",
   "license": "GPL-3.0-or-later",
+  "homepage": "https://lokinet.org",
   "author": {
     "name": "The Oxen Project",
     "email": "team@oxen.io"
