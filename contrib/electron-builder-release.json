@@ -22,7 +22,6 @@
     "target": ["deb"]
   },
   "deb": {
-    "afterInstall": "build-scripts/deb-postinstall.sh"
   },
   "files": [
     "dist/**/*",
