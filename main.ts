@@ -17,7 +17,6 @@ import { darkTheme, lightTheme } from './src/app/theme';
 import { isMacOS, isLinux } from './sharedIpc';
 
 let store: ElectronStore | undefined;
-const configScreenIndex = 'screen_index';
 
 let mainWindow: BrowserWindow | null;
 let tray: Tray | null = null;
@@ -36,37 +35,16 @@ async function createWindow() {
     store = new ElectronStore();
   }
 
-  let validScreenIndexToUse: number | undefined;
-
   const allDisplays = screen.getAllDisplays();
-  if (store.has(configScreenIndex)) {
-    const screenIndexFromStore = store.get(configScreenIndex) as
-      | number
-      | undefined;
 
-    if (
-      screenIndexFromStore !== undefined &&
-      allDisplays.length <= screenIndexFromStore
-    ) {
-      validScreenIndexToUse = screenIndexFromStore;
-    }
-  }
   const openDevTools = process.env.OPEN_DEV_TOOLS || false;
   const defaultHeight = 850;
   const defaultWidth = openDevTools ? 1250 : 450;
 
-  const indexToUse = validScreenIndexToUse || 0;
-  const sz = allDisplays[indexToUse].size;
-  const bounds = allDisplays[indexToUse].bounds;
+  const bounds = allDisplays[0].bounds;
 
-  const displayWidth = Math.max(sz.width, sz.height);
-  const displayHeight = Math.min(sz.width, sz.height);
-
-  const scaleFactorDiy = Math.min(displayWidth / 1920, displayHeight / 1080);
-  console.warn(scaleFactorDiy);
-
-  const width = defaultWidth * scaleFactorDiy;
-  const height = defaultHeight * scaleFactorDiy;
+  const width = defaultWidth;
+  const height = defaultHeight;
 
   const selectedTheme = store.get(SETTINGS_ID_SELECTED_THEME, 'light');
 
@@ -81,8 +59,7 @@ async function createWindow() {
     webPreferences: {
       nodeIntegration: true,
       devTools: true,
-      webSecurity: true,
-      zoomFactor: scaleFactorDiy
+      webSecurity: true
     },
     backgroundColor:
       selectedTheme === 'light'
