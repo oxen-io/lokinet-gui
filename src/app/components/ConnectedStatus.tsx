@@ -90,10 +90,10 @@ export const ConnectedStatus = (): JSX.Element => {
     ledColor = theme.connectingColor;
   } else if (hasExitEnabled) {
     statusText = 'CONNECTED IN VPN MODE';
-    ledColor = theme.connectedColor;
+    ledColor = theme.connectedVpnModeColor;
   } else if (daemonRunning) {
     statusText = 'CONNECTED TO LOKINET';
-    ledColor = theme.textColor;
+    ledColor = theme.connectedLokinetColor;
   }
 
   return (

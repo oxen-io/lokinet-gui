@@ -104,7 +104,10 @@ export const SpeedChart = (): JSX.Element => {
             />
             <VictoryArea
               style={{
-                data: { stroke: theme.connectedColor, fill: theme.connectedColor }
+                data: {
+                  stroke: theme.connectedVpnModeColor,
+                  fill: theme.connectedVpnModeColor
+                }
               }}
               data={uploadCoordinates}
             />

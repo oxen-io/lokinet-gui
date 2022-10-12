@@ -78,10 +78,16 @@ const usePowerButtonContainerShadowStyle = () => {
       : `0px 0px 30px rgba(255, 255, 255, 0.18), 0px 0px 66px #000000`;
   }
 
-  if (daemonRunning || exitConnected) {
+  if (exitConnected) {
     return themeType === 'light'
-      ? '0px 0px 25px rgba(0, 0, 0, 0.55)'
-      : `0px 0px 15px rgba(255, 255, 255, 0.48)`;
+      ? '0px 0px 43px rgba(55, 235, 25, 0.5);'
+      : '0px 0px 43px #37EB19, 0px 0px 66px #000000;';
+  }
+
+  if (daemonRunning) {
+    return themeType === 'light'
+      ? ' 0px 0px 43px rgba(54, 183, 255, 0.5)'
+      : '0px 0px 43px #36B7FF, 0px 0px 66px #000000;';
   }
 
   return themeType === 'light'

@@ -3,7 +3,8 @@ import { DefaultTheme } from 'styled-components';
 const sharedColors = {
   dangerColor: '#F33232',
   connectingColor: '#EBD619',
-  connectedColor: '#37EB19'
+  connectedLokinetColor: '#36B7FF',
+  connectedVpnModeColor: '#37EB19'
 };
 
 export const darkTheme = {
