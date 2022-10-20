@@ -154,6 +154,26 @@ export const statusSlice = createSlice({
         globalError: state.globalError
       };
     },
+    markAsStoppedFromSummaryTimedOut: (state) => {
+      if (
+        !state.initialDaemonStartDone ||
+        state.daemonIsTurningOn ||
+        state.daemonIsTurningOff ||
+        state.exitTurningOff ||
+        state.exitTurningOn
+      ) {
+        return state;
+      }
+      return {
+        ...initialSummaryStatusState,
+        daemonIsTurningOn: state.daemonIsTurningOn,
+        daemonIsTurningOff: state.daemonIsTurningOff,
+        initialDaemonStartDone: state.initialDaemonStartDone,
+        exitNodeFromDaemon: undefined,
+        exitAuthCodeFromDaemon: undefined,
+        globalError: state.globalError
+      };
+    },
     setGlobalError: (state, action: PayloadAction<StatusErrorType>) => {
       state.globalError = action.payload;
       return state;
@@ -169,7 +189,7 @@ export const statusSlice = createSlice({
 
       state.exitTurningOn = isTurningOn;
 
-      if (state.globalError === 'error-add-exit') {
+      if (isTurningOn && state.globalError === 'error-add-exit') {
         state.globalError = undefined; // we want to reset the error state
       }
 
@@ -179,6 +199,10 @@ export const statusSlice = createSlice({
     },
     markExitIsTurningOff: (state, action: PayloadAction<boolean>) => {
       const isTurningOff = action.payload;
+
+      if (isTurningOff && state.globalError === 'error-add-exit') {
+        state.globalError = undefined; // we want to reset the error state
+      }
 
       state.exitTurningOff = isTurningOff;
       return state;
@@ -243,6 +267,7 @@ export const statusSlice = createSlice({
 export const {
   updateFromDaemonStatus,
   markAsStopped,
+  markAsStoppedFromSummaryTimedOut,
   setGlobalError,
   markInitialDaemonStartDone,
   markExitIsTurningOn,

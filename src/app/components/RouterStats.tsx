@@ -15,15 +15,19 @@ const RoutersStatsInner = ({
     <StatsHeading title="ROUTERS" />
     <LabelSubtleWithValue
       label="Total count"
-      value={`${numRouters}`}
+      value={`${numRouters || ''}`}
       center={false}
     />
     <LabelSubtleWithValue
       label="Active paths"
-      value={`${activePaths}`}
+      value={`${activePaths || ''}`}
       center={false}
     />
-    <LabelSubtleWithValue label="Success" value={`${ratio}`} center={false} />
+    <LabelSubtleWithValue
+      label="Success"
+      value={`${ratio || ''}`}
+      center={false}
+    />
   </StatsSection>
 );
 

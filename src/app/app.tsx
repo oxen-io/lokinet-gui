@@ -12,12 +12,12 @@ import {
   POLLING_STATUS_INTERVAL_MS
 } from '../ipc/ipcRenderer';
 import {
-  markAsStopped,
   selectGlobalError,
   selectInitialDaemonStartDone,
   setGlobalError,
   updateFromDaemonStatus,
-  markExitNodesFromDaemon
+  markExitNodesFromDaemon,
+  markAsStoppedFromSummaryTimedOut
 } from '../features/statusSlice';
 import { Provider, useDispatch, useSelector } from 'react-redux';
 import { store } from './store';
@@ -104,12 +104,9 @@ const useSummaryStatusPolling = () => {
           dispatch(setGlobalError(undefined));
         }
       }
-
-      // dispatch(markDaemonIsLoading(false));
     } catch (e) {
       console.log('getSummaryStatus() failed');
-      dispatch(markAsStopped());
-      // dispatch(markDaemonIsLoading(false));
+      dispatch(markAsStoppedFromSummaryTimedOut());
     }
   }, POLLING_STATUS_INTERVAL_MS);
 };

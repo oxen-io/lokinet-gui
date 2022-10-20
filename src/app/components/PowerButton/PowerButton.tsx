@@ -12,6 +12,7 @@ import {
 import { stopLokinetDaemon, startLokinetDaemon } from '../../../features/thunk';
 
 import { selectedTheme } from '../../../features/uiStatusSlice';
+import { checkIfDaemonRunning } from '../../../ipc/ipcRenderer';
 
 import { PowerButtonIcon } from './PowerButtonIcon';
 import { PowerButtonContainerBorder } from './PowerButtonSpinner';
@@ -116,7 +117,10 @@ export const PowerButton = (): JSX.Element => {
     if (daemonIsLoading) {
       return;
     }
-    await startLokinetDaemon();
+    const isDaemonAlreadyRunning = await checkIfDaemonRunning();
+    if (!isDaemonAlreadyRunning) {
+      await startLokinetDaemon();
+    }
   };
 
   return (

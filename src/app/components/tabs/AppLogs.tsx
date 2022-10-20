@@ -5,6 +5,7 @@ import { useCopyToClipboard } from 'react-use';
 import styled, { useTheme } from 'styled-components';
 import { selectAppLogs, clearLogs } from '../../../features/appLogsSlice';
 import { useAppSelector } from '../../hooks';
+import { TextButton } from '../TextButton';
 import { PlusDivider, MinusDivider } from '../Utils/Dividers';
 
 const ButtonRow = styled.div`

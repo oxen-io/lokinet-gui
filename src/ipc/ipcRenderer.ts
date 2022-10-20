@@ -14,6 +14,7 @@ import { appendToAppLogsOutsideRedux, setErrorOutsideRedux } from '../app/app';
 import { store } from '../app/store';
 import {
   markAsStopped,
+  markAsStoppedFromSummaryTimedOut,
   markDaemonIsTurningOn,
   markInitialDaemonStartDone
 } from '../features/statusSlice';
@@ -156,7 +157,6 @@ export async function initializeIpcRendererSide(): Promise<void> {
   // unlock the polls of getSummaryStatus on the main app, as the daemon should be running now
   store.dispatch(markInitialDaemonStartDone());
   store.dispatch(markDaemonIsTurningOn(false));
-
 }
 
 async function _shutdown() {
@@ -285,7 +285,7 @@ function makeChannel(fnName: string) {
         if (fnName === 'getSummaryStatus') {
           console.log(logline);
 
-          store.dispatch(markAsStopped());
+          store.dispatch(markAsStoppedFromSummaryTimedOut());
         }
         _removeJob(jobId);
         reject(`${fnName}: timedout after ${timerForThisCall} `);

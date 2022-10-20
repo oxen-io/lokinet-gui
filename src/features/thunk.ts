@@ -191,7 +191,7 @@ export const turnExitOn = async (
       return;
     }
     if (!parsed.result || !parsed.result.startsWith('OK: connected to')) {
-      console.info(`TurnExitON <= '${parsed}'`);
+      console.info(`TurnExitON: '${parsed}'`);
 
       dispatchExitFailedToTurnOn();
       store.dispatch(
@@ -205,7 +205,7 @@ export const turnExitOn = async (
       // to send us the exit node set from the daemon.
     }
   } catch (e: any) {
-    console.info(`TurnExitON <= 4'${addExitResult}', ${e}`);
+    console.info(`TurnExitON: '${addExitResult}', ${e}`);
 
     dispatchExitFailedToTurnOn();
     store.dispatch(appendToApplogs(`TurnExitON: failed with ${e.message}`));
