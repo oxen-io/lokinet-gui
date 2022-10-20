@@ -5,7 +5,7 @@ import { getMainWindow, getTrayIcon } from './main';
 
 let isRendererReady = false;
 
-export function markRendererReady(jobId: string): void {
+export function markRendererReadyOnNodeSide(jobId: string): void {
   isRendererReady = true;
 
   sendIpcReplyAndDeleteJob(jobId, null, '');

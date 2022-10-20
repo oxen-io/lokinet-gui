@@ -1,15 +1,21 @@
 import { Flex } from '@chakra-ui/react';
 import React from 'react';
 import { useSelector } from 'react-redux';
-import { selectStatus } from '../../../features/statusSlice';
 import { PlusDivider, MinusDivider, paddingDividers } from '../Utils/Dividers';
 import { ExitPanel } from '../Exit/ExitPanel';
 import { RoutersStats } from '../RouterStats';
 import { SpeedStats } from '../SpeedStats';
+import {
+  selectNumPathBuilt,
+  selectNumRoutersKnown,
+  selectRatio
+} from '../../../features/statusSlice';
 
 export const MainTab = (): JSX.Element => {
-  // Select (i.e. extract the daemon status from our global redux state)
-  const daemonStatus = useSelector(selectStatus);
+  const numPathsBuilt = useSelector(selectNumPathBuilt);
+  const ratio = useSelector(selectRatio);
+  const numRoutersKnown = useSelector(selectNumRoutersKnown);
+
   return (
     <>
       <PlusDivider />
@@ -25,9 +31,9 @@ export const MainTab = (): JSX.Element => {
         minWidth="300px"
       >
         <RoutersStats
-          activePaths={daemonStatus.numPathsBuilt}
-          ratio={daemonStatus.ratio}
-          numRouters={daemonStatus.numRoutersKnown}
+          activePaths={numPathsBuilt}
+          ratio={ratio}
+          numRouters={numRoutersKnown}
         />
         <SpeedStats />
       </Flex>

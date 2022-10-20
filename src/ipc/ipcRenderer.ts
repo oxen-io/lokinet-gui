@@ -5,29 +5,30 @@ const { ipcRenderer } = Electron;
 import { clone, forEach, isEmpty, isFunction, isString } from 'lodash';
 import crypto from 'crypto';
 import {
-  DEBUG_IPC_CALLS,
   IPC_CHANNEL_KEY,
   IPC_GLOBAL_ERROR,
   IPC_LOG_LINE,
   StatusErrorType
 } from '../../sharedIpc';
+import { appendToAppLogsOutsideRedux, setErrorOutsideRedux } from '../app/app';
+import { store } from '../app/store';
 import {
-  appendToAppLogsOutsideRedux,
-  markAsStoppedOutsideRedux,
-  setErrorOutsideRedux
-} from '../app/app';
+  markAsStopped,
+  markDaemonIsTurningOn,
+  markInitialDaemonStartDone
+} from '../features/statusSlice';
+import { startLokinetDaemon } from '../features/thunk';
 
 const channelsFromRendererToMainToMake = {
   // rpc calls (zeromq calls)
   getSummaryStatus,
   addExit,
   deleteExit,
-  setConfig,
   // lokinet process manager calls
   doStartLokinetProcess,
   doStopLokinetProcess,
   // utility calls
-  markRendererReady,
+  markRendererReadyOnNodeSide,
   minimizeToTray
 };
 const channels = {} as any;
@@ -43,6 +44,7 @@ let _shutdownPromise: any = null;
 export async function getSummaryStatus(): Promise<string> {
   return channels.getSummaryStatus();
 }
+
 export async function addExit(
   exitAddress: string,
   exitToken?: string
@@ -57,31 +59,49 @@ export async function deleteExit(): Promise<string> {
   return channels.deleteExit();
 }
 
-export async function doStopLokinetProcess(
-  duringAppExit?: boolean
-): Promise<string | null> {
-  return channels.doStopLokinetProcess('doStopLokinetProcess', duringAppExit);
+export async function doStopLokinetProcess(): Promise<string | null> {
+  return channels.doStopLokinetProcess('doStopLokinetProcess');
 }
 
 export async function doStartLokinetProcess(): Promise<string | null> {
   return channels.doStartLokinetProcess('doStartLokinetProcess');
 }
 
-export async function markRendererReady(): Promise<void> {
-  channels.markRendererReady('markRendererReady');
+export async function markRendererReadyOnNodeSide(): Promise<void> {
+  channels.markRendererReadyOnNodeSide('renderer-is-ready-job-id');
 }
 
 export async function minimizeToTray(): Promise<void> {
   channels.minimizeToTray('minimizeToTray');
 }
-export async function setConfig(
-  section: string,
-  key: string,
-  value: string
-): Promise<string> {
-  return channels.setConfig(section, key, value);
+
+export async function checkIfDaemonRunning(): Promise<boolean> {
+  try {
+    // this calls timeouts after TIMEOUT_GET_SUMMARY_STATUS ms.
+    // if it does timeout, an exception is thrown
+
+    appendToAppLogsOutsideRedux(`checking if the lokinet daemon replies...`);
+    const statusAsString = await getSummaryStatus();
+    if (!isEmpty(statusAsString)) {
+      appendToAppLogsOutsideRedux(`Lokinet daemon did reply.`);
+
+      return true;
+    }
+    throw new Error('empty status for checkIfDaemonRunning ');
+  } catch (e) {
+    appendToAppLogsOutsideRedux(`Lokinet daemon did not reply.`);
+
+    return false;
+  }
 }
 
+/**
+ * When the renderer starts, we need to initialize the IPC listeners before we can communicate from node <-> renderer.
+ *
+ *
+ * This function creates all the channels needed for communication, and then sends an event to the node side so the node side do what could not be done before the renderer was ready.
+ * This includes for instance subscribing the lokinet logs. We need the listeners to be set in the rendere for the subscribing to make sense.
+ */
 export async function initializeIpcRendererSide(): Promise<void> {
   // We listen to a lot of events on ipcRenderer, often on the same channel. This prevents
   //   any warnings that might be sent to the console in that case.
@@ -127,8 +147,16 @@ export async function initializeIpcRendererSide(): Promise<void> {
     }
   );
 
-  channels.markRendererReady('markRendererReady');
-  channels.doStartLokinetProcess('doStartLokinetProcess');
+  const isDaemonAlreadyRunning = await checkIfDaemonRunning();
+  if (!isDaemonAlreadyRunning) {
+    await startLokinetDaemon();
+  }
+  // this starts the subscribing of the logs from the lokinet daemon
+  await markRendererReadyOnNodeSide();
+  // unlock the polls of getSummaryStatus on the main app, as the daemon should be running now
+  store.dispatch(markInitialDaemonStartDone());
+  store.dispatch(markDaemonIsTurningOn(false));
+
 }
 
 async function _shutdown() {
@@ -179,7 +207,14 @@ function _makeJob(fnName: string) {
   return jobId;
 }
 
-function _updateJob(id: string, data: any) {
+function _updateJob(
+  id: string,
+  data: {
+    resolve: (value: any) => void;
+    reject: (error: any) => void;
+    args: any;
+  }
+) {
   const { resolve, reject } = data;
 
   _jobs[id] = {
@@ -217,6 +252,9 @@ function _getJob(id: string) {
   return _jobs[id];
 }
 
+const TIMEOUT_GET_SUMMARY_STATUS = 1000;
+const TIMEOUT_GET_OTHER_CALLS = 20000;
+
 function makeChannel(fnName: string) {
   channels[fnName] = async (...args: any) => {
     const jobId = _makeJob(fnName);
@@ -227,19 +265,30 @@ function makeChannel(fnName: string) {
       _updateJob(jobId, {
         resolve,
         reject,
-        args: DEBUG_IPC_CALLS ? args : null
+        args
       });
 
-      const timerForThisCall = fnName === 'getSummaryStatus' ? 1000 : 6000;
+      /**
+       * We want getSummaryStatus to timeout quickly. (TIMEOUT_GET_SUMMARY_STATUS ms)
+       * All other calls can take up to TIMEOUT_GET_OTHER_CALLS ms to timeout
+       */
+      const timerForThisCall =
+        fnName === 'getSummaryStatus'
+          ? TIMEOUT_GET_SUMMARY_STATUS
+          : TIMEOUT_GET_OTHER_CALLS;
 
       _jobs[jobId].timer = setTimeout(() => {
         const logline = `IPC channel job ${jobId}: ${fnName} timed out after ${timerForThisCall}ms`;
         appendToAppLogsOutsideRedux(logline);
 
         // if you ever find that this is run because one of your called timedout, it's because you need to send the ipc reply (look at `sendIpcReplyAndDeleteJob`)
-        if (fnName !== 'addExit') {
-          markAsStoppedOutsideRedux();
+        if (fnName === 'getSummaryStatus') {
+          console.log(logline);
+
+          store.dispatch(markAsStopped());
         }
+        _removeJob(jobId);
+        reject(`${fnName}: timedout after ${timerForThisCall} `);
       }, timerForThisCall);
     });
   };
@@ -255,8 +304,12 @@ export async function closeRpcConnection(): Promise<void> {
   await channels.closeRpcConnection();
 }
 
+/**
+ * This interface defines what we get when parsing the status from the daemon itself.
+ */
 export interface DaemonSummaryStatus {
   isRunning: boolean;
+  initialDaemonStartDone: boolean;
   globalError: StatusErrorType;
   uptime?: number;
   version?: string;
@@ -267,12 +320,15 @@ export interface DaemonSummaryStatus {
   numPathsBuilt: number;
   numRoutersKnown: number;
   ratio: string;
-  exitNode?: string;
-  exitAuthCode?: string;
+
+  // those 2 fields will be set once exitLoading is done loading with what the daemon gave us back.
+  exitNodeFromDaemon?: string;
+  exitAuthCodeFromDaemon?: string;
 }
 
 export const defaultDaemonSummaryStatus: DaemonSummaryStatus = {
   isRunning: false,
+  initialDaemonStartDone: false,
   globalError: undefined,
   uptime: undefined,
   version: undefined,
@@ -283,8 +339,8 @@ export const defaultDaemonSummaryStatus: DaemonSummaryStatus = {
   numPathsBuilt: 0,
   numRoutersKnown: 0,
   ratio: '',
-  exitNode: undefined,
-  exitAuthCode: undefined
+  exitNodeFromDaemon: undefined,
+  exitAuthCodeFromDaemon: undefined
 };
 
 export const parseSummaryStatus = (
@@ -341,20 +397,20 @@ export const parseSummaryStatus = (
     // exitMap should be of length 1 only, but it's an object with keys an IP (not as string)
     // so easier to parse it like this
     for (const k in exitMap) {
-      parsedSummaryStatus.exitNode = exitMap[k];
+      parsedSummaryStatus.exitNodeFromDaemon = exitMap[k];
     }
   } else {
-    parsedSummaryStatus.exitNode = undefined;
+    parsedSummaryStatus.exitNodeFromDaemon = undefined;
   }
   const authCodes = statsResult?.authCodes || undefined;
 
   if (authCodes) {
     for (const lokiExit in authCodes) {
       const auth = statsResult?.authCodes[lokiExit];
-      parsedSummaryStatus.exitAuthCode = auth;
+      parsedSummaryStatus.exitAuthCodeFromDaemon = auth;
     }
   } else {
-    parsedSummaryStatus.exitAuthCode = undefined;
+    parsedSummaryStatus.exitAuthCodeFromDaemon = undefined;
   }
 
   parsedSummaryStatus.ratio = `${Math.ceil(statsResult?.ratio * 100 || 0)}%`;

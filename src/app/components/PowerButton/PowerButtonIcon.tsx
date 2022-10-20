@@ -1,11 +1,11 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
-import styled, {  useTheme } from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import {
+  selectDaemonRunning,
   selectHasExitNodeEnabled,
   selectHasExitNodeChangeLoading
-} from '../../../features/exitStatusSlice';
-import { selectDaemonRunning } from '../../../features/statusSlice';
+} from '../../../features/statusSlice';
 
 export function usePowerButtonColor(isHovered: boolean) {
   const theme = useTheme();

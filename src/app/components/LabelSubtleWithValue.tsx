@@ -170,7 +170,7 @@ export const UpSpeedWithPillAndIcon = (): JSX.Element => {
   const theme = useTheme();
   return (
     <SpeedWithPillAndIcon
-      pillColor={theme.connectedColor}
+      pillColor={theme.connectedVpnModeColor}
       icon={<UploadInlineIcon size="15px" />}
       label="Upload"
       value={upSpeed}

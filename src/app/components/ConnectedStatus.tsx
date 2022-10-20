@@ -1,14 +1,14 @@
 import React from 'react';
 import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
-import {
-  selectHasExitNodeEnabled,
-  selectHasExitNodeChangeLoading,
-  selectDaemonIsLoading
-} from '../../features/exitStatusSlice';
+
 import {
   selectDaemonRunning,
-  selectGlobalError
+  selectGlobalError,
+  selectHasExitNodeEnabled,
+  selectDaemonIsLoading,
+  selectHasExitTurningOff,
+  selectHasExitTurningOn
 } from '../../features/statusSlice';
 
 const ConnectedStatusContainer = styled.div`
@@ -64,13 +64,15 @@ const LokinetTitleSvg = () => {
 };
 
 export const ConnectedStatus = (): JSX.Element => {
+  const theme = useTheme();
+
   const daemonRunning = useSelector(selectDaemonRunning);
   const daemonLoading = useSelector(selectDaemonIsLoading);
   const hasExitEnabled = useSelector(selectHasExitNodeEnabled);
-  const hasExitLoading = useSelector(selectHasExitNodeChangeLoading);
+  const exitTurningOff = useSelector(selectHasExitTurningOff);
+  const exitTurningOn = useSelector(selectHasExitTurningOn);
   const globalError = useSelector(selectGlobalError);
 
-  const theme = useTheme();
 
   if (daemonLoading || !daemonRunning) {
     return <LokinetTitleSvg />;
@@ -85,15 +87,18 @@ export const ConnectedStatus = (): JSX.Element => {
         ? 'FAILED TO START LOKINET'
         : 'UNABLE TO CONNECT';
     ledColor = theme.dangerColor;
-  } else if (hasExitLoading) {
+  } else if (exitTurningOff) {
+    statusText = 'DISCONNECTING';
+    ledColor = theme.connectingColor;
+  } else if (exitTurningOn) {
     statusText = 'CONNECTING';
     ledColor = theme.connectingColor;
   } else if (hasExitEnabled) {
     statusText = 'CONNECTED IN VPN MODE';
-    ledColor = theme.connectedColor;
+    ledColor = theme.connectedVpnModeColor;
   } else if (daemonRunning) {
     statusText = 'CONNECTED TO LOKINET';
-    ledColor = theme.textColor;
+    ledColor = theme.connectedLokinetColor;
   }
 
   return (

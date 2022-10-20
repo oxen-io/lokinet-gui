@@ -2,7 +2,7 @@ import React from 'react';
 import { LabelSubtleWithValue } from './LabelSubtleWithValue';
 import { StatsHeading, StatsSection } from './CommonStats';
 
-export const RoutersStats = ({
+const RoutersStatsInner = ({
   numRouters,
   activePaths,
   ratio
@@ -26,3 +26,5 @@ export const RoutersStats = ({
     <LabelSubtleWithValue label="Success" value={`${ratio}`} center={false} />
   </StatsSection>
 );
+
+export const RoutersStats = React.memo(RoutersStatsInner);

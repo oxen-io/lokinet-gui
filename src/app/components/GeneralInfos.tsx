@@ -26,8 +26,8 @@ const formatUptimeItem = (
 };
 
 const formatUptime = (uptimeInMs: number) => {
-  if (uptimeInMs <= 0) {
-    return `${uptimeInMs} sec`;
+  if (!uptimeInMs || uptimeInMs <= 0) {
+    return `${uptimeInMs || 0} sec`;
   }
   const seconds = uptimeInMs / 1000;
   const d = Math.floor(seconds / (3600 * 24));
