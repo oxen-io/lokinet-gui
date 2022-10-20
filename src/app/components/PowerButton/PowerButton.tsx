@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
-import {
-  selectDaemonIsLoading,
-  selectHasExitNodeEnabled
-} from '../../../features/exitStatusSlice';
+
 import {
   selectDaemonOrExitIsLoading,
   selectDaemonRunning,
-  selectGlobalError
+  selectGlobalError,
+  selectDaemonIsLoading,
+  selectHasExitNodeEnabled
 } from '../../../features/statusSlice';
+import { stopLokinetDaemon, startLokinetDaemon } from '../../../features/thunk';
 
 import { selectedTheme } from '../../../features/uiStatusSlice';
-import {
-  doStartLokinetProcess,
-  doStopLokinetProcess
-} from '../../../ipc/ipcRenderer';
 
 import { PowerButtonIcon } from './PowerButtonIcon';
 import { PowerButtonContainerBorder } from './PowerButtonSpinner';
@@ -104,7 +100,7 @@ export const PowerButton = (): JSX.Element => {
 
   const { shadow, buttonContainerBackground } = usePowerButtonStyles();
 
-  const onPowerButtonClick = () => {
+  const onPowerButtonClick = async () => {
     if (daemonOrExitIsLoading) {
       // we are waiting for a refresh from lokinet, drop the click event
 
@@ -112,7 +108,7 @@ export const PowerButton = (): JSX.Element => {
     }
     if (daemonIsRunning) {
       // no matter the current state, if the daemon is running a click on the power button means STOP the daemon
-      doStopLokinetProcess();
+      await stopLokinetDaemon();
       return;
     }
     // here, daemon is not running. Whatever the state of the rest, we first need to start the daemon first.
@@ -120,8 +116,7 @@ export const PowerButton = (): JSX.Element => {
     if (daemonIsLoading) {
       return;
     }
-    // this effectively trigger a start of the lokinet daemon
-    doStartLokinetProcess();
+    await startLokinetDaemon();
   };
 
   return (

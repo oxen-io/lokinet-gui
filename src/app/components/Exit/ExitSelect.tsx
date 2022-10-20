@@ -3,10 +3,14 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import styled, { css, useTheme } from 'styled-components';
 import {
-  selectExitStatus,
   onUserExitNodeSet,
-  selectExitsFromSettings
-} from '../../../features/exitStatusSlice';
+  selectExitsFromSettings,
+  selectExitInputDisabled,
+  selectExitNodeFromDaemon,
+  selectExitNodeFromUser,
+  selectHasExitTurningOn,
+  selectHasExitTurningOff
+} from '../../../features/statusSlice';
 import { useAppDispatch } from '../../hooks';
 
 const BookMarkSVGSelected = ({ onClick }: { onClick: () => void }) => {
@@ -95,24 +99,42 @@ const BookmarkSvg = ({
   );
 };
 
-export const ExitSelector = ({
-  disableInputEdits
-}: {
-  disableInputEdits: boolean;
-}) => {
-  const exitStatus = useSelector(selectExitStatus);
-  const exitsNodesFromSettings = useSelector(selectExitsFromSettings);
+const useExitToUse = () => {
+  const exitIsTurningOn = useSelector(selectHasExitTurningOn);
+  const exitIsTurningOff = useSelector(selectHasExitTurningOff);
+  const exitNodeFromUser = useSelector(selectExitNodeFromUser);
+  const exitNodeFromDaemon = useSelector(selectExitNodeFromDaemon);
+  const disableInputEdits = useSelector(selectExitInputDisabled);
+
+  // if edits are not disabled, we render whatever the user typed
+  if (!disableInputEdits) {
+    return exitNodeFromUser;
+  }
+
+  // while the exit is turning ON, we usually get a summaryStatus from the daemon with the exit already set. But we do want the addExit call to be finished before updating the exitNodeFromDaemon.
+  if (exitIsTurningOn) {
+    return exitNodeFromUser;
+  }
+
+  // When the exit is turning off,  we want to show the user entered value because the value from the daemon might be removed before the deleteExit call is run
+  if (exitIsTurningOff) {
+    return exitNodeFromUser;
+  }
+  return exitNodeFromDaemon;
+};
+
+export const ExitSelector = () => {
   const dispatch = useAppDispatch();
+
+  const exitsNodesFromSettings = useSelector(selectExitsFromSettings);
 
   const [bookmarkIsOpened, setBookmarkIsOpened] = useState(false);
 
   // if the exit is loading (awaiting answer from daemon)
   // or if the exit node is set, we cannot edit the input fields.
   // We first need to disable the exit node mode
-
-  const exitToUse = disableInputEdits
-    ? exitStatus.exitNodeFromDaemon
-    : exitStatus.exitNodeFromUser;
+  const disableInputEdits = useSelector(selectExitInputDisabled);
+  const exitToUse = useExitToUse();
 
   const sharedOptions = {
     disabled: disableInputEdits,

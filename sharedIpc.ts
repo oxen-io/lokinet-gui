@@ -21,9 +21,6 @@ export type StatusErrorTypeSet = 'error-start-stop' | 'error-add-exit';
 
 export type StatusErrorType = StatusErrorTypeSet | undefined;
 
-export const DEBUG_IPC_CALLS = true;
-export const DEBUG_IPC_CALLS_GET_STATUS = false;
-
 export function isMacOS() {
   return process.platform === 'darwin';
 }

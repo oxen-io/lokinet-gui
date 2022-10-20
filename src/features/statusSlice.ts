@@ -4,27 +4,35 @@ import {
   MAX_NUMBER_POINT_HISTORY,
   SpeedHistoryDataType
 } from '../app/components/tabs/SpeedChart';
+import { getSavedExitNodesFromSettings } from '../app/config';
 import { RootState } from '../app/store';
-import { defaultDaemonSummaryStatus } from '../ipc/ipcRenderer';
 import {
-  selectDaemonIsLoading,
-  selectHasExitNodeChangeLoading
-} from './exitStatusSlice';
+  DaemonSummaryStatus,
+  defaultDaemonSummaryStatus
+} from '../ipc/ipcRenderer';
 
-export interface SummaryStatusState {
-  isRunning: boolean;
-  uptime?: number;
-  version?: string;
-  numPeersConnected: number;
-  uploadUsage: number;
-  downloadUsage: number;
-  lokiAddress: string;
-  numPathsBuilt: number;
-  numRoutersKnown: number;
-  ratio: string;
-  globalError: StatusErrorType;
+/**
+ * This interface defines our status of the daemon+ the loading states and data inputed by the user.
+ * This is the main status of the app.
+ */
+export interface SummaryStatusState extends DaemonSummaryStatus {
   speedHistory: SpeedHistoryDataType;
+
+  // set to true when the user clicked. We must block other call while this is true
+  exitTurningOn: boolean;
+  exitTurningOff: boolean;
+
+  daemonIsTurningOn: boolean;
+  daemonIsTurningOff: boolean;
+
+  // Those are user entered values
+  // When clicking on enable exit, those are the values used to setup the daemon
+  // exitNodeFromUser is required, but not exitAuthCodeFromUser
+  exitNodeFromUser?: string;
+  exitsFromSettings: Array<string>;
+  exitAuthCodeFromUser?: string;
 }
+
 const getDefaultSpeedHistory = (): SpeedHistoryDataType => {
   return {
     upload: new Array<number>(MAX_NUMBER_POINT_HISTORY).fill(0),
@@ -36,6 +44,14 @@ const getDefaultSpeedHistory = (): SpeedHistoryDataType => {
 
 const initialSummaryStatusState: SummaryStatusState = {
   ...defaultDaemonSummaryStatus,
+  // by default the daemon state is loading, but not the exit one
+  exitTurningOn: false,
+  exitTurningOff: false,
+  daemonIsTurningOn: true, // on app start, we try to start the daemon if it's not already running.
+  daemonIsTurningOff: false,
+  exitNodeFromUser: getSavedExitNodesFromSettings()[0],
+  exitsFromSettings: getSavedExitNodesFromSettings(),
+  exitAuthCodeFromUser: undefined,
   speedHistory: getDefaultSpeedHistory()
 };
 
@@ -54,7 +70,13 @@ export const statusSlice = createSlice({
     updateFromDaemonStatus: (
       state,
       action: PayloadAction<{
-        daemonStatus?: Omit<SummaryStatusState, 'speedHistory'>;
+        daemonStatus?: Omit<
+          SummaryStatusState,
+          | 'speedHistory'
+          | 'daemonIsTurningOn'
+          | 'daemonIsTurningOff'
+          | 'exitsFromSettings'
+        >;
         error?: string;
       }>
     ) => {
@@ -119,56 +141,150 @@ export const statusSlice = createSlice({
       return state;
     },
     markAsStopped: (state) => {
-      return { ...initialSummaryStatusState, globalError: state.globalError };
+      if (!state.initialDaemonStartDone) {
+        return state;
+      }
+      return {
+        ...initialSummaryStatusState,
+        daemonIsTurningOn: state.daemonIsTurningOn,
+        daemonIsTurningOff: state.daemonIsTurningOff,
+        initialDaemonStartDone: state.initialDaemonStartDone,
+        exitNodeFromDaemon: undefined,
+        exitAuthCodeFromDaemon: undefined,
+        globalError: state.globalError
+      };
     },
     setGlobalError: (state, action: PayloadAction<StatusErrorType>) => {
       state.globalError = action.payload;
+      return state;
+    },
+    markInitialDaemonStartDone: (state) => {
+      state.initialDaemonStartDone = true;
+      return state;
+    },
+
+    // exit stuff
+    markExitIsTurningOn: (state, action: PayloadAction<boolean>) => {
+      const isTurningOn = action.payload;
+
+      state.exitTurningOn = isTurningOn;
+
+      if (state.globalError === 'error-add-exit') {
+        state.globalError = undefined; // we want to reset the error state
+      }
+
+      state.exitNodeFromDaemon = undefined;
+      state.exitAuthCodeFromDaemon = undefined;
+      return state;
+    },
+    markExitIsTurningOff: (state, action: PayloadAction<boolean>) => {
+      const isTurningOff = action.payload;
+
+      state.exitTurningOff = isTurningOff;
+      return state;
+    },
+
+    markDaemonIsTurningOn(state, action: PayloadAction<boolean>) {
+      const isTurningOn = action.payload;
+      state.daemonIsTurningOn = isTurningOn;
+      if (isTurningOn) {
+        state.globalError = undefined;
+      }
+      state.exitTurningOff = false;
+      state.exitTurningOn = false;
+      state.exitNodeFromDaemon = undefined;
+      state.exitAuthCodeFromDaemon = undefined;
+
+      return state;
+    },
+
+    markDaemonIsTurningOff(state, action: PayloadAction<boolean>) {
+      const isTurningOff = action.payload;
+
+      if (isTurningOff) {
+        state.globalError = undefined;
+      }
+      state.daemonIsTurningOff = isTurningOff;
+      state.exitTurningOff = false;
+      state.exitTurningOn = false;
+
+      return state;
+    },
+
+    onUserExitNodeSet: (state, action: PayloadAction<string>) => {
+      state.exitNodeFromUser = action.payload;
+      return state;
+    },
+    onUserAuthCodeSet: (state, action: PayloadAction<string>) => {
+      state.exitAuthCodeFromUser = action.payload;
+      return state;
+    },
+    markExitNodesFromDaemon: (
+      state,
+      action: PayloadAction<{
+        exitNodeFromDaemon?: string;
+        exitAuthCodeFromDaemon?: string;
+      }>
+    ) => {
+      state.exitNodeFromDaemon = action.payload.exitNodeFromDaemon;
+      state.exitAuthCodeFromDaemon = action.payload.exitAuthCodeFromDaemon;
+      return state;
+    },
+    updateExitsFromSettings: (state, action: PayloadAction<Array<string>>) => {
+      state.exitsFromSettings = action.payload;
       return state;
     }
   }
 });
 
-// Action creators are generated for each case reducer function
-export const { updateFromDaemonStatus, markAsStopped, setGlobalError } =
-  statusSlice.actions;
+/**
+ * Actions which can be called with this slice
+ */
+export const {
+  updateFromDaemonStatus,
+  markAsStopped,
+  setGlobalError,
+  markInitialDaemonStartDone,
+  markExitIsTurningOn,
+  markExitIsTurningOff,
+  markExitNodesFromDaemon,
+  onUserExitNodeSet,
+  onUserAuthCodeSet,
+  markDaemonIsTurningOn,
+  markDaemonIsTurningOff,
+  updateExitsFromSettings
+} = statusSlice.actions;
 
-export function selectStatus(state: RootState): SummaryStatusState {
+/**
+ * Those are all selectors only
+ */
+
+function selectStatus(state: RootState): SummaryStatusState {
   return state.status;
 }
 
-export const selectDaemonRunning = createSelector(
-  selectStatus,
-  (status) => status.isRunning
-);
+export function selectDaemonRunning(state: RootState) {
+  return state.status.isRunning;
+}
 
-export const selectGlobalError = createSelector(
-  selectStatus,
-  (status): StatusErrorType => status.globalError || undefined
-);
+export const selectInitialDaemonStartDone = (state: RootState) =>
+  state.status.initialDaemonStartDone;
 
-export const selectDaemonOrExitIsLoading = createSelector(
-  selectDaemonIsLoading,
-  selectHasExitNodeChangeLoading,
-  selectGlobalError,
-  (daemonIsLoading, exitLoading, globalError) => {
-    return !globalError && (daemonIsLoading || exitLoading);
-  }
-);
+export function selectGlobalError(state: RootState) {
+  return state.status.globalError;
+}
 
-export const selectVersion = createSelector(
-  selectStatus,
-  (status) => status.version || ''
-);
+export function selectVersion(state: RootState) {
+  return state.status.version || '';
+}
 
-export const selectUptime = createSelector(
-  selectStatus,
-  (status) => status.uptime || 0
-);
+export function selectUptime(state: RootState) {
+  return state.status.uptime || 0;
+}
 
-export const selectLokinetAddress = createSelector(
-  selectStatus,
-  (status) => status.lokiAddress || ''
-);
+export function selectLokinetAddress(state: RootState) {
+  return state.status.lokiAddress || '';
+}
 
 export const selectUploadRate = createSelector(selectStatus, (status) =>
   makeRate(status.speedHistory.upload[MAX_NUMBER_POINT_HISTORY - 1] || 0)
@@ -194,3 +310,77 @@ export function makeRate(originalValue: number, forceMBUnit = false): string {
 
   return value.toFixed(1) + unitSpeed;
 }
+
+export const selectSpeedHistory = (state: RootState): SpeedHistoryDataType =>
+  state.status.speedHistory;
+
+/**
+ *
+ */
+
+export const selectExitInputDisabled = (state: RootState): boolean =>
+  Boolean(state.status.exitTurningOff) ||
+  Boolean(state.status.exitTurningOn) ||
+  Boolean(state.status.exitNodeFromDaemon);
+
+export const selectHasExitNodeEnabled = (state: RootState) =>
+  state.status.isRunning &&
+  Boolean(state.status.exitNodeFromDaemon) &&
+  !state.status.exitTurningOn &&
+  !state.status.exitTurningOff;
+
+export const selectHasExitTurningOn = (state: RootState) =>
+  state.status.isRunning && state.status.exitTurningOn;
+
+export const selectHasExitTurningOff = (state: RootState) =>
+  state.status.isRunning && state.status.exitTurningOff;
+
+export const selectHasExitNodeChangeLoading = (state: RootState) =>
+  state.status.isRunning &&
+  (state.status.exitTurningOn || state.status.exitTurningOff);
+
+export const selectExitNodeFromUser = (state: RootState) =>
+  state.status.exitNodeFromUser;
+
+export const selectAuthCodeFromUser = (state: RootState) =>
+  state.status.exitAuthCodeFromUser;
+
+export const selectExitNodeFromDaemon = (state: RootState) =>
+  state.status.exitNodeFromDaemon;
+
+export const selectAuthCodeFromDaemon = (state: RootState) =>
+  state.status.exitAuthCodeFromDaemon;
+
+export const selectDaemonIsTurningOff = (state: RootState) => {
+  return state.status.daemonIsTurningOff;
+};
+
+export const selectDaemonIsTurningOn = (state: RootState) => {
+  return state.status.daemonIsTurningOn || !state.status.initialDaemonStartDone;
+};
+
+export const selectDaemonIsLoading = (state: RootState) => {
+  return (
+    state.status.daemonIsTurningOn ||
+    state.status.daemonIsTurningOff ||
+    !state.status.initialDaemonStartDone
+  );
+};
+
+export const selectExitsFromSettings = (state: RootState) =>
+  state.status.exitsFromSettings;
+
+export const selectDaemonOrExitIsLoading = createSelector(
+  selectDaemonIsLoading,
+  selectHasExitNodeChangeLoading,
+  selectGlobalError,
+  (daemonIsLoading, exitLoading, globalError) => {
+    return !globalError && (daemonIsLoading || exitLoading);
+  }
+);
+
+export const selectNumPathBuilt = (state: RootState) =>
+  state.status.numPathsBuilt;
+export const selectRatio = (state: RootState) => state.status.ratio;
+export const selectNumRoutersKnown = (state: RootState) =>
+  state.status.numRoutersKnown;

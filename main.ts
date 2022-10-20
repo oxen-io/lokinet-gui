@@ -123,14 +123,14 @@ app.on('before-quit', async (event) => {
   if (todoOnExit === 'stop_everything') {
     if (isLinux()) {
       console.info('just triggering lokinet daemon stop');
-      void doStopLokinetProcess('stop_everything', true);
+      void doStopLokinetProcess('stop_everything');
     } else {
       if (stopEverythingDone) {
         return;
       }
       event.preventDefault();
       console.info('waiting for lokinet daemon to stop');
-      await doStopLokinetProcess('stop_everything', true);
+      await doStopLokinetProcess('stop_everything');
       console.info('lokinet daemon stopped');
       stopEverythingDone = true;
 

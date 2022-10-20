@@ -97,7 +97,6 @@ export async function initializeIpcNodeSide(
       eventsByJobId[jobId] = event;
       // this call just trigger the RPC call. The reply will come from somewhere else
       await fnToCall(jobId, ...args);
-      // event.sender.send(`${IPC_CHANNEL_KEY}-done`, jobId, null);
     } catch (error: any) {
       const errorForDisplay = error && error.msg ? error.msg : error;
       console.log(

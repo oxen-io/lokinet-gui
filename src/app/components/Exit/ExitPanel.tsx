@@ -1,27 +1,27 @@
 import { Flex, Stack } from '@chakra-ui/react';
 import React from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import styled, { useTheme } from 'styled-components';
-import {
-  onUserAuthCodeSet,
-  selectAuthCodeFromUser,
-  selectExitNodeFromUser,
-  selectExitStatus,
-  selectHasExitNodeChangeLoading,
-  selectHasExitNodeEnabled
-} from '../../../features/exitStatusSlice';
+
 import { useAppDispatch } from '../../hooks';
 import { paddingDividers } from '../Utils/Dividers';
 import { TextButton } from '../TextButton';
 import { VSpacer } from '../Utils/Spacer';
 
-import { turnExitOff, turnExitOn } from '../PowerButton/PowerButtonActions';
 import {
+  onUserAuthCodeSet,
+  selectAuthCodeFromUser,
   selectDaemonOrExitIsLoading,
-  selectDaemonRunning
+  selectDaemonRunning,
+  selectExitInputDisabled,
+  selectExitNodeFromUser,
+  selectHasExitNodeEnabled,
+  selectHasExitTurningOff,
+  selectHasExitTurningOn
 } from '../../../features/statusSlice';
 import { VpnMode } from '../VpnInfos';
 import { ExitInput, ExitSelector } from './ExitSelect';
+import { turnExitOff, turnExitOn } from '../../../features/thunk';
 
 const InputLabel = styled.div`
   font-family: Archivo;
@@ -36,27 +36,27 @@ const ConnectDisconnectButton = () => {
 
   const daemonOrExitIsLoading = useSelector(selectDaemonOrExitIsLoading);
   const daemonIsRunning = useSelector(selectDaemonRunning);
-  const exitLoading = useSelector(selectHasExitNodeChangeLoading);
   const exitIsOn = useSelector(selectHasExitNodeEnabled);
 
-  const isConnecting = !exitIsOn && exitLoading;
+  const exitTurningOff = useSelector(selectHasExitTurningOff);
+  const exitTurningOn = useSelector(selectHasExitTurningOn);
 
   const buttonText = exitIsOn
     ? 'DISCONNECT'
-    : isConnecting
+    : exitTurningOn
     ? 'CONNECTING'
+    : exitTurningOff
+    ? 'DISCONNECTING'
     : 'CONNECT';
 
   const textAndBorderColor = exitIsOn
     ? theme.dangerColor
-    : isConnecting
+    : exitTurningOn || exitTurningOff
     ? theme.backgroundColor
-    : theme.textColor;
-  const buttonBackgroundColor = isConnecting
-    ? theme.textColor
-    : theme.backgroundColor;
+      : theme.textColor;
 
-  const dispatch = useDispatch();
+  const buttonBackgroundColor =
+    exitTurningOff || exitTurningOn ? theme.textColor : theme.backgroundColor;
 
   const authCodeFromUser = useSelector(selectAuthCodeFromUser);
   const exitNodeFromUser = useSelector(selectExitNodeFromUser);
@@ -68,12 +68,12 @@ const ConnectDisconnectButton = () => {
       return;
     }
     if (exitIsOn) {
-      turnExitOff(dispatch);
+      turnExitOff();
       return;
     }
     if (daemonIsRunning) {
       // no need to try to stop the exit if the daemon is not running
-      turnExitOn(dispatch, exitNodeFromUser, authCodeFromUser);
+      turnExitOn(exitNodeFromUser, authCodeFromUser);
     }
   }
   return (
@@ -88,14 +88,13 @@ const ConnectDisconnectButton = () => {
 };
 
 export const ExitPanel = (): JSX.Element => {
-  const exitStatus = useSelector(selectExitStatus);
+  const exitAuthCodeFromUser = useSelector(selectAuthCodeFromUser);
   const dispatch = useAppDispatch();
 
   // if the exit is loading (awaiting answer from daemon)
   // or if the exit node is set, we cannot edit the input fields.
   // We first need to disable the exit node mode
-  const disableInputEdits =
-    exitStatus.exitLoading || Boolean(exitStatus.exitNodeFromDaemon);
+  const disableInputEdits = useSelector(selectExitInputDisabled);
 
   return (
     <Flex
@@ -108,7 +107,7 @@ export const ExitPanel = (): JSX.Element => {
         <Flex flexDirection="column" flexGrow={1}>
           <VpnMode />
           <InputLabel>EXIT NODE</InputLabel>
-          <ExitSelector disableInputEdits={disableInputEdits} />
+          <ExitSelector />
 
           <InputLabel>AUTH CODE</InputLabel>
 
@@ -123,7 +122,7 @@ export const ExitPanel = (): JSX.Element => {
             }
             size="sm"
             variant="flushed"
-            value={exitStatus.exitAuthCodeFromUser || ''}
+            value={exitAuthCodeFromUser || ''}
             marginBottom={2}
             noOfLines={1}
             style={{ textIndent: '4px' }}

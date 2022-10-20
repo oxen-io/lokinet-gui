@@ -3,7 +3,7 @@ import React from 'react';
 import { StatsHeading, StatsSection } from './CommonStats';
 import { DownSpeedWithIcon, UpSpeedWithIcon } from './LabelSubtleWithValue';
 
-export const SpeedStats = (): JSX.Element => {
+const SpeedStatsInner = (): JSX.Element => {
   return (
     <StatsSection>
       <StatsHeading title="SPEEDS" />
@@ -12,3 +12,5 @@ export const SpeedStats = (): JSX.Element => {
     </StatsSection>
   );
 };
+
+export const SpeedStats = React.memo(SpeedStatsInner);

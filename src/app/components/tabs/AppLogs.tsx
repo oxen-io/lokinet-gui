@@ -1,14 +1,11 @@
 import { Code, Flex, Text } from '@chakra-ui/react';
 import React from 'react';
-import { MdOutlineContentCopy } from 'react-icons/md';
 import { useDispatch } from 'react-redux';
 import { useCopyToClipboard } from 'react-use';
 import styled, { useTheme } from 'styled-components';
 import { selectAppLogs, clearLogs } from '../../../features/appLogsSlice';
 import { useAppSelector } from '../../hooks';
 import { PlusDivider, MinusDivider } from '../Utils/Dividers';
-import { LokinetIconButton } from '../LokinetIconButton';
-import { TextButton } from '../TextButton';
 
 const ButtonRow = styled.div`
   display: flex;
@@ -72,11 +69,9 @@ export const AppLogs = (): JSX.Element => {
       </Code>
       <ButtonRow>
         <TextButton onClick={() => dispatch(clearLogs())} text="Clear" />
-        <LokinetIconButton
+        <TextButton
           onClick={() => copyToClipboard(appLogs.join('\r\n'))}
-          size="30px"
-          icon={<MdOutlineContentCopy />}
-          title="Copy to clipboard"
+          text="Copy"
         />
       </ButtonRow>
       <MinusDivider />

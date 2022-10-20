@@ -52,7 +52,7 @@ export const invoke = async (
 
 export interface ILokinetProcessManager {
   doStartLokinetProcess: () => Promise<string | null>;
-  doStopLokinetProcess: (duringAppExit: boolean) => Promise<string | null>;
+  doStopLokinetProcess: () => Promise<string | null>;
 }
 
 let lokinetProcessManager: ILokinetProcessManager;
@@ -100,15 +100,13 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
     logLineToAppSide('About to start Lokinet process');
 
     const manager = await getLokinetProcessManager();
-    // we send the ipc reply first because the call below might hand until the user typed his password etc.
-    // we then trigger an update if an error happened with `sendGlobalErrorToAppSide`
-    sendIpcReplyAndDeleteJob(jobId, null, '');
 
     const startStopResult = await manager.doStartLokinetProcess();
 
     if (startStopResult) {
       sendGlobalErrorToAppSide('error-start-stop');
     }
+    sendIpcReplyAndDeleteJob(jobId, null, '');
   } catch (e: any) {
     logLineToAppSide(`Lokinet process start failed with ${e.message}`);
     console.info('doStartLokinetProcess failed with', e);
@@ -121,16 +119,13 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
  * doStopLokinetProcess is only called when exiting the app so there is no point to wait
  * for the event return and so no jobId argument required
  */
-export const doStopLokinetProcess = async (
-  jobId: string,
-  duringAppExit = false
-): Promise<void> => {
+export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
   try {
     logLineToAppSide('About to stop Lokinet process');
 
     const manager = await getLokinetProcessManager();
+    await manager.doStopLokinetProcess();
     sendIpcReplyAndDeleteJob(jobId, null, '');
-    await manager.doStopLokinetProcess(duringAppExit);
   } catch (e: any) {
     logLineToAppSide(`Lokinet process stop failed with ${e.message}`);
     sendIpcReplyAndDeleteJob(jobId, e.message, '');
