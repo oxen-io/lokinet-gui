@@ -3,13 +3,15 @@ import {
   getSavedExitNodesFromSettings,
   setSavedExitNodesToSettings
 } from '../app/config';
+import { runForAtLeast } from '../app/promiseUtils';
 import { store } from '../app/store';
 import {
   addExit,
-  checkIfDaemonRunning,
   deleteExit,
   doStartLokinetProcess,
-  doStopLokinetProcess
+  doStopLokinetProcess,
+  waitForDaemonStarted,
+  waitForDaemonStopped
 } from '../ipc/ipcRenderer';
 import { appendToApplogs } from './appLogsSlice';
 import {
@@ -31,11 +33,16 @@ export async function startLokinetDaemon() {
   store.dispatch(markDaemonIsTurningOn(true));
   // this effectively trigger a start of the lokinet daemon
   try {
-    await doStartLokinetProcess();
+    await runForAtLeast(doStartLokinetProcess, 5000);
   } catch (e: any) {
-    console.warn('doStartLokinetProcess', e.message);
+    console.error('doStartLokinetProcess failed with: ', e.message);
   } finally {
+    const isStarted = await waitForDaemonStarted();
+
     store.dispatch(markDaemonIsTurningOn(false));
+    if (isStarted) {
+      store.dispatch(setGlobalError(undefined));
+    }
   }
 }
 
@@ -45,20 +52,16 @@ export async function stopLokinetDaemon() {
 
   let isRunningAfterStop = true;
   try {
-    await doStopLokinetProcess();
+    await runForAtLeast(doStopLokinetProcess, 5000);
   } catch (e: any) {
-    console.warn('doStopLokinetProcess', e.message);
+    console.error('doStopLokinetProcess failed with: ', e.message);
   } finally {
-    try {
-      isRunningAfterStop = await checkIfDaemonRunning();
-    } catch (e: any) {
-      console.warn('checkIfDaemonRunning', e.message);
-    }
-    console.warn('isRunningAfterStop', isRunningAfterStop);
+    isRunningAfterStop = await waitForDaemonStopped();
 
     store.dispatch(markDaemonIsTurningOff(false));
     if (!isRunningAfterStop) {
       store.dispatch(markAsStopped());
+      store.dispatch(setGlobalError(undefined));
     }
   }
 }
@@ -71,14 +74,6 @@ const dispatchExitFailedToTurnOn = () => {
     store.dispatch(setTabSelected('logs'));
   }
 };
-
-async function sleepFor(timeout: number) {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve('sleepFor');
-    }, timeout);
-  });
-}
 
 const dispatchExitFailedToTurnOff = (toLog: string) => {
   // if we were in error based on the exit, just remove that error as we did turn off the exit
@@ -95,12 +90,10 @@ export const turnExitOff = async (): Promise<void> => {
   let deleteExitResult = '';
   try {
     // trigger the IPC+RPC call
-    deleteExitResult = await deleteExit();
+    deleteExitResult = await runForAtLeast<string>(deleteExit, 5000);
     if (!deleteExitResult) {
       throw new Error('deleteExitResult: empty result');
     }
-
-    await sleepFor(1000);
 
     const parsed = JSON.parse(deleteExitResult);
     if (parsed.error) {
@@ -149,6 +142,8 @@ function updateExitsSaved(exitNode: string) {
   store.dispatch(updateExitsFromSettings(existingFromSettings));
 }
 
+const MAX_RETRY_TIMEOUT = 11000;
+
 export const turnExitOn = async (
   exitNode?: string,
   authCode?: string
@@ -172,24 +167,28 @@ export const turnExitOn = async (
   // trigger the IPC+RPC call
   let addExitResult = '';
 
+  let parsed;
   try {
-    addExitResult = await addExit(exitNode, authCode);
-    await sleepFor(1000);
+    console.time('addExit');
 
+    addExitResult = await runForAtLeast<string>(
+      () => addExit(exitNode, authCode),
+      5000
+    );
     if (!addExitResult) {
       throw new Error('addExit: Empty result');
     }
 
-    const parsed = JSON.parse(addExitResult);
+    parsed = JSON.parse(addExitResult);
     if (parsed.error) {
       dispatchExitFailedToTurnOn();
       console.info(`TurnExitON: failed with '${parsed.error}'`);
       store.dispatch(
         appendToApplogs(`TurnExitON: failed with '${parsed.error}'`)
       );
-
       return;
     }
+
     if (!parsed.result || !parsed.result.startsWith('OK: connected to')) {
       console.info(`TurnExitON: '${parsed}'`);
 
@@ -212,6 +211,8 @@ export const turnExitOn = async (
 
     return;
   } finally {
+    console.timeEnd('addExit');
+
     store.dispatch(markExitIsTurningOn(false));
   }
 };

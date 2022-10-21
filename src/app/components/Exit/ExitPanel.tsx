@@ -17,7 +17,8 @@ import {
   selectExitNodeFromUser,
   selectHasExitNodeEnabled,
   selectHasExitTurningOff,
-  selectHasExitTurningOn
+  selectHasExitTurningOn,
+  selectNetworkReady
 } from '../../../features/statusSlice';
 import { VpnMode } from '../VpnInfos';
 import { ExitInput, ExitSelector } from './ExitSelect';
@@ -35,6 +36,7 @@ const ConnectDisconnectButton = () => {
   const theme = useTheme();
 
   const daemonOrExitIsLoading = useSelector(selectDaemonOrExitIsLoading);
+  const networkReady = useSelector(selectNetworkReady);
   const daemonIsRunning = useSelector(selectDaemonRunning);
   const exitIsOn = useSelector(selectHasExitNodeEnabled);
 
@@ -53,7 +55,7 @@ const ConnectDisconnectButton = () => {
     ? theme.dangerColor
     : exitTurningOn || exitTurningOff
     ? theme.backgroundColor
-      : theme.textColor;
+    : theme.textColor;
 
   const buttonBackgroundColor =
     exitTurningOff || exitTurningOn ? theme.textColor : theme.backgroundColor;
@@ -61,7 +63,8 @@ const ConnectDisconnectButton = () => {
   const authCodeFromUser = useSelector(selectAuthCodeFromUser);
   const exitNodeFromUser = useSelector(selectExitNodeFromUser);
 
-  const buttonDisabled = daemonOrExitIsLoading || !daemonIsRunning; // || globalError === 'error-start-stop';
+  const buttonDisabled =
+    daemonOrExitIsLoading || !daemonIsRunning || !networkReady;
 
   function onClick() {
     if (buttonDisabled) {

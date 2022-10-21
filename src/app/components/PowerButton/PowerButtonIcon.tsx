@@ -13,8 +13,8 @@ export function usePowerButtonColor(isHovered: boolean) {
   const hasExitEnabled = useSelector(selectHasExitNodeEnabled);
   const hasExitLoading = useSelector(selectHasExitNodeChangeLoading);
 
-  let buttonColor = isHovered ? theme.textColor : theme.textColorSubtle;
 
+  let buttonColor = isHovered ? theme.textColor : theme.textColorSubtle;
   if (daemonRunning || (hasExitEnabled && !hasExitLoading)) {
     buttonColor = isHovered ? theme.textColorSubtle : theme.textColor;
   }

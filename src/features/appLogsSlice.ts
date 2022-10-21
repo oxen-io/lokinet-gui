@@ -19,6 +19,8 @@ const removeFirstElementIfNeeded = (appLogs: Array<string>) => {
   return appLogs;
 };
 
+let firstLogPrintedAt: number | undefined;
+
 export const appLogsSlice = createSlice({
   name: 'appLogs',
   initialState: initialStatusState,
@@ -33,7 +35,35 @@ export const appLogsSlice = createSlice({
       ) {
         return state;
       }
-      state.appLogs.push(`${Date.now()}: ${action.payload}`);
+
+      if (firstLogPrintedAt === undefined) {
+        firstLogPrintedAt = Date.now();
+      }
+      const diffWithFirstLog = Date.now() - firstLogPrintedAt;
+      const diffDate = new Date(diffWithFirstLog);
+      let offsetToPrint = '';
+      if (diffWithFirstLog > 1000 * 60 * 60 * 24) {
+        offsetToPrint += `${Math.floor(
+          diffWithFirstLog / (1000 * 60 * 60 * 24)
+        )}d`;
+      }
+
+      if (diffWithFirstLog > 1000 * 60 * 60) {
+        offsetToPrint += `${offsetToPrint ? ':' : ''}${diffDate.getHours()}h`;
+      }
+
+      if (diffWithFirstLog > 1000 * 60) {
+        offsetToPrint += `${offsetToPrint ? ':' : ''}${diffDate.getMinutes()}m`;
+      }
+      if (diffWithFirstLog > 1000) {
+        offsetToPrint += `${offsetToPrint ? ':' : ''}${diffDate.getSeconds()}s`;
+      }
+
+      offsetToPrint += `${
+        offsetToPrint ? ':' : ''
+      }${diffDate.getMilliseconds()}ms`;
+
+      state.appLogs.push(`${offsetToPrint}: ${action.payload}`);
 
       // Remove the first item is the size is too big
       state.appLogs = removeFirstElementIfNeeded(state.appLogs);

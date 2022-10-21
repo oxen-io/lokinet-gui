@@ -15,11 +15,11 @@ function getLokinetControlLocation() {
 }
 
 export class LokinetMacOSProcessManager implements ILokinetProcessManager {
-  doStartLokinetProcess(): Promise<string | null> {
+  nodeStartLokinetProcess(): Promise<string | null> {
     return invoke(getLokinetControlLocation(), ['--start']);
   }
 
-  doStopLokinetProcess(): Promise<string | null> {
+  nodeStopLokinetProcess(): Promise<string | null> {
     return invoke(getLokinetControlLocation(), ['--stop']);
   }
 }

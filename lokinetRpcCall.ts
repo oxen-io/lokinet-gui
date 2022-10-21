@@ -47,6 +47,10 @@ export const getSummaryStatus = async (reply_tag: string): Promise<void> => {
   await invoke('llarp.get_status', reply_tag, {});
 };
 
+export const isDaemonRunning = async (reply_tag: string): Promise<void> => {
+  await invoke('llarp.get_status', reply_tag, {});
+};
+
 export const addExit = async (
   reply_tag: string,
   exitAddress: string,
@@ -158,8 +162,13 @@ export const initialLokinetRpcDealer = async (): Promise<void> => {
   }
 
   dealer = new _zmq.Dealer({
-    sendTimeout: 1000,
-    connectTimeout: 5000
+    reconnectInterval: 250,
+    reconnectMaxInterval: 0,
+    sendTimeout: 500,
+    // receiveTimeout: 500,
+    heartbeatInterval: 500,
+    heartbeatTimeToLive: 500,
+    heartbeatTimeout: 750
   });
   // just trigger the non blocking loop
   void loopDealerReceiving();

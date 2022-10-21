@@ -16,7 +16,6 @@ import {
   selectInitialDaemonStartDone,
   setGlobalError,
   updateFromDaemonStatus,
-  markExitNodesFromDaemon,
   markAsStoppedFromSummaryTimedOut
 } from '../features/statusSlice';
 import { Provider, useDispatch, useSelector } from 'react-redux';
@@ -33,7 +32,7 @@ import { StatusErrorType } from '../../sharedIpc';
 import { getThemeFromSettings } from './config';
 
 export function appendToAppLogsOutsideRedux(logline: string): void {
-  store.dispatch(appendToApplogs(logline));
+  store?.dispatch?.(appendToApplogs(logline));
 }
 
 export function setErrorOutsideRedux(errorStatus: StatusErrorType): void {
@@ -63,12 +62,14 @@ const useSummaryStatusPolling = () => {
       const parsedStatus = parseSummaryStatus(statusAsString);
       // Send the update to the redux store.
       dispatch(updateFromDaemonStatus({ daemonStatus: parsedStatus }));
+
       const hasExitNodeChange =
         store.getState().status.exitNodeFromDaemon !==
         parsedStatus.exitNodeFromDaemon;
       const hasExitAuthChange =
         store.getState().status.exitAuthCodeFromDaemon !==
         parsedStatus.exitAuthCodeFromDaemon;
+
       if (hasExitNodeChange) {
         dispatch(
           appendToApplogs(
@@ -87,22 +88,10 @@ const useSummaryStatusPolling = () => {
         );
       }
 
-      if (hasExitNodeChange || hasExitAuthChange) {
-        dispatch(
-          markExitNodesFromDaemon({
-            exitNodeFromDaemon: parsedStatus.exitNodeFromDaemon,
-            exitAuthCodeFromDaemon: parsedStatus.exitAuthCodeFromDaemon
-          })
-        );
-        // the daemon told us we have an exit set but our current state says we have an error on the status.
-        // make sure to remove that error from the UI
-        if (
-          hasExitNodeChange &&
-          parsedStatus.exitNodeFromDaemon &&
-          globalError === 'error-add-exit'
-        ) {
-          dispatch(setGlobalError(undefined));
-        }
+      // the daemon told us we have an exit set but our current state says we have an error on the status.
+      // make sure to remove that error from the UI
+      if (parsedStatus.exitNodeFromDaemon && globalError === 'error-add-exit') {
+        dispatch(setGlobalError(undefined));
       }
     } catch (e) {
       console.log('getSummaryStatus() failed');

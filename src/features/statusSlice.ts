@@ -1,11 +1,14 @@
 import { createSelector, createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { cloneDeep, omit } from 'lodash';
+import { logLineToAppSide } from '../../ipcNode';
 import { StatusErrorType } from '../../sharedIpc';
+import { appendToAppLogsOutsideRedux } from '../app/app';
 import {
   MAX_NUMBER_POINT_HISTORY,
   SpeedHistoryDataType
 } from '../app/components/tabs/SpeedChart';
 import { getSavedExitNodesFromSettings } from '../app/config';
-import { RootState } from '../app/store';
+import { RootState, store } from '../app/store';
 import {
   DaemonSummaryStatus,
   defaultDaemonSummaryStatus
@@ -63,6 +66,33 @@ const removeFirstElementIfNeeded = (speedHistory: SpeedHistoryDataType) => {
   return speedHistory;
 };
 
+function logState(text: string, state: SummaryStatusState) {
+  const toPrint = JSON.stringify(
+    omit(state, [
+      'speedHistory',
+      'exitNodeFromUser',
+      'exitNodeFromUser',
+      'exitAuthCodeFromUser',
+      // 'uptime',
+      // 'version',
+      // 'numPeersConnected',
+      'uploadUsage',
+      'downloadUsage',
+      // 'lokiAddress',
+      // 'numPathsBuilt',
+      'numRoutersKnown',
+      'ratio',
+      // 'isRunning',
+      'exitsFromSettings'
+    ])
+  );
+
+  console.info(text, cloneDeep(toPrint));
+  setTimeout(() => {
+    appendToAppLogsOutsideRedux(`redux state at ${text}:     "${toPrint}"`);
+  }, 1);
+}
+
 export const statusSlice = createSlice({
   name: 'status',
   initialState: initialSummaryStatusState,
@@ -76,6 +106,8 @@ export const statusSlice = createSlice({
           | 'daemonIsTurningOn'
           | 'daemonIsTurningOff'
           | 'exitsFromSettings'
+          | 'exitTurningOn'
+          | 'exitTurningOff'
         >;
         error?: string;
       }>
@@ -83,6 +115,7 @@ export const statusSlice = createSlice({
       state.isRunning = action.payload.daemonStatus?.isRunning || false;
       if (!state.isRunning || !action.payload.daemonStatus?.lokiAddress) {
         state.isRunning = false;
+        state.networkReady = false;
         state.downloadUsage = 0;
         state.uploadUsage = 0;
         state.numPathsBuilt = 0;
@@ -93,12 +126,18 @@ export const statusSlice = createSlice({
         state.version = undefined;
         state.uptime = undefined;
         state.speedHistory = getDefaultSpeedHistory();
+        logState('updateFromDaemonStatus1', state);
+
         return state;
       }
 
       if (state.globalError === 'error-start-stop') {
         state.globalError = undefined;
       }
+
+      state.exitNodeFromDaemon = action.payload.daemonStatus.exitNodeFromDaemon;
+      state.exitAuthCodeFromDaemon =
+        action.payload.daemonStatus.exitAuthCodeFromDaemon;
 
       state.downloadUsage = action.payload.daemonStatus?.downloadUsage || 0;
       state.uploadUsage = action.payload.daemonStatus?.uploadUsage || 0;
@@ -138,13 +177,18 @@ export const statusSlice = createSlice({
 
       // Remove the first item is the size is too long
       state.speedHistory = removeFirstElementIfNeeded(state.speedHistory);
+      state.networkReady = action.payload.daemonStatus.networkReady;
+      logState('updateFromDaemonStatus2', state);
+
       return state;
     },
     markAsStopped: (state) => {
       if (!state.initialDaemonStartDone) {
+        logState('markAsStopped1', state);
+
         return state;
       }
-      return {
+      const updated = {
         ...initialSummaryStatusState,
         daemonIsTurningOn: state.daemonIsTurningOn,
         daemonIsTurningOff: state.daemonIsTurningOff,
@@ -153,6 +197,9 @@ export const statusSlice = createSlice({
         exitAuthCodeFromDaemon: undefined,
         globalError: state.globalError
       };
+      logState('markAsStopped2', updated);
+
+      return updated;
     },
     markAsStoppedFromSummaryTimedOut: (state) => {
       if (
@@ -162,9 +209,12 @@ export const statusSlice = createSlice({
         state.exitTurningOff ||
         state.exitTurningOn
       ) {
+        logState('markAsStoppedFromSummaryTimedOut1', state);
+
         return state;
       }
-      return {
+
+      const updated = {
         ...initialSummaryStatusState,
         daemonIsTurningOn: state.daemonIsTurningOn,
         daemonIsTurningOff: state.daemonIsTurningOff,
@@ -173,13 +223,21 @@ export const statusSlice = createSlice({
         exitAuthCodeFromDaemon: undefined,
         globalError: state.globalError
       };
+
+      logState('markAsStoppedFromSummaryTimedOut2', updated);
+
+      return updated;
     },
     setGlobalError: (state, action: PayloadAction<StatusErrorType>) => {
       state.globalError = action.payload;
+      logState('setGlobalError', state);
+
       return state;
     },
     markInitialDaemonStartDone: (state) => {
       state.initialDaemonStartDone = true;
+      logState('markInitialDaemonStartDone', state);
+
       return state;
     },
 
@@ -189,12 +247,16 @@ export const statusSlice = createSlice({
 
       state.exitTurningOn = isTurningOn;
 
-      if (isTurningOn && state.globalError === 'error-add-exit') {
-        state.globalError = undefined; // we want to reset the error state
+      if (isTurningOn) {
+        if (state.globalError === 'error-add-exit') {
+          state.globalError = undefined; // we want to reset the error state
+        }
+        state.exitNodeFromDaemon = undefined;
+        state.exitAuthCodeFromDaemon = undefined;
       }
 
-      state.exitNodeFromDaemon = undefined;
-      state.exitAuthCodeFromDaemon = undefined;
+      logState('markExitIsTurningOn', state);
+
       return state;
     },
     markExitIsTurningOff: (state, action: PayloadAction<boolean>) => {
@@ -205,6 +267,8 @@ export const statusSlice = createSlice({
       }
 
       state.exitTurningOff = isTurningOff;
+      logState('markExitIsTurningOff', state);
+
       return state;
     },
 
@@ -218,6 +282,7 @@ export const statusSlice = createSlice({
       state.exitTurningOn = false;
       state.exitNodeFromDaemon = undefined;
       state.exitAuthCodeFromDaemon = undefined;
+      logState('markDaemonIsTurningOn', state);
 
       return state;
     },
@@ -231,6 +296,7 @@ export const statusSlice = createSlice({
       state.daemonIsTurningOff = isTurningOff;
       state.exitTurningOff = false;
       state.exitTurningOn = false;
+      logState('markDaemonIsTurningOff', state);
 
       return state;
     },
@@ -241,17 +307,6 @@ export const statusSlice = createSlice({
     },
     onUserAuthCodeSet: (state, action: PayloadAction<string>) => {
       state.exitAuthCodeFromUser = action.payload;
-      return state;
-    },
-    markExitNodesFromDaemon: (
-      state,
-      action: PayloadAction<{
-        exitNodeFromDaemon?: string;
-        exitAuthCodeFromDaemon?: string;
-      }>
-    ) => {
-      state.exitNodeFromDaemon = action.payload.exitNodeFromDaemon;
-      state.exitAuthCodeFromDaemon = action.payload.exitAuthCodeFromDaemon;
       return state;
     },
     updateExitsFromSettings: (state, action: PayloadAction<Array<string>>) => {
@@ -272,7 +327,6 @@ export const {
   markInitialDaemonStartDone,
   markExitIsTurningOn,
   markExitIsTurningOff,
-  markExitNodesFromDaemon,
   onUserExitNodeSet,
   onUserAuthCodeSet,
   markDaemonIsTurningOn,
@@ -292,31 +346,55 @@ export function selectDaemonRunning(state: RootState) {
   return state.status.isRunning;
 }
 
+export function selectNetworkReady(state: RootState) {
+  return state.status.isRunning && state.status.networkReady;
+}
+
 export const selectInitialDaemonStartDone = (state: RootState) =>
   state.status.initialDaemonStartDone;
 
 export function selectGlobalError(state: RootState) {
-  return state.status.globalError;
+  return state.status.initialDaemonStartDone &&
+    !state.status.daemonIsTurningOn &&
+    !state.status.daemonIsTurningOff
+    ? state.status.globalError
+    : undefined;
 }
 
+export const selectDaemonIsLoading = (state: RootState) => {
+  return (
+    state.status.daemonIsTurningOn ||
+    state.status.daemonIsTurningOff ||
+    !state.status.initialDaemonStartDone
+  );
+};
+
 export function selectVersion(state: RootState) {
-  return state.status.version || '';
+  return (!selectDaemonIsLoading(state) && state.status.version) || '';
 }
 
 export function selectUptime(state: RootState) {
-  return state.status.uptime || 0;
+  return (!selectDaemonIsLoading(state) && state.status.uptime) || 0;
 }
 
 export function selectLokinetAddress(state: RootState) {
-  return state.status.lokiAddress || '';
+  return (!selectDaemonIsLoading(state) && state.status.lokiAddress) || '';
 }
 
-export const selectUploadRate = createSelector(selectStatus, (status) =>
-  makeRate(status.speedHistory.upload[MAX_NUMBER_POINT_HISTORY - 1] || 0)
+export const selectUploadRate = createSelector(
+  selectStatus,
+  selectDaemonIsLoading,
+  (status, isLoading) =>
+    !isLoading &&
+    makeRate(status.speedHistory.upload[MAX_NUMBER_POINT_HISTORY - 1] || 0)
 );
 
-export const selectDownloadRate = createSelector(selectStatus, (status) =>
-  makeRate(status.speedHistory.download[MAX_NUMBER_POINT_HISTORY - 1] || 0)
+export const selectDownloadRate = createSelector(
+  selectStatus,
+  selectDaemonIsLoading,
+  (status, isLoading) =>
+    !isLoading &&
+    makeRate(status.speedHistory.download[MAX_NUMBER_POINT_HISTORY - 1] || 0)
 );
 
 export function makeRate(originalValue: number, forceMBUnit = false): string {
@@ -384,28 +462,20 @@ export const selectDaemonIsTurningOn = (state: RootState) => {
   return state.status.daemonIsTurningOn || !state.status.initialDaemonStartDone;
 };
 
-export const selectDaemonIsLoading = (state: RootState) => {
-  return (
-    state.status.daemonIsTurningOn ||
-    state.status.daemonIsTurningOff ||
-    !state.status.initialDaemonStartDone
-  );
-};
-
 export const selectExitsFromSettings = (state: RootState) =>
   state.status.exitsFromSettings;
 
 export const selectDaemonOrExitIsLoading = createSelector(
   selectDaemonIsLoading,
   selectHasExitNodeChangeLoading,
-  selectGlobalError,
-  (daemonIsLoading, exitLoading, globalError) => {
-    return !globalError && (daemonIsLoading || exitLoading);
+  (daemonIsLoading, exitLoading) => {
+    return daemonIsLoading || exitLoading;
   }
 );
 
 export const selectNumPathBuilt = (state: RootState) =>
-  state.status.numPathsBuilt;
-export const selectRatio = (state: RootState) => state.status.ratio;
+  selectDaemonIsLoading(state) ? 0 : state.status.numPathsBuilt;
+export const selectRatio = (state: RootState) =>
+  selectDaemonIsLoading(state) ? 0 : state.status.ratio;
 export const selectNumRoutersKnown = (state: RootState) =>
-  state.status.numRoutersKnown;
+  selectDaemonIsLoading(state) ? 0 : state.status.numRoutersKnown;

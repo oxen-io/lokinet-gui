@@ -13,16 +13,17 @@ import {
 import { appendToAppLogsOutsideRedux, setErrorOutsideRedux } from '../app/app';
 import { store } from '../app/store';
 import {
-  markAsStopped,
   markAsStoppedFromSummaryTimedOut,
   markDaemonIsTurningOn,
   markInitialDaemonStartDone
 } from '../features/statusSlice';
 import { startLokinetDaemon } from '../features/thunk';
+import { runForAtLeast } from '../app/promiseUtils';
 
 const channelsFromRendererToMainToMake = {
   // rpc calls (zeromq calls)
   getSummaryStatus,
+  isDaemonRunning,
   addExit,
   deleteExit,
   // lokinet process manager calls
@@ -41,6 +42,44 @@ export const POLLING_STATUS_INTERVAL_MS = 500;
 let _shuttingDown = false;
 let _shutdownCallback: any = null;
 let _shutdownPromise: any = null;
+
+export async function isDaemonRunning(): Promise<boolean> {
+  try {
+    const statusAsString = await channels.isDaemonRunning();
+    // isDaemonRunning is actually doing a llarp.status call, which returns an non empty string when it worked
+    if (isEmpty(statusAsString)) {
+      appendToAppLogsOutsideRedux(`isDaemonRunning: status is empty`);
+      return false;
+    }
+    appendToAppLogsOutsideRedux(
+      `isDaemonRunning: status received "${statusAsString}"`
+    );
+    try {
+      const parsed = JSON.parse(statusAsString);
+      if (parsed?.result?.running === undefined) {
+        appendToAppLogsOutsideRedux(
+          `isDaemonRunning: no running field set in status: "${statusAsString}"`
+        );
+      } else if (!parsed?.result?.running) {
+        appendToAppLogsOutsideRedux(
+          `isDaemonRunning: running is false in status: "${statusAsString}"`
+        );
+      }
+      return parsed?.result?.running || false;
+    } catch (e) {
+      appendToAppLogsOutsideRedux(
+        `isDaemonRunning: failed to parse status from "${statusAsString}"`
+      );
+      return false;
+    }
+    return true;
+  } catch (e: any) {
+    appendToAppLogsOutsideRedux(`isDaemonRunning: status exception ${e}`);
+
+    console.error(`isDaemonRunning failed with ${e}`);
+    return false;
+  }
+}
 
 export async function getSummaryStatus(): Promise<string> {
   return channels.getSummaryStatus();
@@ -76,21 +115,60 @@ export async function minimizeToTray(): Promise<void> {
   channels.minimizeToTray('minimizeToTray');
 }
 
-export async function checkIfDaemonRunning(): Promise<boolean> {
+/**
+ * Returns true if at most 5 seconds after the call, the daemon is replying to our calls
+ */
+export async function waitForDaemonStarted(): Promise<boolean> {
+  let isRunning = false;
+  const startTimestamp = Date.now();
+  do {
+    isRunning = await runForAtLeast<boolean>(() => {
+      return checkIfDaemonRunning('waitForDaemonStarted');
+    }, 500);
+    console.info(`waitForDaemonStarted: ${isRunning}`);
+  } while (!isRunning && Date.now() - startTimestamp < 5000);
+
+  return isRunning;
+}
+
+/**
+ * Returns true if at most 5 seconds after the call, the daemon is still replying to our calls
+ */
+export async function waitForDaemonStopped(): Promise<boolean> {
+  let isStillRunning = true;
+  const startTimestamp = Date.now();
+
+  do {
+    isStillRunning = await runForAtLeast<boolean>(() => {
+      return checkIfDaemonRunning('waitForDaemonStopped');
+    }, 500);
+    console.info(`waitForDaemonStopped  isStillRunning:${isStillRunning}`);
+  } while (isStillRunning && Date.now() - startTimestamp < 5000);
+
+  return isStillRunning;
+}
+
+export async function checkIfDaemonRunning(reason: string): Promise<boolean> {
   try {
     // this calls timeouts after TIMEOUT_GET_SUMMARY_STATUS ms.
     // if it does timeout, an exception is thrown
 
-    appendToAppLogsOutsideRedux(`checking if the lokinet daemon replies...`);
-    const statusAsString = await getSummaryStatus();
-    if (!isEmpty(statusAsString)) {
-      appendToAppLogsOutsideRedux(`Lokinet daemon did reply.`);
+    appendToAppLogsOutsideRedux(
+      `checking if the lokinet daemon replies for reason: "${reason}"...`
+    );
+    const daemonIsRunning = await isDaemonRunning();
+    if (daemonIsRunning) {
+      appendToAppLogsOutsideRedux(
+        `Lokinet daemon did reply for reason: "${reason}"`
+      );
 
       return true;
     }
     throw new Error('empty status for checkIfDaemonRunning ');
   } catch (e) {
-    appendToAppLogsOutsideRedux(`Lokinet daemon did not reply.`);
+    appendToAppLogsOutsideRedux(
+      `Lokinet daemon did not reply for reason: "${reason}"`
+    );
 
     return false;
   }
@@ -148,12 +226,13 @@ export async function initializeIpcRendererSide(): Promise<void> {
     }
   );
 
-  const isDaemonAlreadyRunning = await checkIfDaemonRunning();
+  const isDaemonAlreadyRunning = await checkIfDaemonRunning('initialize ipc');
   if (!isDaemonAlreadyRunning) {
     await startLokinetDaemon();
   }
   // this starts the subscribing of the logs from the lokinet daemon
   await markRendererReadyOnNodeSide();
+
   // unlock the polls of getSummaryStatus on the main app, as the daemon should be running now
   store.dispatch(markInitialDaemonStartDone());
   store.dispatch(markDaemonIsTurningOn(false));
@@ -273,7 +352,7 @@ function makeChannel(fnName: string) {
        * All other calls can take up to TIMEOUT_GET_OTHER_CALLS ms to timeout
        */
       const timerForThisCall =
-        fnName === 'getSummaryStatus'
+        fnName === 'getSummaryStatus' || fnName === 'isDaemonRunning'
           ? TIMEOUT_GET_SUMMARY_STATUS
           : TIMEOUT_GET_OTHER_CALLS;
 
@@ -309,6 +388,7 @@ export async function closeRpcConnection(): Promise<void> {
  */
 export interface DaemonSummaryStatus {
   isRunning: boolean;
+  networkReady: boolean;
   initialDaemonStartDone: boolean;
   globalError: StatusErrorType;
   uptime?: number;
@@ -328,6 +408,7 @@ export interface DaemonSummaryStatus {
 
 export const defaultDaemonSummaryStatus: DaemonSummaryStatus = {
   isRunning: false,
+  networkReady: false,
   initialDaemonStartDone: false,
   globalError: undefined,
   uptime: undefined,
@@ -416,5 +497,6 @@ export const parseSummaryStatus = (
   parsedSummaryStatus.ratio = `${Math.ceil(statsResult?.ratio * 100 || 0)}%`;
 
   parsedSummaryStatus.numPathsBuilt = statsResult.numPathsBuilt;
+  parsedSummaryStatus.networkReady = statsResult.networkReady || false;
   return parsedSummaryStatus;
 };

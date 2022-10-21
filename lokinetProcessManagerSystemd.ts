@@ -29,7 +29,7 @@ export const isSystemD = async (): Promise<boolean> => {
 const lokinetService = 'lokinet.service';
 
 export class LokinetSystemDProcessManager implements ILokinetProcessManager {
-  async doStartLokinetProcess(): Promise<string | null> {
+  async nodeStartLokinetProcess(): Promise<string | null> {
     const result = await invoke('systemctl', [
       '--no-block',
       'start',
@@ -42,7 +42,7 @@ export class LokinetSystemDProcessManager implements ILokinetProcessManager {
     return result;
   }
 
-  async doStopLokinetProcess(): Promise<string | null> {
+  async nodeStopLokinetProcess(): Promise<string | null> {
     return invoke('systemctl', ['--no-block', 'stop', lokinetService]);
   }
 }

@@ -51,8 +51,8 @@ export const invoke = async (
 };
 
 export interface ILokinetProcessManager {
-  doStartLokinetProcess: () => Promise<string | null>;
-  doStopLokinetProcess: () => Promise<string | null>;
+  nodeStartLokinetProcess: () => Promise<string | null>;
+  nodeStopLokinetProcess: () => Promise<string | null>;
 }
 
 let lokinetProcessManager: ILokinetProcessManager;
@@ -101,15 +101,29 @@ export const doStartLokinetProcess = async (jobId: string): Promise<void> => {
 
     const manager = await getLokinetProcessManager();
 
-    const startStopResult = await manager.doStartLokinetProcess();
+    let startResult = await manager.nodeStartLokinetProcess();
+    logLineToAppSide(`Lokinet process start result: "${startResult}"`);
 
-    if (startStopResult) {
+    if (
+      startResult &&
+      startResult.includes('The requested service has already been started')
+    ) {
+      // try to stop it and restart it?
+      logLineToAppSide(`Trying to restart the daemon...`);
+      const stopResult = await manager.nodeStopLokinetProcess();
+      logLineToAppSide(`restart stop: ${stopResult}`);
+
+      startResult = await manager.nodeStartLokinetProcess();
+      logLineToAppSide(`Lokinet process restart result: "${startResult}"`);
+    }
+
+    if (startResult) {
       sendGlobalErrorToAppSide('error-start-stop');
     }
     sendIpcReplyAndDeleteJob(jobId, null, '');
   } catch (e: any) {
     logLineToAppSide(`Lokinet process start failed with ${e.message}`);
-    console.info('doStartLokinetProcess failed with', e);
+    console.info('nodeStartLokinetProcess failed with', e);
     sendGlobalErrorToAppSide('error-start-stop');
     sendIpcReplyAndDeleteJob(jobId, null, result);
   }
@@ -124,12 +138,12 @@ export const doStopLokinetProcess = async (jobId: string): Promise<void> => {
     logLineToAppSide('About to stop Lokinet process');
 
     const manager = await getLokinetProcessManager();
-    await manager.doStopLokinetProcess();
+    await manager.nodeStopLokinetProcess();
     sendIpcReplyAndDeleteJob(jobId, null, '');
   } catch (e: any) {
     logLineToAppSide(`Lokinet process stop failed with ${e.message}`);
     sendIpcReplyAndDeleteJob(jobId, e.message, '');
 
-    console.info('doStopLokinetProcess failed with', e);
+    console.info('nodeStopLokinetProcess failed with', e);
   }
 };

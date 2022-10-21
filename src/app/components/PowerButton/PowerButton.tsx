@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 
@@ -7,12 +8,14 @@ import {
   selectDaemonRunning,
   selectGlobalError,
   selectDaemonIsLoading,
-  selectHasExitNodeEnabled
+  selectHasExitNodeEnabled,
+  markDaemonIsTurningOn
 } from '../../../features/statusSlice';
 import { stopLokinetDaemon, startLokinetDaemon } from '../../../features/thunk';
 
 import { selectedTheme } from '../../../features/uiStatusSlice';
 import { checkIfDaemonRunning } from '../../../ipc/ipcRenderer';
+import { appendToAppLogsOutsideRedux } from '../../app';
 
 import { PowerButtonIcon } from './PowerButtonIcon';
 import { PowerButtonContainerBorder } from './PowerButtonSpinner';
@@ -93,6 +96,7 @@ const usePowerButtonContainerShadowStyle = () => {
 };
 
 export const PowerButton = (): JSX.Element => {
+  const dispatch = useDispatch();
   const [isHovered, setIsHovered] = useState(false);
 
   const daemonOrExitIsLoading = useSelector(selectDaemonOrExitIsLoading);
@@ -102,6 +106,9 @@ export const PowerButton = (): JSX.Element => {
   const { shadow, buttonContainerBackground } = usePowerButtonStyles();
 
   const onPowerButtonClick = async () => {
+    appendToAppLogsOutsideRedux(
+      `onPowerButtonClick: daemonOrExitIsLoading:${daemonOrExitIsLoading},  daemonIsRunning:${daemonIsRunning},  daemonIsLoading:${daemonIsLoading}, `
+    );
     if (daemonOrExitIsLoading) {
       // we are waiting for a refresh from lokinet, drop the click event
 
@@ -117,9 +124,18 @@ export const PowerButton = (): JSX.Element => {
     if (daemonIsLoading) {
       return;
     }
-    const isDaemonAlreadyRunning = await checkIfDaemonRunning();
+    // start the spinner while we make sure the daemon is not running.
+    dispatch(markDaemonIsTurningOn(true));
+
+    // no need to wait here, we just want a one shot Are you ON call.
+    const isDaemonAlreadyRunning = await checkIfDaemonRunning(
+      'onPowerButtonClick'
+    );
+
     if (!isDaemonAlreadyRunning) {
       await startLokinetDaemon();
+    } else {
+      dispatch(markDaemonIsTurningOn(false));
     }
   };
 

@@ -1,11 +1,11 @@
 import { ILokinetProcessManager, invoke } from './lokinetProcessManager';
 
 export class LokinetWindowsProcessManager implements ILokinetProcessManager {
-  doStartLokinetProcess(): Promise<string | null> {
+  nodeStartLokinetProcess(): Promise<string | null> {
     return invoke('net', ['start', 'lokinet']);
   }
 
-  doStopLokinetProcess(): Promise<string | null> {
+  nodeStopLokinetProcess(): Promise<string | null> {
     return invoke('net', ['stop', 'lokinet']);
   }
 }

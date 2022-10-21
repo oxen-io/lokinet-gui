@@ -54,7 +54,7 @@ export const AppLogs = (): JSX.Element => {
       >
         {hasLogLine ? (
           appLogs.map((logLine) => {
-            const separator = logLine.indexOf(':');
+            const separator = logLine.indexOf('ms:') + 3;
             const timestamp = logLine.substring(0, separator);
             const content = logLine.substring(separator);
             return (
