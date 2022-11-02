@@ -23,7 +23,7 @@
   },
   "deb": {
     "packageCategory": "net",
-    "depends": ["lokinet>=0.9.10~", "gconf2", "gconf-service", "libnotify4", "libxtst6", "libnss3"]
+    "depends": ["lokinet (>= 0.9.10~)", "gconf2", "gconf-service", "libnotify4", "libxtst6", "libnss3"]
   },
   "files": [
     "dist/**/*",
