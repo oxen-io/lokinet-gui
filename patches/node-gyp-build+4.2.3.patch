@@ -13,11 +13,11 @@ index b5096ed..6b0a3f9 100644
      var winner = candidates.sort(compareTags(runtime))[0]
      if (winner) return path.join(prebuilds, winner.file)
 +
-+
++    // Add a few extra path to look for the binding
 +    var parsedZMQ = readdirSync(prebuildsZMQ).map(parseTags)
 +    var candidatesZMQ = parsedZMQ.filter(matchTags(runtime, abi))
 +    var winnerZMQ = candidatesZMQ.sort(compareTags(runtime))[0]
 +    if (winnerZMQ) return path.join(prebuildsZMQ, winnerZMQ.file)
    }
  }
- 
+
