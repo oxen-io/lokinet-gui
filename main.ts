@@ -44,14 +44,21 @@ async function createWindow() {
   const bounds = allDisplays[0].bounds;
 
   const width = defaultWidth;
-  const height = defaultHeight;
+  let height = defaultHeight;
 
   const selectedTheme = store.get(SETTINGS_ID_SELECTED_THEME, 'light');
+  const screenHeight = bounds.height;
+  // ideally we want the window to be 850 so everything fits in it without resizing.
+  // but some screen are too small to fit this. So, if we are on a small screen, make the default height to be 700 instead
+
+  if (screenHeight < defaultHeight) {
+    height = 700;
+  }
 
   mainWindow = new BrowserWindow({
     width,
     height,
-    minHeight: height,
+    minHeight: 600,
     minWidth: 450,
     resizable: true,
 
