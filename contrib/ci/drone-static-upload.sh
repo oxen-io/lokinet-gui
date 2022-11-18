@@ -19,7 +19,10 @@ set -o xtrace  # Don't start tracing until *after* we write the ssh key
 
 chmod 600 ssh_key
 
-os="${UPLOAD_OS:-$DRONE_STAGE_OS-$DRONE_STAGE_ARCH}"
+OS="$DRONE_STAGE_OS"
+if [ "$OS" = darwin ]; then OS=macos; fi
+
+os="${UPLOAD_OS:-$OS-$DRONE_STAGE_ARCH}"
 if [ -n "$WINDOWS_BUILD_NAME" ]; then
     os="windows-$WINDOWS_BUILD_NAME"
 fi
@@ -33,29 +36,23 @@ else
     base="lokinet-$os-$(date --date=@$DRONE_BUILD_CREATED +%Y%m%dT%H%M%SZ)-${DRONE_COMMIT:0:9}"
 fi
 
-mkdir -v "$base"
-mkdir -v gui
-if [ -e release/*.exe ]; then
-    cp -av release/*.exe gui/lokinet-gui.exe
-    # zipit up yo
-    archive="$base.zip"
-    zip -r "$archive" gui
-elif [ -e release/*.deb ]; then
-    cp -av release/*.deb "$base"
-    # tar dat shiz up yo
-    archive="$base-deb.tar.xz"
-    tar cJvf "$archive" "$base"
-elif [ -e release/*.AppImage ]; then
-    cp -av release/*.AppImage "$base"
-    # tar dat shiz up yo
-    archive="$base-appimage.tar.xz"
-    tar cJvf "$archive" "$base"
-elif [ -e release/mac/Lokinet-GUI.app ]; then
-    archive="$base-macos-unsigned.tar.xz"
-    tar cJvf "$archive" release/mac/Lokinet-GUI.app
+upload=()
+upload_to="oxen.rocks/${DRONE_REPO// /_}/${DRONE_BRANCH// /_}$upload_to_suffix"
+
+if [ -e release/mac/Lokinet-GUI.app ]; then
+    upload=("$base-macos-unsigned.tar.xz")
+    (cd release/mac && tar cJvf ../../"$upload" Lokinet-GUI.app)
+else
+    shopt -s nullglob
+    upload=(release/*.{exe,deb,AppImage})
+    upload_to="$upload_to/$base"
 fi
 
-upload_to="oxen.rocks/${DRONE_REPO// /_}/${DRONE_BRANCH// /_}"
+
+if [ ${#upload[@]} -eq 0 ]; then
+    echo "Error: couldn't find any files to upload!" >&2
+    exit 1
+fi
 
 # sftp doesn't have any equivalent to mkdir -p, so we have to split the above up into a chain of
 # -mkdir a/, -mkdir a/b/, -mkdir a/b/c/, ... commands.  The leading `-` allows the command to fail
@@ -71,10 +68,10 @@ done
 
 sftp -i ssh_key -b - -o StrictHostKeyChecking=off drone@oxen.rocks <<SFTP
 $mkdirs
-put $archive $upload_to
+put ${upload[*]} $upload_to
 SFTP
 
 set +o xtrace
 
-echo -e "\n\n\n\n\e[32;1mUploaded to https://${upload_to}/${archive}\e[0m\n\n\n"
+echo -e "\n\n\n\n\e[32;1mUploaded to https://$upload_to\e[0m\n\n\n"
 
